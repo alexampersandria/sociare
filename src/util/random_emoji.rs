@@ -109,9 +109,43 @@ pub fn random_emoji() -> String {
     "🐖".to_string(),
     "🐁".to_string(),
     "🐂".to_string(),
+    "🦞".to_string(),
+    "🦀".to_string(),
+    "🦐".to_string(),
+    "🦑".to_string(),
+    "🦋".to_string(),
+    "🦔".to_string(),
+    "🦇".to_string(),
+    "🦅".to_string(),
+    "🦆".to_string(),
+    "🌈".to_string(),
+    "🦄".to_string(),
+    "🌸".to_string(),
+    "🌷".to_string(),
+    "🌹".to_string(),
+    "🌺".to_string(),
+    "🌻".to_string(),
+    "🌼".to_string(),
+    "✌️".to_string(),
+    "👌".to_string(),
+    "🖖".to_string(),
+    "🤌".to_string(),
+    "🤟".to_string(),
+    "🤘".to_string(),
+    "🤙".to_string(),
+    "🤞".to_string(),
+    "🙌".to_string(),
+    "👀".to_string(),
+    "👁️".to_string(),
+    "👅".to_string(),
+    "👂".to_string(),
+    "👃".to_string(),
+    "👄".to_string(),
   ];
-
-  let mut rng = rand::thread_rng();
-  let emoji = allowed_emojis.choose(&mut rng).unwrap();
-  emoji.to_string()
+  let emoji = allowed_emojis.choose(&mut rand::thread_rng());
+  if let Some(emoji) = emoji {
+    emoji.to_string()
+  } else {
+    "🦀".to_string() // crab
+  }
 }
