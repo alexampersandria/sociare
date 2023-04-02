@@ -1,39 +1,35 @@
-# Sociare
+<h1 align="center">
+  Sociare
+</h1>
+
+<p align="center">
+  A WeShare replacement API in Rust
+</p>
 
 <p align="center">
   <img src="https://github.com/alexampersandria/sociare/actions/workflows/rust.yml/badge.svg" alt="GitHub Actions Build Badge" />
 </p>
 
-A WeShare replacement API.
-
-## Run
-
-### Cargo
+### Run
 
 ```bash
 cargo run
 ```
 
-## Test
-
-### Cargo
+### Test
 
 ```bash
 cargo test
 ```
 
-## Lint
-
-### Cargo
+### Lint
 
 ```bash
 cargo fmt
 cargo clippy
 ```
 
-## Build
-
-### Cargo
+### Build
 
 ```bash
 cargo build

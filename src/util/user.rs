@@ -1,13 +1,13 @@
 use uuid::Uuid;
 
-use super::timestamp;
+use chrono::prelude::*;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct User {
   pub id: Uuid,
   pub name: String,
   pub email: String,
-  pub created_at: u64,
+  pub created_at: DateTime<Utc>,
 }
 
 impl User {
@@ -16,7 +16,7 @@ impl User {
       id: Uuid::new_v4(),
       name,
       email,
-      created_at: timestamp::unix_timestamp(),
+      created_at: Utc::now(),
     }
   }
 }

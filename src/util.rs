@@ -10,7 +10,5 @@ pub mod message;
 pub use message::*;
 pub mod user;
 pub use user::*;
-pub mod timestamp;
-pub use timestamp::*;
 pub mod random_emoji;
 pub use random_emoji::*;

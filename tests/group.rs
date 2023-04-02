@@ -57,8 +57,8 @@ fn settle_debts(group: &mut Group) {
     group.add_transaction(Transaction::new(
       debt.from,
       debt.to,
-      debt.amount.unsigned_abs(),
-      "Settlement".to_string(),
+      debt.amount,
+      "test".to_string(),
     ));
   }
   for transaction in &mut group.transactions {
@@ -132,7 +132,7 @@ fn total_user_3() {
 }
 
 #[test]
-#[ignore] // not yet implemented
+#[ignore] // #TODO: remove ignore when fixed
 fn minimal_transactions() {
   let mut group = group();
   let settle = group.debts();

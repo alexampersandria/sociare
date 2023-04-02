@@ -34,7 +34,7 @@ pub struct Group {
   pub name: String,
   pub emoji: String,
   pub users: Vec<GroupUser>,
-  pub created_at: u64,
+  pub created_at: i64,
   pub receipts: Vec<Receipt>,
   pub transactions: Vec<Transaction>,
   pub messages: Vec<Message>,
@@ -79,37 +79,32 @@ impl Group {
     self.receipts.push(receipt);
   }
 
-  pub fn get_receipt(&mut self, receipt: Uuid) -> Option<&mut Receipt> {
-    self.receipts.iter_mut().find(|r| r.id == receipt)
+  pub fn get_receipt(&mut self, uuid: Uuid) -> Option<&mut Receipt> {
+    self.receipts.iter_mut().find(|r| r.id == uuid)
   }
 
   pub fn add_transaction(&mut self, transaction: Transaction) {
     self.transactions.push(transaction);
   }
 
-  pub fn get_transaction(&mut self, transaction: Uuid) -> Option<&mut Transaction> {
-    self.transactions.iter_mut().find(|t| t.id == transaction)
+  pub fn get_transaction(&mut self, uuid: Uuid) -> Option<&mut Transaction> {
+    self.transactions.iter_mut().find(|t| t.id == uuid)
   }
 
   pub fn add_user(&mut self, user: &User) {
-    if !self.user_in_group(user.id) {
-      self.users.push(GroupUser::new(user.id, &user.name));
+    if let Some(found_user) = self.get_user(user.id) {
+      found_user.active = true;
     } else {
-      self.get_user(user.id).unwrap().active = true;
+      self.users.push(GroupUser {
+        id: user.id,
+        display_name: user.name.clone(),
+        active: true,
+      });
     }
   }
 
-  pub fn get_user(&mut self, user: Uuid) -> Option<&mut GroupUser> {
-    self.users.iter_mut().find(|u| u.id == user)
-  }
-
-  pub fn user_in_group(&self, user: Uuid) -> bool {
-    for u in self.users.iter() {
-      if u.id == user {
-        return true;
-      }
-    }
-    false
+  pub fn get_user(&mut self, uuid: Uuid) -> Option<&mut GroupUser> {
+    self.users.iter_mut().find(|u| u.id == uuid)
   }
 
   pub fn get_active_users(&self) -> Vec<Uuid> {
@@ -125,8 +120,8 @@ impl Group {
     self.messages.push(message);
   }
 
-  pub fn get_message(&mut self, message: Uuid) -> Option<&mut Message> {
-    self.messages.iter_mut().find(|m| m.id == message)
+  pub fn get_message(&mut self, uuid: Uuid) -> Option<&mut Message> {
+    self.messages.iter_mut().find(|m| m.id == uuid)
   }
 
   pub fn balance(&mut self) -> HashMap<Uuid, i64> {
@@ -138,21 +133,18 @@ impl Group {
     }
     for receipt in self.receipts.iter() {
       if !receipt.deleted {
-        balance.insert(
-          receipt.user,
-          balance[&receipt.user] + (receipt.amount as i64),
-        );
+        balance.insert(receipt.user, balance[&receipt.user] + receipt.amount);
       }
     }
     for transaction in self.transactions.iter() {
       if !transaction.deleted && transaction.confirmed {
         balance.insert(
           transaction.from,
-          balance[&transaction.from] + (transaction.amount as i64),
+          balance[&transaction.from] + transaction.amount,
         );
         balance.insert(
           transaction.to,
-          balance[&transaction.to] - (transaction.amount as i64),
+          balance[&transaction.to] - transaction.amount,
         );
       }
     }
