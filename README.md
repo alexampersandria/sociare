@@ -1,10 +1,10 @@
 # Sociare
 
+<p align="center">
+  <img src="https://github.com/alexampersandria/sociare/actions/workflows/rust.yml/badge.svg" alt="GitHub Actions Build Badge" />
+</p>
+
 A WeShare replacement API.
-
----
-
-It is recommend to use [rust-analyzer](https://rust-analyzer.github.io/manual.html) for development. And change the `rust-analyzer.checkOnSave.command` to `clippy`.
 
 ## Run
 
