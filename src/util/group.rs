@@ -26,9 +26,6 @@ impl GroupUser {
       active: true,
     }
   }
-  pub fn set_nickname(&mut self, nickname: &str) {
-    self.nickname = nickname.to_string();
-  }
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -61,21 +58,11 @@ impl Group {
     }
   }
 
-  pub fn set_name(&mut self, name: String) {
-    self.name = name;
-  }
-
-  pub fn set_emoji(&mut self, emoji: String) {
-    if emojis::get(&emoji).is_some() {
-      self.emoji = emoji;
-    }
-  }
-
   pub fn add_receipt(&mut self, receipt: Receipt) {
     self.receipts.push(receipt);
   }
 
-  pub fn get_receipt(&mut self, uuid: Uuid) -> Option<&mut Receipt> {
+  pub fn find_receipt(&mut self, uuid: Uuid) -> Option<&mut Receipt> {
     self.receipts.iter_mut().find(|r| r.id == uuid)
   }
 
@@ -83,23 +70,23 @@ impl Group {
     self.transactions.push(transaction);
   }
 
-  pub fn get_transaction(&mut self, uuid: Uuid) -> Option<&mut Transaction> {
+  pub fn find_transaction(&mut self, uuid: Uuid) -> Option<&mut Transaction> {
     self.transactions.iter_mut().find(|t| t.id == uuid)
   }
 
   pub fn add_user(&mut self, user: &User) {
-    if let Some(found_user) = self.get_user(user.id) {
+    if let Some(found_user) = self.find_user(user.id) {
       found_user.active = true;
     } else {
       self.users.push(GroupUser::new(user.id));
     }
   }
 
-  pub fn get_user(&mut self, uuid: Uuid) -> Option<&mut GroupUser> {
+  pub fn find_user(&mut self, uuid: Uuid) -> Option<&mut GroupUser> {
     self.users.iter_mut().find(|u| u.id == uuid)
   }
 
-  pub fn get_active_users(&self) -> Vec<Uuid> {
+  pub fn find_active_users(&self) -> Vec<Uuid> {
     self
       .users
       .iter()
@@ -112,7 +99,7 @@ impl Group {
     self.messages.push(message);
   }
 
-  pub fn get_message(&mut self, uuid: Uuid) -> Option<&mut Message> {
+  pub fn find_message(&mut self, uuid: Uuid) -> Option<&mut Message> {
     self.messages.iter_mut().find(|m| m.id == uuid)
   }
 

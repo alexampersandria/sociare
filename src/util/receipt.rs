@@ -8,7 +8,6 @@ pub struct Receipt {
   pub amount: i64,
   pub info: String,
   pub created_at: DateTime<Utc>,
-  pub edited_at: DateTime<Utc>,
   pub deleted: bool,
 }
 
@@ -21,29 +20,7 @@ impl Receipt {
       amount,
       info,
       created_at: Utc::now(),
-      edited_at: Utc::now(),
       deleted: false,
     }
-  }
-
-  pub fn set_amount(&mut self, amount: i64) {
-    if !self.deleted {
-      self.amount = amount;
-      self.edited_at = Utc::now();
-    }
-  }
-
-  pub fn set_info(&mut self, info: String) {
-    if !self.deleted {
-      self.info = info;
-      self.edited_at = Utc::now();
-    }
-  }
-
-  pub fn delete(&mut self) {
-    self.amount = 0;
-    self.info = "".to_string();
-    self.deleted = true;
-    self.edited_at = Utc::now();
   }
 }

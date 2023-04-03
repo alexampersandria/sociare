@@ -10,8 +10,6 @@ pub struct Transaction {
   pub method: String,
   pub confirmed: bool,
   pub created_at: DateTime<Utc>,
-  pub edited_at: DateTime<Utc>,
-  pub confirmed_at: DateTime<Utc>,
   pub deleted: bool,
 }
 
@@ -26,37 +24,7 @@ impl Transaction {
       method,
       confirmed: false,
       created_at: Utc::now(),
-      edited_at: Utc::now(),
-      confirmed_at: Utc::now(),
       deleted: false,
     }
-  }
-
-  pub fn set_amount(&mut self, amount: i64) {
-    if !self.confirmed && !self.deleted {
-      self.amount = amount;
-      self.edited_at = Utc::now();
-    }
-  }
-
-  pub fn set_method(&mut self, method: String) {
-    if !self.confirmed && !self.deleted {
-      self.method = method;
-      self.edited_at = Utc::now();
-    }
-  }
-
-  pub fn delete(&mut self) {
-    if !self.confirmed && !self.deleted {
-      self.amount = 0;
-      self.method = "".to_string();
-      self.deleted = true;
-      self.edited_at = Utc::now();
-    }
-  }
-
-  pub fn confirm(&mut self) {
-    self.confirmed = true;
-    self.confirmed_at = Utc::now();
   }
 }

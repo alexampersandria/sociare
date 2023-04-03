@@ -7,7 +7,6 @@ pub struct Message {
   pub user: Uuid,
   pub message: String,
   pub created_at: DateTime<Utc>,
-  pub edited_at: DateTime<Utc>,
   pub deleted: bool,
 }
 
@@ -19,19 +18,7 @@ impl Message {
       user,
       message,
       created_at: Utc::now(),
-      edited_at: Utc::now(),
       deleted: false,
     }
-  }
-
-  pub fn set_message(&mut self, message: String) {
-    self.message = message;
-    self.edited_at = Utc::now();
-  }
-
-  pub fn delete(&mut self) {
-    self.message = "".to_string();
-    self.deleted = true;
-    self.edited_at = Utc::now();
   }
 }

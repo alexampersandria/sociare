@@ -62,7 +62,7 @@ fn settle_debts(group: &mut Group) {
     ));
   }
   for transaction in &mut group.transactions {
-    transaction.confirm();
+    transaction.confirmed = true;
   }
 }
 
