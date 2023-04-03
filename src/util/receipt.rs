@@ -1,25 +1,25 @@
-use chrono::prelude::*;
+use super::unix_time;
 use uuid::Uuid;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Receipt {
-  pub id: Uuid,
-  pub user: Uuid,
+  pub id: String,
+  pub user: String,
   pub amount: i64,
   pub info: String,
-  pub created_at: DateTime<Utc>,
+  pub created_at: i64,
   pub deleted: bool,
 }
 
 #[allow(dead_code)]
 impl Receipt {
-  pub fn new(user: Uuid, amount: i64, info: String) -> Self {
+  pub fn new(user: String, amount: i64, info: String) -> Self {
     Receipt {
-      id: Uuid::new_v4(),
+      id: Uuid::new_v4().to_string(),
       user,
       amount,
       info,
-      created_at: Utc::now(),
+      created_at: unix_time(),
       deleted: false,
     }
   }

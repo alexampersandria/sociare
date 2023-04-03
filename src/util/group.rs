@@ -13,13 +13,13 @@ use crate::util::random_emoji::random_emoji;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct GroupUser {
-  pub id: Uuid,
+  pub id: String,
   pub nickname: String,
   pub active: bool,
 }
 
 impl GroupUser {
-  pub fn new(id: Uuid) -> Self {
+  pub fn new(id: String) -> Self {
     GroupUser {
       id,
       nickname: "".to_string(),
@@ -30,7 +30,7 @@ impl GroupUser {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Group {
-  pub id: Uuid,
+  pub id: String,
   pub name: String,
   pub emoji: String,
   pub users: Vec<GroupUser>,
@@ -44,9 +44,9 @@ pub struct Group {
 #[allow(dead_code)]
 impl Group {
   pub fn new(name: String, users: &[User], currency: iso::Currency) -> Group {
-    let group_users = users.iter().map(|u| GroupUser::new(u.id)).collect();
+    let group_users = users.iter().map(|u| GroupUser::new(u.id.clone())).collect();
     Group {
-      id: Uuid::new_v4(),
+      id: Uuid::new_v4().to_string(),
       name,
       emoji: random_emoji(),
       users: group_users,
@@ -62,7 +62,7 @@ impl Group {
     self.receipts.push(receipt);
   }
 
-  pub fn find_receipt(&mut self, uuid: Uuid) -> Option<&mut Receipt> {
+  pub fn find_receipt(&mut self, uuid: String) -> Option<&mut Receipt> {
     self.receipts.iter_mut().find(|r| r.id == uuid)
   }
 
@@ -70,28 +70,28 @@ impl Group {
     self.transactions.push(transaction);
   }
 
-  pub fn find_transaction(&mut self, uuid: Uuid) -> Option<&mut Transaction> {
+  pub fn find_transaction(&mut self, uuid: String) -> Option<&mut Transaction> {
     self.transactions.iter_mut().find(|t| t.id == uuid)
   }
 
   pub fn add_user(&mut self, user: &User) {
-    if let Some(found_user) = self.find_user(user.id) {
+    if let Some(found_user) = self.find_user(user.id.clone()) {
       found_user.active = true;
     } else {
-      self.users.push(GroupUser::new(user.id));
+      self.users.push(GroupUser::new(user.id.clone()));
     }
   }
 
-  pub fn find_user(&mut self, uuid: Uuid) -> Option<&mut GroupUser> {
+  pub fn find_user(&mut self, uuid: String) -> Option<&mut GroupUser> {
     self.users.iter_mut().find(|u| u.id == uuid)
   }
 
-  pub fn find_active_users(&self) -> Vec<Uuid> {
+  pub fn find_active_users(&self) -> Vec<String> {
     self
       .users
       .iter()
       .filter(|u| u.active)
-      .map(|u| u.id)
+      .map(|u| u.id.clone())
       .collect()
   }
 
@@ -99,30 +99,33 @@ impl Group {
     self.messages.push(message);
   }
 
-  pub fn find_message(&mut self, uuid: Uuid) -> Option<&mut Message> {
+  pub fn find_message(&mut self, uuid: String) -> Option<&mut Message> {
     self.messages.iter_mut().find(|m| m.id == uuid)
   }
 
-  pub fn balance(&mut self) -> HashMap<Uuid, i64> {
-    let mut balance: HashMap<Uuid, i64> = HashMap::new();
+  pub fn balance(&mut self) -> HashMap<String, i64> {
+    let mut balance: HashMap<String, i64> = HashMap::new();
     for user in self.users.iter() {
       if user.active {
-        balance.insert(user.id, 0);
+        balance.insert(user.id.clone(), 0);
       }
     }
     for receipt in self.receipts.iter() {
       if !receipt.deleted {
-        balance.insert(receipt.user, balance[&receipt.user] + receipt.amount);
+        balance.insert(
+          receipt.user.clone(),
+          balance[&receipt.user] + receipt.amount,
+        );
       }
     }
     for transaction in self.transactions.iter() {
       if !transaction.deleted && transaction.confirmed {
         balance.insert(
-          transaction.from,
+          transaction.from.clone(),
           balance[&transaction.from] + transaction.amount,
         );
         balance.insert(
-          transaction.to,
+          transaction.to.clone(),
           balance[&transaction.to] - transaction.amount,
         );
       }
@@ -148,8 +151,8 @@ impl Group {
           let transaction_amount: i64 = (*creditor.1 - *debtor.1) / (balance.len() as i64);
           if transaction_amount > 0 {
             payments.push(Debt {
-              from: *debtor.0,
-              to: *creditor.0,
+              from: debtor.0.clone(),
+              to: creditor.0.clone(),
               amount: transaction_amount,
             });
           }

@@ -18,6 +18,14 @@ It is recommended that you install [Cocogitto](https://github.com/cocogitto/coco
 cargo install --locked cocogitto
 ```
 
+### .env
+
+Create a `.env` file in the root of the project with the following contents:
+
+```env
+DATABASE_URL=postgres://<user>@<password>@<host>/<database>
+```
+
 ### Run
 
 ```bash
