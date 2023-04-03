@@ -1,5 +1,6 @@
 [hooks]
 pre-commit = "cargo fmt -- --check && cargo clippy -- -D warnings && cargo test"
+post-commit = "cog check"
 
 [logging]
 verbose = true
