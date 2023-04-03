@@ -14,17 +14,20 @@ use crate::util::random_emoji::random_emoji;
 #[derive(Debug, PartialEq, Clone)]
 pub struct GroupUser {
   pub id: Uuid,
-  pub display_name: String,
+  pub nickname: String,
   pub active: bool,
 }
 
 impl GroupUser {
-  pub fn new(id: Uuid, name: &str) -> Self {
+  pub fn new(id: Uuid) -> Self {
     GroupUser {
       id,
-      display_name: name.to_string(),
+      nickname: "".to_string(),
       active: true,
     }
+  }
+  pub fn set_nickname(&mut self, nickname: &str) {
+    self.nickname = nickname.to_string();
   }
 }
 
@@ -44,14 +47,7 @@ pub struct Group {
 #[allow(dead_code)]
 impl Group {
   pub fn new(name: String, users: &[User], currency: iso::Currency) -> Group {
-    let group_users = users
-      .iter()
-      .map(|u| GroupUser {
-        id: u.id,
-        display_name: u.name.clone(),
-        active: true,
-      })
-      .collect();
+    let group_users = users.iter().map(|u| GroupUser::new(u.id)).collect();
     Group {
       id: Uuid::new_v4(),
       name,
@@ -95,11 +91,7 @@ impl Group {
     if let Some(found_user) = self.get_user(user.id) {
       found_user.active = true;
     } else {
-      self.users.push(GroupUser {
-        id: user.id,
-        display_name: user.name.clone(),
-        active: true,
-      });
+      self.users.push(GroupUser::new(user.id));
     }
   }
 

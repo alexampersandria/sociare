@@ -96,7 +96,7 @@ fn total_user_1() {
   let user_1 = group
     .users
     .iter()
-    .find(|u| u.display_name == "user_1")
+    .find(|u| u.id == group.users.get(0).unwrap().id)
     .unwrap();
   let user_1_total = balance.get(&user_1.id).unwrap();
   assert_eq!(format_value(*user_1_total, &group.currency), "1.285,60kr.");
@@ -109,7 +109,7 @@ fn total_user_2() {
   let user_2 = group
     .users
     .iter()
-    .find(|u| u.display_name == "user_2")
+    .find(|u| u.id == group.users.get(1).unwrap().id)
     .unwrap();
   let user_2_total = balance.get(&user_2.id).unwrap();
   assert_eq!(format_value(*user_2_total, &group.currency), "1.257,80kr.");
@@ -119,16 +119,13 @@ fn total_user_2() {
 fn total_user_3() {
   let mut group = group();
   let balance = group.balance();
-  let thorifnn = group
+  let user_3 = group
     .users
     .iter()
-    .find(|u| u.display_name == "user_3")
+    .find(|u| u.id == group.users.get(2).unwrap().id)
     .unwrap();
-  let thorifnn_total = balance.get(&thorifnn.id).unwrap();
-  assert_eq!(
-    format_value(*thorifnn_total, &group.currency),
-    "1.431,75kr."
-  );
+  let user_3_total = balance.get(&user_3.id).unwrap();
+  assert_eq!(format_value(*user_3_total, &group.currency), "1.431,75kr.");
 }
 
 #[test]
