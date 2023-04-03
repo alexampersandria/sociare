@@ -12,3 +12,6 @@ pub mod user;
 pub use user::*;
 pub mod random_emoji;
 pub use random_emoji::*;
+
+pub mod mobilepay;
+pub use mobilepay::*;
