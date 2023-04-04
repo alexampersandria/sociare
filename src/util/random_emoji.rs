@@ -149,3 +149,14 @@ pub fn random_emoji() -> String {
     "🦀".to_string() // crab
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn is_emoji() {
+    let emoji = random_emoji();
+    assert!(emojis::get(&emoji).is_some());
+  }
+}

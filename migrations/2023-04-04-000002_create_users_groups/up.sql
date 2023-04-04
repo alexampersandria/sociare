@@ -1,0 +1,10 @@
+-- Your SQL goes here
+CREATE TABLE users_groups (
+  id VARCHAR(255) PRIMARY KEY,
+  user_id VARCHAR(255) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  group_id VARCHAR(255) NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+  nickname VARCHAR(255) NOT NULL,
+  is_admin BOOLEAN NOT NULL,
+  active BOOLEAN NOT NULL,
+  created_at BIGINT NOT NULL
+)

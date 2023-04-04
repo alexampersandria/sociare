@@ -1,0 +1,10 @@
+-- Your SQL goes here
+CREATE TABLE receipts (
+  id VARCHAR(255) PRIMARY KEY,
+  group_id VARCHAR(255) NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+  user_id VARCHAR(255) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  amount BIGINT NOT NULL,
+  info TEXT NOT NULL,
+  created_at BIGINT NOT NULL,
+  deleted BOOLEAN NOT NULL
+)
