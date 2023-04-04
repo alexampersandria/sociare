@@ -7,7 +7,7 @@ pub fn unix_time() -> i64 {
 }
 
 #[cfg(test)]
-mod tests {
+mod ci_unit {
   use super::*;
 
   #[test]

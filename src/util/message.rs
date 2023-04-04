@@ -33,7 +33,7 @@ impl Message {
 }
 
 #[cfg(test)]
-mod unit {
+mod ci_unit {
   use super::*;
 
   #[test]

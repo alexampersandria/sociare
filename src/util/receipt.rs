@@ -35,7 +35,7 @@ impl Receipt {
 }
 
 #[cfg(test)]
-mod unit {
+mod ci_unit {
   use super::*;
 
   #[test]

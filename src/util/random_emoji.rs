@@ -151,7 +151,7 @@ pub fn random_emoji() -> String {
 }
 
 #[cfg(test)]
-mod tests {
+mod ci_unit {
   use super::*;
 
   #[test]

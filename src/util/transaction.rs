@@ -48,7 +48,7 @@ impl Transaction {
 }
 
 #[cfg(test)]
-mod unit {
+mod ci_unit {
   use super::*;
 
   #[test]
