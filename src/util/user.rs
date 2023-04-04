@@ -3,7 +3,7 @@ use crate::schema;
 use diesel::{Insertable, Queryable};
 use uuid::Uuid;
 
-#[derive(Insertable, Queryable, Debug, Clone)]
+#[derive(Insertable, Queryable, Debug, Clone, PartialEq)]
 #[diesel(table_name = schema::users)]
 pub struct User {
   pub id: String,
@@ -32,5 +32,33 @@ impl User {
       password,
       created_at: unix_time(),
     }
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn new() {
+    let username = "testuser".to_string();
+    let password = "password123".to_string();
+    let name = "Test User".to_string();
+    let email = "testuser@example.com".to_string();
+    let phone = "123-456-7890".to_string();
+
+    let user = User::new(
+      username.clone(),
+      password.clone(),
+      name.clone(),
+      email.clone(),
+      phone.clone(),
+    );
+
+    assert_eq!(user.username, username);
+    assert_eq!(user.password, password);
+    assert_eq!(user.name, name);
+    assert_eq!(user.email, email);
+    assert_eq!(user.phone, phone);
   }
 }
