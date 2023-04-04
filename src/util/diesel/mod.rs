@@ -1,2 +1,10 @@
 pub mod user;
 pub use user::*;
+pub mod message;
+pub use message::*;
+pub mod debt;
+pub use debt::*;
+pub mod receipt;
+pub use receipt::*;
+pub mod group;
+pub use group::*;

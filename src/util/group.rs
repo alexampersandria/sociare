@@ -1,60 +1,65 @@
-use std::collections::HashMap;
-
-use rusty_money::iso;
-use uuid::Uuid;
-
+use super::{unix_time, Message};
+use crate::schema;
 use crate::util::debt::Debt;
-use crate::util::message::Message;
+use crate::util::random_emoji::random_emoji;
 use crate::util::receipt::Receipt;
 use crate::util::transaction::Transaction;
 use crate::util::user::User;
+use diesel::{Identifiable, Insertable, Queryable, Selectable};
+use std::collections::HashMap;
+use uuid::Uuid;
 
-use crate::util::random_emoji::random_emoji;
-
-#[derive(Debug, PartialEq, Clone)]
-pub struct GroupUser {
-  pub id: String,
-  pub nickname: String,
-  pub active: bool,
-}
-
-impl GroupUser {
-  pub fn new(id: String) -> Self {
-    GroupUser {
-      id,
-      nickname: "".to_string(),
-      active: true,
-    }
-  }
-}
-
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Identifiable, Selectable, Debug, PartialEq, Insertable, Queryable, Clone)]
+#[diesel(table_name = schema::groups)]
 pub struct Group {
   pub id: String,
   pub name: String,
   pub emoji: String,
-  pub users: Vec<GroupUser>,
+  pub currency: String,
   pub created_at: i64,
-  pub receipts: Vec<Receipt>,
-  pub transactions: Vec<Transaction>,
-  pub messages: Vec<Message>,
-  pub currency: iso::Currency,
 }
 
-#[allow(dead_code)]
 impl Group {
-  pub fn new(name: String, users: &[User], currency: iso::Currency) -> Group {
-    let group_users = users.iter().map(|u| GroupUser::new(u.id.clone())).collect();
+  pub fn new(name: String, emoji: String, currency: String) -> Self {
     Group {
       id: Uuid::new_v4().to_string(),
       name,
-      emoji: random_emoji(),
-      users: group_users,
-      created_at: 0,
+      emoji,
+      currency,
+      created_at: unix_time(),
+    }
+  }
+}
+
+/**
+A [Group] with all of its relations:
+- users
+- receipts
+- transactions
+- messages
+ */
+#[derive(Debug, PartialEq, Clone)]
+pub struct FullGroup {
+  pub group: Group,
+  /// junction table between users and groups
+  pub users: Vec<User>,
+  pub receipts: Vec<Receipt>,
+  pub transactions: Vec<Transaction>,
+  pub messages: Vec<Message>,
+  pub debts: Vec<Debt>,
+}
+
+#[allow(dead_code)]
+impl FullGroup {
+  pub fn new(name: String, users: Vec<User>, currency: String) -> FullGroup {
+    let group = Group::new(name, random_emoji(), currency);
+    FullGroup {
+      group,
+      users,
       receipts: vec![],
       transactions: vec![],
       messages: vec![],
-      currency,
+      debts: vec![],
     }
   }
 
@@ -75,24 +80,15 @@ impl Group {
   }
 
   pub fn add_user(&mut self, user: &User) {
-    if let Some(found_user) = self.find_user(user.id.clone()) {
-      found_user.active = true;
-    } else {
-      self.users.push(GroupUser::new(user.id.clone()));
-    }
+    self.users.push(user.clone());
   }
 
-  pub fn find_user(&mut self, uuid: String) -> Option<&mut GroupUser> {
+  pub fn find_user(&mut self, uuid: String) -> Option<&mut User> {
     self.users.iter_mut().find(|u| u.id == uuid)
   }
 
   pub fn find_active_users(&self) -> Vec<String> {
-    self
-      .users
-      .iter()
-      .filter(|u| u.active)
-      .map(|u| u.id.clone())
-      .collect()
+    self.users.iter().map(|u| u.id.clone()).collect()
   }
 
   pub fn add_message(&mut self, message: Message) {
@@ -103,30 +99,36 @@ impl Group {
     self.messages.iter_mut().find(|m| m.id == uuid)
   }
 
+  pub fn add_debt(&mut self, debt: Debt) {
+    self.debts.push(debt);
+  }
+
+  pub fn find_debt(&mut self, uuid: String) -> Option<&mut Debt> {
+    self.debts.iter_mut().find(|d| d.id == uuid)
+  }
+
   pub fn balance(&mut self) -> HashMap<String, i64> {
     let mut balance: HashMap<String, i64> = HashMap::new();
     for user in self.users.iter() {
-      if user.active {
-        balance.insert(user.id.clone(), 0);
-      }
+      balance.insert(user.id.clone(), 0);
     }
     for receipt in self.receipts.iter() {
       if !receipt.deleted {
         balance.insert(
-          receipt.user.clone(),
-          balance[&receipt.user] + receipt.amount,
+          receipt.user_id.clone(),
+          balance.get(&receipt.user_id).unwrap_or(&0) + receipt.amount,
         );
       }
     }
     for transaction in self.transactions.iter() {
       if !transaction.deleted && transaction.confirmed {
         balance.insert(
-          transaction.from.clone(),
-          balance[&transaction.from] + transaction.amount,
+          transaction.from_id.clone(),
+          balance.get(&transaction.from_id).unwrap_or(&0) + transaction.amount,
         );
         balance.insert(
-          transaction.to.clone(),
-          balance[&transaction.to] - transaction.amount,
+          transaction.to_id.clone(),
+          balance.get(&transaction.to_id).unwrap_or(&0) - transaction.amount,
         );
       }
     }
@@ -150,11 +152,12 @@ impl Group {
         if debtor.0 != creditor.0 {
           let transaction_amount: i64 = (*creditor.1 - *debtor.1) / (balance.len() as i64);
           if transaction_amount > 0 {
-            payments.push(Debt {
-              from: debtor.0.clone(),
-              to: creditor.0.clone(),
-              amount: transaction_amount,
-            });
+            payments.push(Debt::new(
+              self.group.id.clone(),
+              debtor.0.clone(),
+              creditor.0.clone(),
+              transaction_amount,
+            ));
           }
         }
       }
@@ -163,5 +166,9 @@ impl Group {
     // #TODO: Reduce payments to minimum
 
     payments
+  }
+
+  pub fn update_debts(&mut self) {
+    self.debts = self.debts();
   }
 }

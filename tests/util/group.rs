@@ -1,4 +1,4 @@
-use sociare::util::group::Group;
+use sociare::util::group::FullGroup;
 use sociare::util::receipt::Receipt;
 use sociare::util::transaction::Transaction;
 use sociare::util::user::User;
@@ -6,7 +6,7 @@ use sociare::util::user::User;
 use rusty_money::{iso, Money};
 
 #[allow(dead_code)]
-fn group() -> Group {
+fn full_group() -> FullGroup {
   let user_1 = User::new(
     "user_1".to_string(),
     "hunter2".to_string(),
@@ -30,35 +30,150 @@ fn group() -> Group {
   );
 
   let data: Vec<Receipt> = vec![
-    Receipt::new(user_2.id.clone(), 13605, "shop_1".to_string()),
-    Receipt::new(user_2.id.clone(), 14785, "shop_2".to_string()),
-    Receipt::new(user_2.id.clone(), 10735, "shop_1".to_string()),
-    Receipt::new(user_2.id.clone(), 9715, "shop_2".to_string()),
-    Receipt::new(user_1.id.clone(), 25095, "shop_2".to_string()),
-    Receipt::new(user_1.id.clone(), 15885, "shop_2".to_string()),
-    Receipt::new(user_2.id.clone(), 8320, "shop_2".to_string()),
-    Receipt::new(user_2.id.clone(), 14495, "shop_1".to_string()),
-    Receipt::new(user_3.id.clone(), 25200, "takeaway".to_string()),
-    Receipt::new(user_1.id.clone(), 13830, "shop_2".to_string()),
-    Receipt::new(user_3.id.clone(), 13135, "shop_1".to_string()),
-    Receipt::new(user_3.id.clone(), 32330, "shop_1 + shop_2".to_string()),
-    Receipt::new(user_3.id.clone(), 16110, "shop_2".to_string()),
-    Receipt::new(user_2.id.clone(), 10580, "shop_2".to_string()),
-    Receipt::new(user_3.id.clone(), 25830, "shop_2".to_string()),
-    Receipt::new(user_1.id.clone(), 13890, "shop_2".to_string()),
-    Receipt::new(user_3.id.clone(), 14790, "shop_2".to_string()),
-    Receipt::new(user_3.id.clone(), 15780, "shop_1".to_string()),
-    Receipt::new(user_1.id.clone(), 31360, "shop_2".to_string()),
-    Receipt::new(user_2.id.clone(), 14900, "shop_2".to_string()),
-    Receipt::new(user_2.id.clone(), 16765, "shop_2".to_string()),
-    Receipt::new(user_1.id.clone(), 28500, "takeaway".to_string()),
-    Receipt::new(user_2.id.clone(), 11880, "shop_2".to_string()),
+    Receipt::new(
+      "test_group".to_string(),
+      user_2.id.clone(),
+      13605,
+      "shop_1".to_string(),
+    ),
+    Receipt::new(
+      "test_group".to_string(),
+      user_2.id.clone(),
+      14785,
+      "shop_2".to_string(),
+    ),
+    Receipt::new(
+      "test_group".to_string(),
+      user_2.id.clone(),
+      10735,
+      "shop_1".to_string(),
+    ),
+    Receipt::new(
+      "test_group".to_string(),
+      user_2.id.clone(),
+      9715,
+      "shop_2".to_string(),
+    ),
+    Receipt::new(
+      "test_group".to_string(),
+      user_1.id.clone(),
+      25095,
+      "shop_2".to_string(),
+    ),
+    Receipt::new(
+      "test_group".to_string(),
+      user_1.id.clone(),
+      15885,
+      "shop_2".to_string(),
+    ),
+    Receipt::new(
+      "test_group".to_string(),
+      user_2.id.clone(),
+      8320,
+      "shop_2".to_string(),
+    ),
+    Receipt::new(
+      "test_group".to_string(),
+      user_2.id.clone(),
+      14495,
+      "shop_1".to_string(),
+    ),
+    Receipt::new(
+      "test_group".to_string(),
+      user_3.id.clone(),
+      25200,
+      "takeaway".to_string(),
+    ),
+    Receipt::new(
+      "test_group".to_string(),
+      user_1.id.clone(),
+      13830,
+      "shop_2".to_string(),
+    ),
+    Receipt::new(
+      "test_group".to_string(),
+      user_3.id.clone(),
+      13135,
+      "shop_1".to_string(),
+    ),
+    Receipt::new(
+      "test_group".to_string(),
+      user_3.id.clone(),
+      32330,
+      "shop_1 + shop_2".to_string(),
+    ),
+    Receipt::new(
+      "test_group".to_string(),
+      user_3.id.clone(),
+      16110,
+      "shop_2".to_string(),
+    ),
+    Receipt::new(
+      "test_group".to_string(),
+      user_2.id.clone(),
+      10580,
+      "shop_2".to_string(),
+    ),
+    Receipt::new(
+      "test_group".to_string(),
+      user_3.id.clone(),
+      25830,
+      "shop_2".to_string(),
+    ),
+    Receipt::new(
+      "test_group".to_string(),
+      user_1.id.clone(),
+      13890,
+      "shop_2".to_string(),
+    ),
+    Receipt::new(
+      "test_group".to_string(),
+      user_3.id.clone(),
+      14790,
+      "shop_2".to_string(),
+    ),
+    Receipt::new(
+      "test_group".to_string(),
+      user_3.id.clone(),
+      15780,
+      "shop_1".to_string(),
+    ),
+    Receipt::new(
+      "test_group".to_string(),
+      user_1.id.clone(),
+      31360,
+      "shop_2".to_string(),
+    ),
+    Receipt::new(
+      "test_group".to_string(),
+      user_2.id.clone(),
+      14900,
+      "shop_2".to_string(),
+    ),
+    Receipt::new(
+      "test_group".to_string(),
+      user_2.id.clone(),
+      16765,
+      "shop_2".to_string(),
+    ),
+    Receipt::new(
+      "test_group".to_string(),
+      user_1.id.clone(),
+      28500,
+      "takeaway".to_string(),
+    ),
+    Receipt::new(
+      "test_group".to_string(),
+      user_2.id.clone(),
+      11880,
+      "shop_2".to_string(),
+    ),
   ];
 
-  let mut group = Group::new(
+  let mut group = FullGroup::new(
     "LTT FEB 2023".to_string(),
-    &vec![user_1, user_2, user_3],
-    iso::DKK.to_owned(),
+    vec![user_1, user_2, user_3],
+    "DKK".to_string(),
   );
 
   for receipt in data {
@@ -69,12 +184,14 @@ fn group() -> Group {
 }
 
 #[allow(dead_code)]
-fn settle_debts(group: &mut Group) {
+fn settle_debts(group: &mut FullGroup) {
   let settle = group.debts();
   for debt in settle {
     group.add_transaction(Transaction::new(
-      debt.from,
-      debt.to,
+      "test_group".to_string(),
+      debt.from_id,
+      debt.to_id,
+      "test_id".to_string(),
       debt.amount,
       "test".to_string(),
     ));
@@ -91,7 +208,7 @@ fn format_value(value: i64, currency: &iso::Currency) -> String {
 
 #[test]
 fn total_remains_the_same() {
-  let mut group = group();
+  let mut group = full_group();
   let before_total = group.total();
   settle_debts(&mut group);
   let after_total = group.total();
@@ -100,7 +217,7 @@ fn total_remains_the_same() {
 
 #[test]
 fn balance_changed() {
-  let mut group = group();
+  let mut group = full_group();
   let before_balance = group.balance();
   settle_debts(&mut group);
   let after_balance = group.balance();
@@ -109,7 +226,7 @@ fn balance_changed() {
 
 #[test]
 fn total_user_1() {
-  let mut group = group();
+  let mut group = full_group();
   let balance = group.balance();
   let user_1 = group
     .users
@@ -117,12 +234,13 @@ fn total_user_1() {
     .find(|u| u.id == group.users.get(0).unwrap().id)
     .unwrap();
   let user_1_total = balance.get(&user_1.id).unwrap();
-  assert_eq!(format_value(*user_1_total, &group.currency), "1.285,60kr.");
+  let currency = iso::find(&group.group.currency).unwrap();
+  assert_eq!(format_value(*user_1_total, currency), "1.285,60kr.");
 }
 
 #[test]
 fn total_user_2() {
-  let mut group = group();
+  let mut group = full_group();
   let balance = group.balance();
   let user_2 = group
     .users
@@ -130,12 +248,13 @@ fn total_user_2() {
     .find(|u| u.id == group.users.get(1).unwrap().id)
     .unwrap();
   let user_2_total = balance.get(&user_2.id).unwrap();
-  assert_eq!(format_value(*user_2_total, &group.currency), "1.257,80kr.");
+  let currency = iso::find(&group.group.currency).unwrap();
+  assert_eq!(format_value(*user_2_total, currency), "1.257,80kr.");
 }
 
 #[test]
 fn total_user_3() {
-  let mut group = group();
+  let mut group = full_group();
   let balance = group.balance();
   let user_3 = group
     .users
@@ -143,13 +262,14 @@ fn total_user_3() {
     .find(|u| u.id == group.users.get(2).unwrap().id)
     .unwrap();
   let user_3_total = balance.get(&user_3.id).unwrap();
-  assert_eq!(format_value(*user_3_total, &group.currency), "1.431,75kr.");
+  let currency = iso::find(&group.group.currency).unwrap();
+  assert_eq!(format_value(*user_3_total, currency), "1.431,75kr.");
 }
 
 #[test]
 #[ignore] // #TODO: remove ignore when fixed
 fn minimal_transactions() {
-  let mut group = group();
+  let mut group = full_group();
   let settle = group.debts();
   assert_eq!(settle.len(), 2);
 }
