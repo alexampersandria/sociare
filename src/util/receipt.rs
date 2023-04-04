@@ -21,13 +21,13 @@ pub struct Receipt {
 
 #[allow(dead_code)]
 impl Receipt {
-  pub fn new(group_id: String, user_id: String, amount: i64, info: String) -> Self {
+  pub fn new(group_id: &str, user_id: &str, amount: i64, info: &str) -> Self {
     Receipt {
       id: Uuid::new_v4().to_string(),
-      group_id,
-      user_id,
+      group_id: group_id.to_string(),
+      user_id: user_id.to_string(),
       amount,
-      info,
+      info: info.to_string(),
       created_at: unix_time(),
       deleted: false,
     }
@@ -35,7 +35,7 @@ impl Receipt {
 }
 
 #[cfg(test)]
-mod tests {
+mod unit {
   use super::*;
 
   #[test]
@@ -44,7 +44,7 @@ mod tests {
     let user_id = String::from("test_user");
     let amount = 100;
     let info = String::from("Test receipt");
-    let receipt = Receipt::new(group_id.clone(), user_id.clone(), amount, info.clone());
+    let receipt = Receipt::new(&group_id, &user_id, amount, &info);
     assert_eq!(receipt.group_id, group_id);
     assert_eq!(receipt.user_id, user_id);
     assert_eq!(receipt.amount, amount);

@@ -1,7 +1,6 @@
 use super::{unix_time, Message};
 use crate::schema;
 use crate::util::debt::Debt;
-use crate::util::random_emoji::random_emoji;
 use crate::util::receipt::Receipt;
 use crate::util::transaction::Transaction;
 use crate::util::user::User;
@@ -20,12 +19,12 @@ pub struct Group {
 }
 
 impl Group {
-  pub fn new(name: String, emoji: String, currency: String) -> Self {
+  pub fn new(name: &str, emoji: &str, currency: &str) -> Self {
     Group {
       id: Uuid::new_v4().to_string(),
-      name,
-      emoji,
-      currency,
+      name: name.to_string(),
+      emoji: emoji.to_string(),
+      currency: currency.to_string(),
       created_at: unix_time(),
     }
   }
@@ -51,8 +50,8 @@ pub struct FullGroup {
 
 #[allow(dead_code)]
 impl FullGroup {
-  pub fn new(name: String, users: Vec<User>, currency: String) -> FullGroup {
-    let group = Group::new(name, random_emoji(), currency);
+  pub fn new(name: &str, users: Vec<User>, emoji: &str, currency: &str) -> FullGroup {
+    let group = Group::new(name, emoji, currency);
     FullGroup {
       group,
       users,
@@ -153,9 +152,9 @@ impl FullGroup {
           let transaction_amount: i64 = (*creditor.1 - *debtor.1) / (balance.len() as i64);
           if transaction_amount > 0 {
             payments.push(Debt::new(
-              self.group.id.clone(),
-              debtor.0.clone(),
-              creditor.0.clone(),
+              &self.group.id,
+              debtor.0,
+              creditor.0,
               transaction_amount,
             ));
           }
@@ -171,4 +170,44 @@ impl FullGroup {
   pub fn update_debts(&mut self) {
     self.debts = self.debts();
   }
+}
+
+#[cfg(test)]
+mod unit {
+  use super::*;
+
+  #[test]
+  fn new() {
+    let group = Group::new("Test Group", "🎉", "USD");
+    assert_eq!(group.name, "Test Group");
+    assert_eq!(group.emoji, "🎉");
+    assert_eq!(group.currency, "USD");
+  }
+
+  #[test]
+  fn add_receipt() {
+    let mut group = FullGroup::new("Test Group", vec![], "🎉", "USD");
+    let receipt = Receipt::new(&group.group.id, "Test User", 100, "");
+    group.add_receipt(receipt);
+    assert_eq!(group.receipts.len(), 1);
+    assert_eq!(group.receipts[0].user_id, "Test User");
+  }
+
+  #[test]
+  fn find_receipt() {
+    let mut group = FullGroup::new("Test Group", vec![], "🎉", "USD");
+    let receipt = Receipt::new(&group.group.id, "User 1", 100, "");
+    group.add_receipt(receipt.clone());
+
+    // Find existing receipt
+    let found_receipt = group.find_receipt(receipt.id);
+    assert!(found_receipt.is_some());
+    assert_eq!(found_receipt.unwrap().user_id, "User 1");
+
+    // Find non-existing receipt
+    let non_existent_receipt = group.find_receipt("nonexistentid".to_string());
+    assert!(non_existent_receipt.is_none());
+  }
+
+  // Add more tests for other functions here...
 }

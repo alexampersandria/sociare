@@ -1,179 +1,53 @@
-use sociare::util::group::FullGroup;
 use sociare::util::receipt::Receipt;
 use sociare::util::transaction::Transaction;
 use sociare::util::user::User;
+use sociare::util::{group::FullGroup, random_emoji};
 
 use rusty_money::{iso, Money};
 
 #[allow(dead_code)]
 fn full_group() -> FullGroup {
-  let user_1 = User::new(
-    "user_1".to_string(),
-    "hunter2".to_string(),
-    "Foo".to_string(),
-    "user_1@example.com".to_string(),
-    "1234".to_string(),
-  );
-  let user_2 = User::new(
-    "user_2".to_string(),
-    "hunter2".to_string(),
-    "Bar".to_string(),
-    "user_2@example.com".to_string(),
-    "5678".to_string(),
-  );
+  let user_1 = User::new("user_1", "hunter2", "Foo", "user_1@example.com", "1234");
+  let user_2 = User::new("user_2", "hunter2", "Bar", "user_2@example.com", "5678");
   let user_3 = User::new(
-    "user_3".to_string(),
-    "hunter2".to_string(),
-    "Keith".to_string(),
-    "user_3@example.com".to_string(),
-    "12345678".to_string(),
+    "user_3",
+    "hunter2",
+    "Keith",
+    "user_3@example.com",
+    "12345678",
   );
 
   let data: Vec<Receipt> = vec![
-    Receipt::new(
-      "test_group".to_string(),
-      user_2.id.clone(),
-      13605,
-      "shop_1".to_string(),
-    ),
-    Receipt::new(
-      "test_group".to_string(),
-      user_2.id.clone(),
-      14785,
-      "shop_2".to_string(),
-    ),
-    Receipt::new(
-      "test_group".to_string(),
-      user_2.id.clone(),
-      10735,
-      "shop_1".to_string(),
-    ),
-    Receipt::new(
-      "test_group".to_string(),
-      user_2.id.clone(),
-      9715,
-      "shop_2".to_string(),
-    ),
-    Receipt::new(
-      "test_group".to_string(),
-      user_1.id.clone(),
-      25095,
-      "shop_2".to_string(),
-    ),
-    Receipt::new(
-      "test_group".to_string(),
-      user_1.id.clone(),
-      15885,
-      "shop_2".to_string(),
-    ),
-    Receipt::new(
-      "test_group".to_string(),
-      user_2.id.clone(),
-      8320,
-      "shop_2".to_string(),
-    ),
-    Receipt::new(
-      "test_group".to_string(),
-      user_2.id.clone(),
-      14495,
-      "shop_1".to_string(),
-    ),
-    Receipt::new(
-      "test_group".to_string(),
-      user_3.id.clone(),
-      25200,
-      "takeaway".to_string(),
-    ),
-    Receipt::new(
-      "test_group".to_string(),
-      user_1.id.clone(),
-      13830,
-      "shop_2".to_string(),
-    ),
-    Receipt::new(
-      "test_group".to_string(),
-      user_3.id.clone(),
-      13135,
-      "shop_1".to_string(),
-    ),
-    Receipt::new(
-      "test_group".to_string(),
-      user_3.id.clone(),
-      32330,
-      "shop_1 + shop_2".to_string(),
-    ),
-    Receipt::new(
-      "test_group".to_string(),
-      user_3.id.clone(),
-      16110,
-      "shop_2".to_string(),
-    ),
-    Receipt::new(
-      "test_group".to_string(),
-      user_2.id.clone(),
-      10580,
-      "shop_2".to_string(),
-    ),
-    Receipt::new(
-      "test_group".to_string(),
-      user_3.id.clone(),
-      25830,
-      "shop_2".to_string(),
-    ),
-    Receipt::new(
-      "test_group".to_string(),
-      user_1.id.clone(),
-      13890,
-      "shop_2".to_string(),
-    ),
-    Receipt::new(
-      "test_group".to_string(),
-      user_3.id.clone(),
-      14790,
-      "shop_2".to_string(),
-    ),
-    Receipt::new(
-      "test_group".to_string(),
-      user_3.id.clone(),
-      15780,
-      "shop_1".to_string(),
-    ),
-    Receipt::new(
-      "test_group".to_string(),
-      user_1.id.clone(),
-      31360,
-      "shop_2".to_string(),
-    ),
-    Receipt::new(
-      "test_group".to_string(),
-      user_2.id.clone(),
-      14900,
-      "shop_2".to_string(),
-    ),
-    Receipt::new(
-      "test_group".to_string(),
-      user_2.id.clone(),
-      16765,
-      "shop_2".to_string(),
-    ),
-    Receipt::new(
-      "test_group".to_string(),
-      user_1.id.clone(),
-      28500,
-      "takeaway".to_string(),
-    ),
-    Receipt::new(
-      "test_group".to_string(),
-      user_2.id.clone(),
-      11880,
-      "shop_2".to_string(),
-    ),
+    Receipt::new("test_group", &user_2.id, 13605, "shop_1"),
+    Receipt::new("test_group", &user_2.id, 14785, "shop_2"),
+    Receipt::new("test_group", &user_2.id, 10735, "shop_1"),
+    Receipt::new("test_group", &user_2.id, 9715, "shop_2"),
+    Receipt::new("test_group", &user_1.id, 25095, "shop_2"),
+    Receipt::new("test_group", &user_1.id, 15885, "shop_2"),
+    Receipt::new("test_group", &user_2.id, 8320, "shop_2"),
+    Receipt::new("test_group", &user_2.id, 14495, "shop_1"),
+    Receipt::new("test_group", &user_3.id, 25200, "takeaway"),
+    Receipt::new("test_group", &user_1.id, 13830, "shop_2"),
+    Receipt::new("test_group", &user_3.id, 13135, "shop_1"),
+    Receipt::new("test_group", &user_3.id, 32330, "shop_1 + shop_2"),
+    Receipt::new("test_group", &user_3.id, 16110, "shop_2"),
+    Receipt::new("test_group", &user_2.id, 10580, "shop_2"),
+    Receipt::new("test_group", &user_3.id, 25830, "shop_2"),
+    Receipt::new("test_group", &user_1.id, 13890, "shop_2"),
+    Receipt::new("test_group", &user_3.id, 14790, "shop_2"),
+    Receipt::new("test_group", &user_3.id, 15780, "shop_1"),
+    Receipt::new("test_group", &user_1.id, 31360, "shop_2"),
+    Receipt::new("test_group", &user_2.id, 14900, "shop_2"),
+    Receipt::new("test_group", &user_2.id, 16765, "shop_2"),
+    Receipt::new("test_group", &user_1.id, 28500, "takeaway"),
+    Receipt::new("test_group", &user_2.id, 11880, "shop_2"),
   ];
 
   let mut group = FullGroup::new(
-    "LTT FEB 2023".to_string(),
+    "LTT FEB 2023",
     vec![user_1, user_2, user_3],
-    "DKK".to_string(),
+    &random_emoji(),
+    "DKK",
   );
 
   for receipt in data {
@@ -188,12 +62,12 @@ fn settle_debts(group: &mut FullGroup) {
   let settle = group.debts();
   for debt in settle {
     group.add_transaction(Transaction::new(
-      "test_group".to_string(),
-      debt.from_id,
-      debt.to_id,
-      "test_id".to_string(),
+      "test_group",
+      &debt.from_id,
+      &debt.to_id,
+      "test_id",
       debt.amount,
-      "test".to_string(),
+      "test",
     ));
   }
   for transaction in &mut group.transactions {

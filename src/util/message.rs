@@ -20,12 +20,12 @@ pub struct Message {
 
 #[allow(dead_code)]
 impl Message {
-  pub fn new(group_id: String, user_id: String, content: String) -> Self {
+  pub fn new(group_id: &str, user_id: &str, content: &str) -> Self {
     Message {
       id: Uuid::new_v4().to_string(),
-      group_id,
-      user_id,
-      content,
+      group_id: group_id.to_string(),
+      user_id: user_id.to_string(),
+      content: content.to_string(),
       created_at: unix_time(),
       deleted: false,
     }
@@ -33,7 +33,7 @@ impl Message {
 }
 
 #[cfg(test)]
-mod tests {
+mod unit {
   use super::*;
 
   #[test]
@@ -41,7 +41,7 @@ mod tests {
     let group_id = String::from("test_group");
     let user_id = Uuid::new_v4().to_string();
     let message = String::from("Hello, world!");
-    let new_message = Message::new(group_id.clone(), user_id.clone(), message.clone());
+    let new_message = Message::new(&group_id, &user_id, &message);
     assert_eq!(new_message.group_id, group_id);
     assert_eq!(new_message.user_id, user_id);
     assert_eq!(new_message.content, message);

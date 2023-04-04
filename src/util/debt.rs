@@ -19,12 +19,12 @@ pub struct Debt {
 }
 
 impl Debt {
-  pub fn new(group_id: String, from_id: String, to_id: String, amount: i64) -> Self {
+  pub fn new(group_id: &str, from_id: &str, to_id: &str, amount: i64) -> Self {
     Debt {
       id: Uuid::new_v4().to_string(),
-      group_id,
-      from_id,
-      to_id,
+      group_id: group_id.to_string(),
+      from_id: from_id.to_string(),
+      to_id: to_id.to_string(),
       amount,
       created_at: unix_time(),
     }
@@ -32,7 +32,7 @@ impl Debt {
 }
 
 #[cfg(test)]
-mod tests {
+mod unit {
   use super::*;
 
   #[test]
@@ -41,7 +41,7 @@ mod tests {
     let from = String::from("user1");
     let to = String::from("user2");
     let amount = 100;
-    let debt = Debt::new(group.clone(), from.clone(), to.clone(), amount);
+    let debt = Debt::new(&group, &from, &to, amount);
     assert_eq!(debt.group_id, group);
     assert_eq!(debt.from_id, from);
     assert_eq!(debt.to_id, to);

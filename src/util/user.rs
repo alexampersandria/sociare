@@ -17,20 +17,14 @@ pub struct User {
 }
 
 impl User {
-  pub fn new(
-    username: String,
-    password: String,
-    name: String,
-    email: String,
-    phone: String,
-  ) -> User {
+  pub fn new(username: &str, password: &str, name: &str, email: &str, phone: &str) -> User {
     User {
       id: Uuid::new_v4().to_string(),
-      username,
-      name,
-      email,
-      phone,
-      password,
+      username: username.to_string(),
+      name: name.to_string(),
+      email: email.to_string(),
+      phone: phone.to_string(),
+      password: password.to_string(),
       created_at: unix_time(),
     }
   }
@@ -71,7 +65,7 @@ impl UserGroup {
 }
 
 #[cfg(test)]
-mod tests {
+mod unit {
   use super::*;
 
   #[test]
@@ -82,13 +76,7 @@ mod tests {
     let email = "testuser@example.com".to_string();
     let phone = "123-456-7890".to_string();
 
-    let user = User::new(
-      username.clone(),
-      password.clone(),
-      name.clone(),
-      email.clone(),
-      phone.clone(),
-    );
+    let user = User::new(&username, &password, &name, &email, &phone);
 
     assert_eq!(user.username, username);
     assert_eq!(user.password, password);
