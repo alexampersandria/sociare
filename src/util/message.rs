@@ -1,13 +1,12 @@
-use super::unix_time;
 use crate::schema;
-use crate::util::Group;
+use crate::util;
 use diesel::{Associations, Identifiable, Insertable, Queryable, Selectable};
 use uuid::Uuid;
 
 #[derive(
   Insertable, Queryable, Selectable, Identifiable, Associations, Debug, Clone, PartialEq,
 )]
-#[diesel(belongs_to(Group))]
+#[diesel(belongs_to(util::Group))]
 #[diesel(table_name = schema::messages)]
 pub struct Message {
   pub id: String,
@@ -26,7 +25,7 @@ impl Message {
       group_id: group_id.to_string(),
       user_id: user_id.to_string(),
       content: content.to_string(),
-      created_at: unix_time(),
+      created_at: util::unix_time(),
       deleted: false,
     }
   }

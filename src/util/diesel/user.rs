@@ -1,15 +1,13 @@
-use crate::{
-  schema::{self, users::name},
-  util::{self, Group, User, UserGroup},
+use crate::schema;
+use crate::util;
+use diesel::{
+  BelongingToDsl, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl, SelectableHelper,
 };
-use diesel::BelongingToDsl;
-use diesel::ExpressionMethods;
-use diesel::PgConnection;
-use diesel::QueryDsl;
-use diesel::RunQueryDsl;
-use diesel::SelectableHelper;
 
-pub fn create_user(conn: &mut PgConnection, user: &User) -> Result<usize, diesel::result::Error> {
+pub fn create_user(
+  conn: &mut PgConnection,
+  user: &util::User,
+) -> Result<usize, diesel::result::Error> {
   diesel::insert_into(schema::users::table)
     .values(user)
     .execute(conn)
@@ -31,7 +29,7 @@ pub fn set_name(
   new_name: &String,
 ) -> Result<usize, diesel::result::Error> {
   diesel::update(schema::users::table.find(id))
-    .set(name.eq(new_name))
+    .set(schema::users::name.eq(new_name))
     .execute(conn)
 }
 
@@ -69,13 +67,13 @@ pub fn delete_user(conn: &mut PgConnection, id: &String) -> Result<usize, diesel
   diesel::delete(schema::users::table.find(id)).execute(conn)
 }
 
-pub fn get_user(conn: &mut PgConnection, id: &String) -> Result<User, diesel::result::Error> {
+pub fn get_user(conn: &mut PgConnection, id: &String) -> Result<util::User, diesel::result::Error> {
   schema::users::table.find(id).get_result(conn)
 }
 
 pub fn add_to_group(
   conn: &mut PgConnection,
-  user_group: &UserGroup,
+  user_group: &util::UserGroup,
 ) -> Result<usize, diesel::result::Error> {
   diesel::insert_into(schema::users_groups::table)
     .values(user_group)
@@ -98,10 +96,10 @@ pub fn remove_from_group(
 pub fn get_groups(
   conn: &mut PgConnection,
   user_id: &String,
-) -> Result<Vec<Group>, diesel::result::Error> {
+) -> Result<Vec<util::Group>, diesel::result::Error> {
   let gotten_user = get_user(conn, user_id)?;
 
-  util::user::UserGroup::belonging_to(&gotten_user)
+  util::UserGroup::belonging_to(&gotten_user)
     .inner_join(schema::groups::table)
     .select(util::Group::as_select())
     .load(conn)

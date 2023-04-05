@@ -1,15 +1,12 @@
-use crate::schema::{self};
-use crate::util::{self, Group, User};
-use diesel::BelongingToDsl;
-use diesel::ExpressionMethods;
-use diesel::PgConnection;
-use diesel::QueryDsl;
-use diesel::RunQueryDsl;
-use diesel::SelectableHelper;
+use crate::schema;
+use crate::util;
+use diesel::{
+  BelongingToDsl, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl, SelectableHelper,
+};
 
 pub fn create_group(
   conn: &mut PgConnection,
-  group: &Group,
+  group: &util::Group,
 ) -> Result<usize, diesel::result::Error> {
   diesel::insert_into(schema::groups::table)
     .values(group)
@@ -46,14 +43,20 @@ pub fn set_currency(
     .execute(conn)
 }
 
-pub fn get_group(conn: &mut PgConnection, id: &String) -> Result<Group, diesel::result::Error> {
+pub fn get_group(
+  conn: &mut PgConnection,
+  id: &String,
+) -> Result<util::Group, diesel::result::Error> {
   schema::groups::table.find(id).first(conn)
 }
 
-pub fn get_users(conn: &mut PgConnection, id: &String) -> Result<Vec<User>, diesel::result::Error> {
+pub fn get_users(
+  conn: &mut PgConnection,
+  id: &String,
+) -> Result<Vec<util::User>, diesel::result::Error> {
   let gotten_group = get_group(conn, id)?;
 
-  util::user::UserGroup::belonging_to(&gotten_group)
+  util::UserGroup::belonging_to(&gotten_group)
     .inner_join(schema::users::table)
     .select(util::User::as_select())
     .load(conn)

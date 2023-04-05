@@ -1,11 +1,10 @@
-use crate::schema::{self, messages::content};
-use crate::util::Message;
-use diesel::ExpressionMethods;
-use diesel::{PgConnection, QueryDsl, RunQueryDsl};
+use crate::schema;
+use crate::util;
+use diesel::{ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
 
 pub fn create_message(
   conn: &mut PgConnection,
-  message: &Message,
+  message: &util::Message,
 ) -> Result<usize, diesel::result::Error> {
   diesel::insert_into(schema::messages::table)
     .values(message)
@@ -18,7 +17,7 @@ pub fn set_content(
   new_content: &String,
 ) -> Result<usize, diesel::result::Error> {
   diesel::update(schema::messages::table.find(id))
-    .set(content.eq(new_content))
+    .set(schema::messages::content.eq(new_content))
     .execute(conn)
 }
 

@@ -1,9 +1,11 @@
-use crate::schema::{self, debts::amount};
-use crate::util::Debt;
-use diesel::ExpressionMethods;
-use diesel::{PgConnection, QueryDsl, RunQueryDsl};
+use crate::schema;
+use crate::util;
+use diesel::{ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
 
-pub fn create_debt(conn: &mut PgConnection, debt: &Debt) -> Result<usize, diesel::result::Error> {
+pub fn create_debt(
+  conn: &mut PgConnection,
+  debt: &util::Debt,
+) -> Result<usize, diesel::result::Error> {
   diesel::insert_into(schema::debts::table)
     .values(debt)
     .execute(conn)
@@ -35,8 +37,12 @@ pub fn set_amount(
   new_amount: &i64,
 ) -> Result<usize, diesel::result::Error> {
   diesel::update(schema::debts::table.find(id))
-    .set(amount.eq(new_amount))
+    .set(schema::debts::amount.eq(new_amount))
     .execute(conn)
+}
+
+pub fn get_debt(conn: &mut PgConnection, id: &String) -> Result<util::Debt, diesel::result::Error> {
+  schema::debts::table.find(id).first(conn)
 }
 
 pub fn delete_debt(conn: &mut PgConnection, id: &String) -> Result<usize, diesel::result::Error> {

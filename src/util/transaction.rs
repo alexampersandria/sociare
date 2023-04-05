@@ -1,13 +1,12 @@
-use super::unix_time;
 use crate::schema;
-use crate::util::Group;
+use crate::util;
 use diesel::{Associations, Identifiable, Insertable, Queryable, Selectable};
 use uuid::Uuid;
 
 #[derive(
   Insertable, Queryable, Selectable, Identifiable, Associations, Debug, Clone, PartialEq,
 )]
-#[diesel(belongs_to(Group))]
+#[diesel(belongs_to(util::Group))]
 #[diesel(table_name = schema::transactions)]
 pub struct Transaction {
   pub id: String,
@@ -41,7 +40,7 @@ impl Transaction {
       amount,
       method: method.to_string(),
       confirmed: false,
-      created_at: unix_time(),
+      created_at: util::unix_time(),
       deleted: false,
     }
   }

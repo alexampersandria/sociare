@@ -1,13 +1,10 @@
-use crate::{
-  schema::{self},
-  util::Receipt,
-};
-use diesel::ExpressionMethods;
-use diesel::{PgConnection, QueryDsl, RunQueryDsl};
+use crate::schema;
+use crate::util;
+use diesel::{ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
 
 pub fn create_receipt(
   conn: &mut PgConnection,
-  receipt: &Receipt,
+  receipt: &util::Receipt,
 ) -> Result<usize, diesel::result::Error> {
   diesel::insert_into(schema::receipts::table)
     .values(receipt)
@@ -52,6 +49,15 @@ pub fn set_deleted(
   diesel::update(schema::receipts::table.find(id))
     .set(schema::receipts::deleted.eq(new_deleted))
     .execute(conn)
+}
+
+pub fn get_receipt(
+  conn: &mut PgConnection,
+  id: &String,
+) -> Result<util::Receipt, diesel::result::Error> {
+  schema::receipts::table
+    .find(id)
+    .first::<util::Receipt>(conn)
 }
 
 /**

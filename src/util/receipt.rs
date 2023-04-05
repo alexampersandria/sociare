@@ -1,13 +1,12 @@
-use super::unix_time;
 use crate::schema;
-use crate::util::Group;
+use crate::util;
 use diesel::{Associations, Identifiable, Insertable, Queryable, Selectable};
 use uuid::Uuid;
 
 #[derive(
   Insertable, Queryable, Selectable, Identifiable, Associations, Debug, Clone, PartialEq,
 )]
-#[diesel(belongs_to(Group))]
+#[diesel(belongs_to(util::Group))]
 #[diesel(table_name = schema::receipts)]
 pub struct Receipt {
   pub id: String,
@@ -28,7 +27,7 @@ impl Receipt {
       user_id: user_id.to_string(),
       amount,
       info: info.to_string(),
-      created_at: unix_time(),
+      created_at: util::unix_time(),
       deleted: false,
     }
   }
