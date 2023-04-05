@@ -30,7 +30,7 @@ impl Transaction {
       amount,
       method: method.to_string(),
       confirmed: false,
-      created_at: util::unix_time(),
+      created_at: util::unix_ms(),
       deleted: false,
     }
   }

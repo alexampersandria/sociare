@@ -26,7 +26,7 @@ impl Receipt {
       user_id: user_id.to_string(),
       amount,
       info: info.to_string(),
-      created_at: util::unix_time(),
+      created_at: util::unix_ms(),
       deleted: false,
     }
   }

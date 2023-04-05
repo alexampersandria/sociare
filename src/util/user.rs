@@ -23,7 +23,7 @@ impl User {
       email: email.to_string(),
       phone: phone.to_string(),
       password: password.to_string(),
-      created_at: util::unix_time(),
+      created_at: util::unix_ms(),
     }
   }
 }

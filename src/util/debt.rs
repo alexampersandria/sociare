@@ -24,7 +24,7 @@ impl Debt {
       from_id: from_id.to_string(),
       to_id: to_id.to_string(),
       amount,
-      created_at: util::unix_time(),
+      created_at: util::unix_ms(),
     }
   }
 }

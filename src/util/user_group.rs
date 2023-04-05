@@ -28,7 +28,7 @@ impl UserGroup {
       nickname: "".to_string(),
       is_admin: false,
       active: true,
-      created_at: util::unix_time(),
+      created_at: util::unix_ms(),
     }
   }
 }

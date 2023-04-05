@@ -20,7 +20,7 @@ impl Group {
       name: name.to_string(),
       emoji: emoji.to_string(),
       currency: currency.to_string(),
-      created_at: util::unix_time(),
+      created_at: util::unix_ms(),
     }
   }
 }

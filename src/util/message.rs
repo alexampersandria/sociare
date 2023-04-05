@@ -24,7 +24,7 @@ impl Message {
       group_id: group_id.to_string(),
       user_id: user_id.to_string(),
       content: content.to_string(),
-      created_at: util::unix_time(),
+      created_at: util::unix_ms(),
       deleted: false,
     }
   }
