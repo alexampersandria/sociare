@@ -1,5 +1,4 @@
-use crate::schema;
-use crate::util;
+use crate::{schema, util};
 use diesel::{Identifiable, Insertable, Queryable, Selectable};
 use std::collections::HashMap;
 use uuid::Uuid;

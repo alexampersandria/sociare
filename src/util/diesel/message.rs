@@ -1,5 +1,4 @@
-use crate::schema;
-use crate::util;
+use crate::{schema, util};
 use diesel::{ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl};
 
 pub fn create_message(

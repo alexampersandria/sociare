@@ -1,5 +1,4 @@
-use crate::schema;
-use crate::util;
+use crate::{schema, util};
 use diesel::{
   BelongingToDsl, ExpressionMethods, PgConnection, QueryDsl, RunQueryDsl, SelectableHelper,
 };

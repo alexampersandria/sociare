@@ -1,5 +1,4 @@
-use crate::schema;
-use crate::util;
+use crate::{schema, util};
 use diesel::{Associations, Identifiable, Insertable, Queryable, Selectable};
 use uuid::Uuid;
 

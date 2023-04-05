@@ -1,10 +1,9 @@
-use crate::schema;
-use crate::util;
+use crate::{schema, util};
 use diesel::{Associations, Identifiable, Insertable, Queryable, Selectable};
 use uuid::Uuid;
 
 #[derive(
-  Insertable, Queryable, Selectable, Identifiable, Associations, Debug, Clone, PartialEq,
+  Associations, Clone, Debug, Identifiable, Insertable, PartialEq, Queryable, Selectable,
 )]
 #[diesel(belongs_to(util::Group))]
 #[diesel(table_name = schema::receipts)]
