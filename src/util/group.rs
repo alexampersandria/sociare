@@ -2,6 +2,7 @@ use crate::{schema, util};
 use diesel::{Identifiable, Insertable, Queryable, Selectable};
 use std::collections::HashMap;
 use uuid::Uuid;
+
 #[derive(Clone, Debug, Identifiable, Insertable, PartialEq, Queryable, Selectable)]
 #[diesel(table_name = schema::groups)]
 pub struct Group {
@@ -156,7 +157,41 @@ impl FullGroup {
       }
     }
 
-    // #TODO: Reduce payments to minimum
+    let mut update: Vec<util::Debt> = Vec::new();
+    let mut eliminate: Vec<util::Debt> = Vec::new();
+
+    let mut link_state = LinkState::Initial;
+
+    while link_state != LinkState::None {
+      link_state = LinkState::Initial;
+
+      for payment in &payments {
+        for link in &payments {
+          if payment.id != link.id
+            && payment.from_id != link.from_id
+            && payment.to_id == link.to_id
+            && payment.amount > link.amount
+          {
+            let mut new_payment = payment.clone();
+            new_payment.amount += link.amount;
+            update.push(new_payment);
+            eliminate.push(link.clone());
+            link_state = LinkState::Found;
+          }
+        }
+      }
+      if link_state == LinkState::Initial {
+        link_state = LinkState::None;
+      }
+
+      for payment in &update {
+        payments.retain(|p| p.id != payment.id);
+        payments.push(payment.clone());
+      }
+      for payment in &eliminate {
+        payments.retain(|p| p.id != payment.id);
+      }
+    }
 
     payments
   }
@@ -164,6 +199,13 @@ impl FullGroup {
   pub fn update_debts(&mut self) {
     self.debts = self.debts();
   }
+}
+
+#[derive(Debug, PartialEq)]
+enum LinkState {
+  Initial,
+  Found,
+  None,
 }
 
 #[cfg(test)]

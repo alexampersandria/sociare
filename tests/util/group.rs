@@ -144,7 +144,6 @@ mod ci_integration {
   }
 
   #[test]
-  #[ignore] // #TODO: remove ignore when fixed
   fn minimal_transactions() {
     let mut group = full_group();
     let settle = group.debts();
