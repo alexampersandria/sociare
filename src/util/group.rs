@@ -73,8 +73,8 @@ impl FullGroup {
     self.transactions.iter_mut().find(|t| t.id == uuid)
   }
 
-  pub fn add_user(&mut self, user: &util::User) {
-    self.users.push(user.clone());
+  pub fn add_user(&mut self, user: util::User) {
+    self.users.push(user);
   }
 
   pub fn find_user(&mut self, uuid: String) -> Option<&mut util::User> {
@@ -202,6 +202,83 @@ mod ci_unit {
     // Find non-existing receipt
     let non_existent_receipt = group.find_receipt("nonexistentid".to_string());
     assert!(non_existent_receipt.is_none());
+  }
+
+  #[test]
+  fn add_transaction() {
+    let mut group = FullGroup::new("Test Group", vec![], "🎉", "USD");
+    let transaction =
+      util::Transaction::new(&group.group.id, "User 1", "User 2", 100, "Test Transaction");
+    group.add_transaction(transaction);
+    assert_eq!(group.transactions.len(), 1);
+    assert_eq!(group.transactions[0].from_id, "User 1");
+  }
+
+  #[test]
+  fn find_transaction() {
+    let mut group = FullGroup::new("Test Group", vec![], "🎉", "USD");
+    let transaction =
+      util::Transaction::new(&group.group.id, "User 1", "User 2", 100, "Test Transaction");
+    group.add_transaction(transaction.clone());
+
+    // Find existing transaction
+    let found_transaction = group.find_transaction(transaction.id);
+    assert!(found_transaction.is_some());
+    assert_eq!(found_transaction.unwrap().from_id, "User 1");
+
+    // Find non-existing transaction
+    let non_existent_transaction = group.find_transaction("nonexistentid".to_string());
+    assert!(non_existent_transaction.is_none());
+  }
+
+  #[test]
+  fn add_user() {
+    let mut group = FullGroup::new("Test Group", vec![], "🎉", "USD");
+    let user = util::User::new("Test User", "1", "2", "3", "4");
+    group.add_user(user);
+    assert_eq!(group.users.len(), 1);
+    assert_eq!(group.users[0].username, "Test User");
+  }
+
+  #[test]
+  fn find_user() {
+    let mut group = FullGroup::new("Test Group", vec![], "🎉", "USD");
+    let user = util::User::new("Test User", "1", "2", "3", "4");
+    group.add_user(user.clone());
+
+    // Find existing user
+    let found_user = group.find_user(user.id);
+    assert!(found_user.is_some());
+    assert_eq!(found_user.unwrap().username, "Test User");
+
+    // Find non-existing user
+    let non_existent_user = group.find_user("nonexistentid".to_string());
+    assert!(non_existent_user.is_none());
+  }
+
+  #[test]
+  fn add_message() {
+    let mut group = FullGroup::new("Test Group", vec![], "🎉", "USD");
+    let message = util::Message::new(&group.group.id, "Test User", "Test Message");
+    group.add_message(message);
+    assert_eq!(group.messages.len(), 1);
+    assert_eq!(group.messages[0].user_id, "Test User");
+  }
+
+  #[test]
+  fn find_message() {
+    let mut group = FullGroup::new("Test Group", vec![], "🎉", "USD");
+    let message = util::Message::new(&group.group.id, "Test User", "Test Message");
+    group.add_message(message.clone());
+
+    // Find existing message
+    let found_message = group.find_message(message.id);
+    assert!(found_message.is_some());
+    assert_eq!(found_message.unwrap().user_id, "Test User");
+
+    // Find non-existing message
+    let non_existent_message = group.find_message("nonexistentid".to_string());
+    assert!(non_existent_message.is_none());
   }
 
   // Add more tests for other functions here...

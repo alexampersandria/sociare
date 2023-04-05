@@ -50,7 +50,6 @@ diesel::table! {
         group_id -> Varchar,
         from_id -> Varchar,
         to_id -> Varchar,
-        debt_id -> Varchar,
         amount -> Int8,
         method -> Text,
         confirmed -> Bool,
@@ -88,7 +87,6 @@ diesel::joinable!(messages -> groups (group_id));
 diesel::joinable!(messages -> users (user_id));
 diesel::joinable!(receipts -> groups (group_id));
 diesel::joinable!(receipts -> users (user_id));
-diesel::joinable!(transactions -> debts (debt_id));
 diesel::joinable!(transactions -> groups (group_id));
 diesel::joinable!(users_groups -> groups (group_id));
 diesel::joinable!(users_groups -> users (user_id));

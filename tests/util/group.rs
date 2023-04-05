@@ -69,7 +69,6 @@ mod ci_integration {
         "test_group",
         &debt.from_id,
         &debt.to_id,
-        "test_id",
         debt.amount,
         "test",
       ));

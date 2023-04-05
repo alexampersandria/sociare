@@ -126,3 +126,7 @@ pub fn get_full_group(
     debts,
   })
 }
+
+pub fn delete_group(conn: &mut PgConnection, id: &String) -> Result<usize, diesel::result::Error> {
+  diesel::delete(schema::groups::table.find(id)).execute(conn)
+}
