@@ -157,8 +157,8 @@ impl FullGroup {
       }
     }
 
-    let mut update: Vec<util::Debt> = Vec::new();
-    let mut eliminate: Vec<util::Debt> = Vec::new();
+    let mut update: Vec<(String, i64)> = Vec::new();
+    let mut eliminate: Vec<String> = Vec::new();
 
     let mut link_state = LinkState::Initial;
 
@@ -172,10 +172,8 @@ impl FullGroup {
             && payment.to_id == link.to_id
             && payment.amount > link.amount
           {
-            let mut new_payment = payment.clone();
-            new_payment.amount += link.amount;
-            update.push(new_payment);
-            eliminate.push(link.clone());
+            update.push((payment.id.clone(), payment.amount + link.amount));
+            eliminate.push(link.id.clone());
             link_state = LinkState::Found;
           }
         }
@@ -184,12 +182,14 @@ impl FullGroup {
         link_state = LinkState::None;
       }
 
-      for payment in &update {
-        payments.retain(|p| p.id != payment.id);
-        payments.push(payment.clone());
+      for update_entry in &update {
+        let payment = payments.iter_mut().find(|p| p.id == update_entry.0);
+        if let Some(payment) = payment {
+          payment.amount = update_entry.1;
+        }
       }
-      for payment in &eliminate {
-        payments.retain(|p| p.id != payment.id);
+      for id in &eliminate {
+        payments.retain(|p| &p.id != id);
       }
     }
 
