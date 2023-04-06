@@ -139,12 +139,12 @@ impl FullGroup {
 
   pub fn debts(&mut self) -> Vec<util::Debt> {
     let balance = self.balance();
-    let mut payments: Vec<util::Debt> = vec![];
+    let mut payments = Vec::with_capacity(balance.len() * balance.len());
 
     for debtor in &balance {
       for creditor in &balance {
         if debtor.0 != creditor.0 {
-          let transaction_amount: i64 = (*creditor.1 - *debtor.1) / (balance.len() as i64);
+          let transaction_amount = (*creditor.1 - *debtor.1) / (balance.len() as i64);
           if transaction_amount > 0 {
             payments.push(util::Debt::new(
               &self.group.id,
@@ -157,23 +157,23 @@ impl FullGroup {
       }
     }
 
-    let mut update: Vec<(String, i64)> = Vec::new();
-    let mut eliminate: Vec<String> = Vec::new();
+    let mut update = Vec::new();
+    let mut eliminate = Vec::new();
 
     let mut link_state = LinkState::Initial;
 
     while link_state != LinkState::None {
       link_state = LinkState::Initial;
 
-      for payment in &payments {
-        for link in &payments {
-          if payment.id != link.id
+      for (i, payment) in payments.iter().enumerate() {
+        for (j, link) in payments.iter().enumerate() {
+          if i != j
             && payment.from_id != link.from_id
             && payment.to_id == link.to_id
             && payment.amount > link.amount
           {
-            update.push((payment.id.clone(), payment.amount + link.amount));
-            eliminate.push(link.id.clone());
+            update.push((i, payment.amount + link.amount));
+            eliminate.push(j);
             link_state = LinkState::Found;
           }
         }
@@ -182,15 +182,16 @@ impl FullGroup {
         link_state = LinkState::None;
       }
 
-      for update_entry in &update {
-        let payment = payments.iter_mut().find(|p| p.id == update_entry.0);
-        if let Some(payment) = payment {
-          payment.amount = update_entry.1;
-        }
+      for (i, amount) in &update {
+        payments[*i].amount = *amount;
       }
-      for id in &eliminate {
-        payments.retain(|p| &p.id != id);
+      eliminate.sort();
+      eliminate.dedup();
+      for &j in eliminate.iter().rev() {
+        payments.swap_remove(j);
       }
+      update.clear();
+      eliminate.clear();
     }
 
     payments
