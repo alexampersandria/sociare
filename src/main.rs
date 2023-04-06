@@ -1,10 +1,4 @@
-use poem::{
-  endpoint::StaticFilesEndpoint,
-  get, handler,
-  listener::TcpListener,
-  middleware::{NormalizePath, TrailingSlash},
-  EndpointExt, Route, Server,
-};
+use poem::{endpoint::StaticFilesEndpoint, get, handler, listener::TcpListener, Route, Server};
 use sociare::util;
 
 #[handler]
@@ -19,16 +13,17 @@ async fn main() -> Result<(), std::io::Error> {
   }
   tracing_subscriber::fmt::init();
 
-  let mut app = Route::new();
+  let app = Route::new()
+    .nest(
+      "/api",
+      Route::new().nest("/v1", Route::new().nest("/", get(api))),
+    )
+    .nest(
+      "/",
+      StaticFilesEndpoint::new("./www").index_file("index.html"),
+    );
 
-  app = app.at("/api/v1", get(api));
-
-  app = app.at(
-    "/",
-    StaticFilesEndpoint::new("./www").index_file("index.html"),
-  );
-
-  Server::new(TcpListener::bind("127.0.0.1:3030"))
-    .run(app.with(NormalizePath::new(TrailingSlash::Trim)))
+  Server::new(TcpListener::bind("127.0.0.1:3000"))
+    .run(app)
     .await
 }
