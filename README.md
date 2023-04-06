@@ -37,6 +37,30 @@ $ cargo clippy
 $ cargo build
 ```
 
+### ⚡ Vite
+
+The front end is built with [Vite](https://vitejs.dev/) and lives in the `vite` dir.
+
+In the `build/build.rs` script, Vite is automatically built using yarn when running `cargo build` or on file changed if using [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer). To manually build Vite, run the following commands:
+
+```bash
+$ cd vite
+$ yarn
+$ yarn build
+```
+
+Vite will build to `www` in the root dir served by poem on `/`.
+
+#### 👩‍💻 Dev Server
+
+Running the vite dev server.
+
+```bash
+$ cd vite
+$ yarn
+$ yarn dev
+```
+
 ### ⛽ Diesel
 
 This project uses [Diesel](https://diesel.rs/) and Postgres.

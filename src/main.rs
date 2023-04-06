@@ -1,1 +1,29 @@
-fn main() {}
+use poem::{endpoint::StaticFilesEndpoint, get, handler, listener::TcpListener, Route, Server};
+use sociare::util;
+
+#[handler]
+fn api() -> String {
+  format!("current_time: {}", util::unix_ms())
+}
+
+#[tokio::main]
+async fn main() -> Result<(), std::io::Error> {
+  if std::env::var_os("RUST_LOG").is_none() {
+    std::env::set_var("RUST_LOG", "poem=debug");
+  }
+  tracing_subscriber::fmt::init();
+
+  let app = Route::new()
+    .nest(
+      "/api",
+      Route::new().nest("/v1", Route::new().nest("/", get(api))),
+    )
+    .nest(
+      "/",
+      StaticFilesEndpoint::new("./www").index_file("index.html"),
+    );
+
+  Server::new(TcpListener::bind("127.0.0.1:3000"))
+    .run(app)
+    .await
+}
