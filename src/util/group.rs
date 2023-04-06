@@ -157,56 +157,12 @@ impl FullGroup {
       }
     }
 
-    let mut update = Vec::new();
-    let mut eliminate = Vec::new();
-
-    let mut link_state = LinkState::Initial;
-
-    while link_state != LinkState::None {
-      link_state = LinkState::Initial;
-
-      for (i, payment) in payments.iter().enumerate() {
-        for (j, link) in payments.iter().enumerate() {
-          if i != j
-            && payment.from_id != link.from_id
-            && payment.to_id == link.to_id
-            && payment.amount > link.amount
-          {
-            update.push((i, payment.amount + link.amount));
-            eliminate.push(j);
-            link_state = LinkState::Found;
-          }
-        }
-      }
-      if link_state == LinkState::Initial {
-        link_state = LinkState::None;
-      }
-
-      for (i, amount) in &update {
-        payments[*i].amount = *amount;
-      }
-      eliminate.sort();
-      eliminate.dedup();
-      for &j in eliminate.iter().rev() {
-        payments.swap_remove(j);
-      }
-      update.clear();
-      eliminate.clear();
-    }
-
     payments
   }
 
   pub fn update_debts(&mut self) {
     self.debts = self.debts();
   }
-}
-
-#[derive(Debug, PartialEq)]
-enum LinkState {
-  Initial,
-  Found,
-  None,
 }
 
 #[cfg(test)]
