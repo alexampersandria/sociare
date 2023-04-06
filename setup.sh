@@ -22,7 +22,7 @@ sudo -u postgres createdb $database
 sudo -u postgres psql -d postgres -c "ALTER USER \"$username\" WITH PASSWORD '$password';"
 sudo -u postgres psql -d postgres -c "GRANT ALL PRIVILEGES ON DATABASE \"$database\" TO \"$username\";"
 cargo install diesel_cli --no-default-features --features postgres
-echo DATABASE_URL=postgres://$username:$password@localhost/$database > .env
+echo -e "DATABASE_URL=postgres://$username:$password@localhost/$database\nDIESEL_CONFIG_FILE=./diesel.toml" > .env
 diesel setup
 diesel migration run
 

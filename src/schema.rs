@@ -59,6 +59,17 @@ diesel::table! {
 }
 
 diesel::table! {
+    user_sessions (id) {
+        id -> Varchar,
+        user_id -> Varchar,
+        created_at -> Int8,
+        accessed_at -> Int8,
+        ip_address -> Varchar,
+        user_agent -> Text,
+    }
+}
+
+diesel::table! {
     users (id) {
         id -> Varchar,
         username -> Varchar,
@@ -88,6 +99,7 @@ diesel::joinable!(messages -> users (user_id));
 diesel::joinable!(receipts -> groups (group_id));
 diesel::joinable!(receipts -> users (user_id));
 diesel::joinable!(transactions -> groups (group_id));
+diesel::joinable!(user_sessions -> users (user_id));
 diesel::joinable!(users_groups -> groups (group_id));
 diesel::joinable!(users_groups -> users (user_id));
 
@@ -97,6 +109,7 @@ diesel::allow_tables_to_appear_in_same_query!(
   messages,
   receipts,
   transactions,
+  user_sessions,
   users,
   users_groups,
 );
