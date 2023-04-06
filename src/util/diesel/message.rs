@@ -30,10 +30,8 @@ pub fn set_deleted(
     .execute(conn)
 }
 
-/**
-# ⚠️ WARNING ⚠️
-Use only for tests. In production, use `set_deleted` instead.
-*/
+/// # ⚠️ WARNING ⚠️
+/// Use only for tests. In production, use `set_deleted` instead.
 pub fn delete_message(
   conn: &mut PgConnection,
   id: &String,

@@ -25,13 +25,11 @@ impl Group {
   }
 }
 
-/**
-A [Group] with all of its relations:
-- users
-- receipts
-- transactions
-- messages
- */
+/// A [Group] with all of its relations:
+/// - users
+/// - receipts
+/// - transactions
+/// - messages
 #[derive(Debug, PartialEq, Clone)]
 pub struct FullGroup {
   pub group: Group,

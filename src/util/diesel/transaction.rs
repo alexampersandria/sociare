@@ -79,10 +79,8 @@ pub fn get_transaction(
     .first::<util::Transaction>(conn)
 }
 
-/**
-# ⚠️ WARNING ⚠️
-Use only for tests. In production, use `set_deleted` instead.
-*/
+/// # ⚠️ WARNING ⚠️
+/// Use only for tests. In production, use `set_deleted` instead.
 pub fn delete_transaction(
   conn: &mut PgConnection,
   id: &String,

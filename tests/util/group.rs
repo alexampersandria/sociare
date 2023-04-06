@@ -1,9 +1,7 @@
-use sociare::util::receipt::Receipt;
-use sociare::util::transaction::Transaction;
-use sociare::util::user::User;
-use sociare::util::{group::FullGroup, random_emoji};
-
 use rusty_money::{iso, Money};
+use sociare::util::{
+  group::FullGroup, random_emoji, receipt::Receipt, transaction::Transaction, user::User,
+};
 
 #[cfg(test)]
 mod ci_integration {

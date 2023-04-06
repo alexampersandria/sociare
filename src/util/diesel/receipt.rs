@@ -59,10 +59,8 @@ pub fn get_receipt(
     .first::<util::Receipt>(conn)
 }
 
-/**
-# ⚠️ WARNING ⚠️
-Use only for tests. In production, use `set_deleted` instead.
-*/
+/// # ⚠️ WARNING ⚠️
+/// Use only for tests. In production, use `set_deleted` instead.
 pub fn delete_receipt(
   conn: &mut PgConnection,
   id: &String,
