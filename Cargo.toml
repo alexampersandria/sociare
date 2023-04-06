@@ -28,6 +28,3 @@ features = [
 
 [dev-dependencies]
 rusty-hook = "^0.11.2"
-
-[build-dependencies]
-dotenvy = "0.15"
