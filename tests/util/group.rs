@@ -147,6 +147,25 @@ mod ci_integration {
   }
 
   #[test]
+  fn debts_settle_group() {
+    let mut group = full_group();
+    let settle = group.debts();
+    for debt in settle {
+      let mut transaction = Transaction::new(
+        &group.group.id,
+        &debt.from_id,
+        &debt.to_id,
+        debt.amount,
+        "test",
+      );
+      transaction.confirmed = true;
+      group.add_transaction(transaction);
+    }
+    let after_settle = group.debts();
+    assert_eq!(after_settle.len(), 0);
+  }
+
+  #[test]
   #[ignore] // #TODO: remove once algorithm fixed
   fn minimal_transactions() {
     let mut group = full_group();
