@@ -1,6 +1,7 @@
 {
-  "recommendations": [
-    "rust-lang.rust-analyzer",
-    "bungcip.better-toml"
-  ]
+	"recommendations": [
+		"rust-lang.rust-analyzer",
+		"bungcip.better-toml",
+		"svelte.svelte-vscode"
+	]
 }

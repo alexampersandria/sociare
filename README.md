@@ -37,6 +37,29 @@ $ cargo clippy
 $ cargo build
 ```
 
+### ⚡ Vite
+
+The front end is built with [Vite](https://vitejs.dev/) and lives in the `vite` dir.
+
+```bash
+$ cd vite
+$ yarn install
+```
+
+#### 👩‍💻 Dev Server
+
+```bash
+$ yarn dev
+```
+
+#### ⛏️ Build
+
+Vite will build to `www` in the root dir served by poem.
+
+```bash
+$ yarn build
+```
+
 ### ⛽ Diesel
 
 This project uses [Diesel](https://diesel.rs/) and Postgres.
