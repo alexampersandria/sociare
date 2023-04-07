@@ -1,6 +1,6 @@
 use rusty_money::{iso, Money};
 use sociare::util::{
-  group::FullGroup, random_emoji, receipt::Receipt, transaction::Transaction, user::User,
+  emoji, group::FullGroup, receipt::Receipt, transaction::Transaction, user::User,
 };
 
 #[cfg(test)]
@@ -51,7 +51,7 @@ mod ci_integration {
     let mut group = FullGroup::new(
       "LTT FEB 2023",
       vec![user_1, user_2, user_3],
-      &random_emoji(),
+      &emoji::random(),
       "DKK",
     );
 
