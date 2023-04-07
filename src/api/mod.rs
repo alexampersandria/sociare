@@ -1,4 +1,4 @@
-pub mod endpoint;
-pub use endpoint::*;
+pub mod index;
+pub use index::*;
 pub mod v1;
 pub use v1::*;

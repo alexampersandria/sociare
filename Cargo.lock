@@ -912,6 +912,8 @@ dependencies = [
  "rand",
  "rusty-hook",
  "rusty-money",
+ "serde",
+ "serde_json",
  "tokio",
  "tracing-subscriber",
  "urlencoding",

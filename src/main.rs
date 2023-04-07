@@ -8,7 +8,7 @@ async fn main() -> Result<(), std::io::Error> {
   }
   tracing_subscriber::fmt::init();
 
-  let app = Route::new().nest("/api", api::endpoint()).nest(
+  let app = Route::new().nest("/api", api::index::endpoint()).nest(
     "/",
     StaticFilesEndpoint::new("./www").index_file("index.html"),
   );
