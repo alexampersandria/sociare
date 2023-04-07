@@ -75,9 +75,10 @@ diesel::table! {
         username -> Varchar,
         name -> Varchar,
         email -> Varchar,
-        phone -> Varchar,
         password -> Varchar,
         created_at -> Int8,
+        phone -> Nullable<Varchar>,
+        paypal_me -> Nullable<Varchar>,
     }
 }
 

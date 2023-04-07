@@ -9,21 +9,41 @@ pub struct User {
   pub username: String,
   pub name: String,
   pub email: String,
-  pub phone: String,
   pub password: String,
   pub created_at: i64,
+  pub phone: Option<String>,
+  pub paypal_me: Option<String>,
 }
 
 impl User {
-  pub fn new(username: &str, password: &str, name: &str, email: &str, phone: &str) -> User {
+  pub fn new(username: &str, password: &str, name: &str, email: &str) -> User {
     User {
       id: Uuid::new_v4().to_string(),
       username: username.to_string(),
       name: name.to_string(),
       email: email.to_string(),
-      phone: phone.to_string(),
       password: password.to_string(),
       created_at: util::unix_ms(),
+      phone: None,
+      paypal_me: None,
+    }
+  }
+  pub fn new_with_phone(
+    username: &str,
+    password: &str,
+    name: &str,
+    email: &str,
+    phone: &str,
+  ) -> User {
+    User {
+      id: Uuid::new_v4().to_string(),
+      username: username.to_string(),
+      name: name.to_string(),
+      email: email.to_string(),
+      password: password.to_string(),
+      created_at: util::unix_ms(),
+      phone: Option::from(phone.to_string()),
+      paypal_me: None,
     }
   }
 }
@@ -38,14 +58,32 @@ mod ci_unit {
     let password = "password123".to_string();
     let name = "Test User".to_string();
     let email = "testuser@example.com".to_string();
-    let phone = "123-456-7890".to_string();
 
-    let user = User::new(&username, &password, &name, &email, &phone);
+    let user = User::new(&username, &password, &name, &email);
 
     assert_eq!(user.username, username);
     assert_eq!(user.password, password);
     assert_eq!(user.name, name);
     assert_eq!(user.email, email);
-    assert_eq!(user.phone, phone);
+    assert!(user.phone.is_none());
+    assert!(user.paypal_me.is_none());
+  }
+
+  #[test]
+  fn new_with_phone() {
+    let username = "testuser".to_string();
+    let password = "password123".to_string();
+    let name = "Test User".to_string();
+    let email = "testuser@example.com".to_string();
+    let phone = "123-456-7890".to_string();
+
+    let user = User::new_with_phone(&username, &password, &name, &email, &phone);
+
+    assert_eq!(user.username, username);
+    assert_eq!(user.password, password);
+    assert_eq!(user.name, name);
+    assert_eq!(user.email, email);
+    assert_eq!(user.phone.unwrap(), phone);
+    assert!(user.paypal_me.is_none());
   }
 }

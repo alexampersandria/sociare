@@ -3,7 +3,7 @@
 </h1>
 
 <p align="center">
-  A WeShare replacement API in Rust
+  A WeShare replacement service in Rust & Svelte
 </p>
 
 <p align="center">

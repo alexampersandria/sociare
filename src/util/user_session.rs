@@ -35,7 +35,7 @@ mod ci_unit {
 
   #[test]
   fn new() {
-    let user = util::User::new("test", "hunter2", "Test User", "e@x.com", "1234");
+    let user = util::User::new_with_phone("test", "hunter2", "Test User", "e@x.com", "1234");
     let session = util::UserSession::new(&user.id, "ip", "ua");
     assert_eq!(session.user_id, user.id);
     assert_eq!(session.ip_address, "ip");

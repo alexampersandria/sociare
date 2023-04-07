@@ -4,7 +4,8 @@ CREATE TABLE users (
   username VARCHAR(255) NOT NULL,
   name VARCHAR(255) NOT NULL,
   email VARCHAR(319) NOT NULL,
-  phone VARCHAR(255) NOT NULL,
   password VARCHAR(255) NOT NULL,
-  created_at BIGINT NOT NULL
+  created_at BIGINT NOT NULL,
+  phone VARCHAR(255),
+  paypal_me VARCHAR(255)
 )
