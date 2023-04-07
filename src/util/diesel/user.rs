@@ -42,13 +42,13 @@ pub fn set_email(
     .execute(conn)
 }
 
-pub fn set_phone(
+pub fn set_mobilepay(
   conn: &mut PgConnection,
   id: &String,
-  new_phone: &String,
+  new_mobilepay: &String,
 ) -> Result<usize, diesel::result::Error> {
   diesel::update(schema::users::table.find(id))
-    .set(schema::users::phone.eq(new_phone))
+    .set(schema::users::mobilepay.eq(new_mobilepay))
     .execute(conn)
 }
 

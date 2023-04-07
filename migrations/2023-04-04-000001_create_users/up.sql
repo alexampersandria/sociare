@@ -6,6 +6,6 @@ CREATE TABLE users (
   email VARCHAR(319) NOT NULL,
   password VARCHAR(255) NOT NULL,
   created_at BIGINT NOT NULL,
-  phone VARCHAR(255),
+  mobilepay VARCHAR(255),
   paypal_me VARCHAR(255)
 )

@@ -7,14 +7,14 @@ mod diesel_integration {
   #[test]
   fn create_delete() {
     let mut conn = sociare::establish_connection();
-    let from = sociare::util::User::new_with_phone(
+    let from = sociare::util::User::new_with_mobilepay(
       "username",
       "password",
       "Display Name 🦀",
       "test@example.com",
       "12345678",
     );
-    let to = sociare::util::User::new_with_phone(
+    let to = sociare::util::User::new_with_mobilepay(
       "other user",
       "password",
       "Lobster Man 🦞",

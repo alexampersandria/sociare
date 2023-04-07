@@ -1,9 +1,11 @@
+use crate::api;
 use crate::establish_connection;
 use crate::schema;
 use crate::util;
 use bcrypt::hash;
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use poem::web::Json;
+use poem::Request;
 use poem::{handler, web::Path};
 use serde::Deserialize;
 use serde::Serialize;
@@ -28,7 +30,7 @@ pub fn get(Path(id): Path<String>) -> String {
 }
 
 #[handler]
-pub fn post(Json(user): Json<NewUser>) -> String {
+pub fn create(Json(user): Json<NewUser>) -> String {
   let mut conn = establish_connection();
 
   let found_user = schema::users::table
@@ -58,6 +60,30 @@ pub fn post(Json(user): Json<NewUser>) -> String {
   }
 }
 
+#[handler]
+pub fn login(req: &Request, Json(user): Json<NewUser>) -> String {
+  let headers = req.headers();
+
+  let ip_address_value = headers.get("X-Forwarded-For");
+  let ip_address = match ip_address_value {
+    Some(ip_address) => ip_address.to_str().unwrap_or(""),
+    None => "",
+  };
+
+  let user_agent_value = headers.get("User-Agent");
+  let user_agent = match user_agent_value {
+    Some(user_agent) => user_agent.to_str().unwrap_or(""),
+    None => "",
+  };
+
+  let session = api::auth::create_session(&user.username, &user.password, ip_address, user_agent);
+
+  match session {
+    Some(session) => serde_json::to_string_pretty(&session).unwrap(),
+    None => "{\"error\": \"invalid_credentials\"}".to_string(),
+  }
+}
+
 #[derive(Deserialize, Serialize, Debug)]
 pub struct PublicUserData {
   id: String,
@@ -71,6 +97,41 @@ impl PublicUserData {
       id: result.0,
       username: result.1,
       created_at: result.2,
+    }
+  }
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct PrivateUserData {
+  id: String,
+  username: String,
+  name: String,
+  email: String,
+  mobilepay: String,
+  paypal_me: String,
+  created_at: i64,
+}
+
+impl PrivateUserData {
+  pub fn new(
+    result: (
+      String,
+      String,
+      String,
+      String,
+      Option<String>,
+      Option<String>,
+      i64,
+    ),
+  ) -> Self {
+    Self {
+      id: result.0,
+      username: result.1,
+      name: result.2,
+      email: result.3,
+      mobilepay: result.4.unwrap_or("".to_string()),
+      paypal_me: result.5.unwrap_or("".to_string()),
+      created_at: result.6,
     }
   }
 }

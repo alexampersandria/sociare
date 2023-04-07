@@ -10,7 +10,8 @@ fn benchmark() {
   let mut group = util::FullGroup::new("Test Group", vec![], "🎉", "USD");
 
   for i in 0..100 {
-    let user = util::User::new_with_phone(&format!("user_{}", i), "hunter", "test", "test", "test");
+    let user =
+      util::User::new_with_mobilepay(&format!("user_{}", i), "hunter", "test", "test", "test");
     group.add_user(user);
   }
 

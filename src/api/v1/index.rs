@@ -4,8 +4,10 @@ use poem::{get, handler, post, Route};
 pub fn endpoint() -> poem::Route {
   Route::new()
     .nest("/", package_version)
-    .at("/user/:username", get(v1::user::get))
-    .at("/user", post(v1::user::post))
+    .at("/users/:username", get(v1::user::get))
+    .at("/user/create", post(v1::user::create))
+    .at("/user/login", post(v1::user::login))
+    .at("/session/:session", get(v1::auth::check))
 }
 
 #[handler]

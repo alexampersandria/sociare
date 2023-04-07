@@ -9,7 +9,7 @@ mod diesel_integration {
     let mut conn = sociare::establish_connection();
 
     let group = Group::new("Crab Chat", "🦀", "USD");
-    let user = sociare::util::User::new_with_phone(
+    let user = sociare::util::User::new_with_mobilepay(
       "momo",
       "hunter2",
       "Momo 🙈",

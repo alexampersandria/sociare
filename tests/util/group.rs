@@ -9,9 +9,11 @@ mod ci_integration {
 
   #[allow(dead_code)]
   fn full_group() -> FullGroup {
-    let mut user_1 = User::new_with_phone("user_1", "hunter2", "Foo", "user_1@example.com", "1234");
-    let mut user_2 = User::new_with_phone("user_2", "hunter2", "Bar", "user_2@example.com", "5678");
-    let mut user_3 = User::new_with_phone(
+    let mut user_1 =
+      User::new_with_mobilepay("user_1", "hunter2", "Foo", "user_1@example.com", "1234");
+    let mut user_2 =
+      User::new_with_mobilepay("user_2", "hunter2", "Bar", "user_2@example.com", "5678");
+    let mut user_3 = User::new_with_mobilepay(
       "user_3",
       "hunter2",
       "Keith",

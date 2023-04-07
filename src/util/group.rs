@@ -230,7 +230,7 @@ mod ci_unit {
   #[test]
   fn add_user() {
     let mut group = FullGroup::new("Test Group", vec![], "🎉", "USD");
-    let user = util::User::new_with_phone("Test User", "1", "2", "3", "4");
+    let user = util::User::new_with_mobilepay("Test User", "1", "2", "3", "4");
     group.add_user(user);
     assert_eq!(group.users.len(), 1);
     assert_eq!(group.users[0].username, "Test User");
@@ -239,7 +239,7 @@ mod ci_unit {
   #[test]
   fn find_user() {
     let mut group = FullGroup::new("Test Group", vec![], "🎉", "USD");
-    let user = util::User::new_with_phone("Test User", "1", "2", "3", "4");
+    let user = util::User::new_with_mobilepay("Test User", "1", "2", "3", "4");
     group.add_user(user.clone());
 
     // Find existing user

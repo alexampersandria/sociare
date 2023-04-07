@@ -10,3 +10,5 @@ pub mod transaction;
 pub use transaction::*;
 pub mod user;
 pub use user::*;
+pub mod user_session;
+pub use user_session::*;
