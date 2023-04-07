@@ -1,8 +1,11 @@
 use crate::{schema, util};
 use diesel::{Identifiable, Insertable, Queryable, Selectable};
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Clone, Debug, Identifiable, Insertable, PartialEq, Queryable, Selectable)]
+#[derive(
+  Clone, Debug, Deserialize, Identifiable, Insertable, PartialEq, Queryable, Selectable, Serialize,
+)]
 #[diesel(table_name = schema::users)]
 pub struct User {
   pub id: String,

@@ -1,4 +1,9 @@
-use poem::{endpoint::StaticFilesEndpoint, listener::TcpListener, Route, Server};
+use poem::{
+  endpoint::StaticFilesEndpoint,
+  listener::TcpListener,
+  middleware::{NormalizePath, TrailingSlash},
+  EndpointExt, Route, Server,
+};
 use sociare::api;
 
 #[tokio::main]
@@ -8,10 +13,13 @@ async fn main() -> Result<(), std::io::Error> {
   }
   tracing_subscriber::fmt::init();
 
-  let app = Route::new().nest("/api", api::index::endpoint()).nest(
-    "/",
-    StaticFilesEndpoint::new("./www").index_file("index.html"),
-  );
+  let app = Route::new()
+    .nest("/api", api::index::endpoint())
+    .nest(
+      "/",
+      StaticFilesEndpoint::new("./www").index_file("index.html"),
+    )
+    .with(NormalizePath::new(TrailingSlash::Trim));
 
   Server::new(TcpListener::bind("127.0.0.1:3000"))
     .run(app)
