@@ -51,82 +51,90 @@ pub fn get(req: &Request, Path(group): Path<String>) -> String {
       .filter(schema::groups::id.eq_any(user_groups))
       .first::<crate::util::Group>(&mut conn);
 
-    let users: Result<
-      Vec<(
-        util::UserGroup,
-        String,
-        String,
-        String,
-        Option<String>,
-        Option<String>,
-        i64,
-      )>,
-      diesel::result::Error,
-    > = schema::users_groups::table
-      .filter(schema::users_groups::active.eq(true))
-      .filter(schema::users_groups::group_id.eq(&group))
-      .inner_join(schema::users::table)
-      .select((
-        util::UserGroup::as_select(),
-        schema::users::id,
-        schema::users::username,
-        schema::users::name,
-        schema::users::mobilepay,
-        schema::users::paypal_me,
-        schema::users::created_at,
-      ))
-      .get_results::<(
-        util::UserGroup,
-        String,
-        String,
-        String,
-        Option<String>,
-        Option<String>,
-        i64,
-      )>(&mut conn);
+    if let Ok(found_group) = found_group {
+      let users: Result<
+        Vec<(
+          util::UserGroup,
+          String,
+          String,
+          String,
+          Option<String>,
+          Option<String>,
+          i64,
+        )>,
+        diesel::result::Error,
+      > = schema::users_groups::table
+        .filter(schema::users_groups::active.eq(true))
+        .filter(schema::users_groups::group_id.eq(&group))
+        .inner_join(schema::users::table)
+        .select((
+          util::UserGroup::as_select(),
+          schema::users::id,
+          schema::users::username,
+          schema::users::name,
+          schema::users::mobilepay,
+          schema::users::paypal_me,
+          schema::users::created_at,
+        ))
+        .get_results::<(
+          util::UserGroup,
+          String,
+          String,
+          String,
+          Option<String>,
+          Option<String>,
+          i64,
+        )>(&mut conn);
 
-    if let Ok(users) = users {
-      let group_member_users: Vec<api::v1::user::GroupMemberUserData> = users
-        .iter()
-        .map(|user| api::v1::user::GroupMemberUserData {
-          user_group: user.0.clone(),
-          id: user.1.clone(),
-          username: user.2.clone(),
-          name: user.3.clone(),
-          mobilepay: user.4.clone(),
-          paypal_me: user.5.clone(),
-          created_at: user.6,
-        })
-        .collect::<Vec<api::v1::user::GroupMemberUserData>>();
+      if let Ok(users) = users {
+        let group_member_users: Vec<api::v1::user::GroupMemberUserData> = users
+          .iter()
+          .map(|user| api::v1::user::GroupMemberUserData {
+            id: user.1.clone(),
+            username: user.2.clone(),
+            name: user.3.clone(),
+            mobilepay: user.4.clone(),
+            paypal_me: user.5.clone(),
+            created_at: user.6,
+          })
+          .collect::<Vec<api::v1::user::GroupMemberUserData>>();
 
-      let messages = schema::messages::table
-        .filter(schema::messages::group_id.eq(&group))
-        .order(schema::messages::created_at.desc())
-        .get_results::<crate::util::Message>(&mut conn);
+        let messages = schema::messages::table
+          .filter(schema::messages::group_id.eq(&group))
+          .order(schema::messages::created_at.desc())
+          .get_results::<crate::util::Message>(&mut conn);
 
-      if let Ok(messages) = messages {
-        let receipts = schema::receipts::table
-          .filter(schema::receipts::group_id.eq(&group))
-          .order(schema::receipts::created_at.desc())
-          .get_results::<crate::util::Receipt>(&mut conn);
+        if let Ok(messages) = messages {
+          let receipts = schema::receipts::table
+            .filter(schema::receipts::group_id.eq(&group))
+            .order(schema::receipts::created_at.desc())
+            .get_results::<crate::util::Receipt>(&mut conn);
 
-        if let Ok(receipts) = receipts {
-          let transactions = schema::transactions::table
-            .filter(schema::transactions::group_id.eq(&group))
-            .order(schema::transactions::created_at.desc())
-            .get_results::<crate::util::Transaction>(&mut conn);
+          if let Ok(receipts) = receipts {
+            let transactions = schema::transactions::table
+              .filter(schema::transactions::group_id.eq(&group))
+              .order(schema::transactions::created_at.desc())
+              .get_results::<crate::util::Transaction>(&mut conn);
 
-          if let Ok(transactions) = transactions {
-            let full_group = FullGroupWithGroupMemberUserData {
-              group: found_group.unwrap(),
-              users: group_member_users,
-              messages,
-              receipts,
-              transactions,
-            };
+            if let Ok(transactions) = transactions {
+              let full_group = util::FullGroup {
+                group: found_group,
+                users: users.iter().map(|user| user.0.clone()).collect(),
+                messages,
+                receipts,
+                transactions,
+                debts: vec![],
+              };
+              let full_group_with_members_user_data = FullGroupWithGroupMemberUserData {
+                group: full_group,
+                users: group_member_users,
+              };
 
-            serde_json::to_string_pretty(&full_group)
-              .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
+              serde_json::to_string_pretty(&full_group_with_members_user_data)
+                .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
+            } else {
+              "{\"error\": \"internal_server_error\"}".to_string()
+            }
           } else {
             "{\"error\": \"internal_server_error\"}".to_string()
           }
@@ -142,15 +150,6 @@ pub fn get(req: &Request, Path(group): Path<String>) -> String {
   } else {
     "{\"error\": \"invalid_session\"}".to_string()
   }
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-pub struct FullGroupWithGroupMemberUserData {
-  pub group: util::Group,
-  pub users: Vec<api::v1::user::GroupMemberUserData>,
-  pub messages: Vec<util::Message>,
-  pub receipts: Vec<util::Receipt>,
-  pub transactions: Vec<util::Transaction>,
 }
 
 #[handler]
@@ -230,6 +229,12 @@ pub fn add(req: &Request, Json(add_user_to_group): Json<AddUserToGroup>) -> Stri
   } else {
     "{\"error\": \"invalid_session\"}".to_string()
   }
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct FullGroupWithGroupMemberUserData {
+  pub group: util::FullGroup,
+  pub users: Vec<api::v1::user::GroupMemberUserData>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Validate)]

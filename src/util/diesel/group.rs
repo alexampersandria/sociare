@@ -52,12 +52,11 @@ pub fn get_group(
 pub fn get_users(
   conn: &mut PgConnection,
   id: &String,
-) -> Result<Vec<util::User>, diesel::result::Error> {
+) -> Result<Vec<util::UserGroup>, diesel::result::Error> {
   let gotten_group = get_group(conn, id)?;
 
   util::UserGroup::belonging_to(&gotten_group)
-    .inner_join(schema::users::table)
-    .select(util::User::as_select())
+    .select(util::UserGroup::as_select())
     .load(conn)
 }
 

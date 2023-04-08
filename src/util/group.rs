@@ -44,11 +44,11 @@ impl Group {
 /// - receipts
 /// - transactions
 /// - messages
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct FullGroup {
   pub group: Group,
   /// junction table between users and groups
-  pub users: Vec<util::User>,
+  pub users: Vec<util::UserGroup>,
   pub receipts: Vec<util::Receipt>,
   pub transactions: Vec<util::Transaction>,
   pub messages: Vec<util::Message>,
@@ -57,11 +57,11 @@ pub struct FullGroup {
 
 #[allow(dead_code)]
 impl FullGroup {
-  pub fn new(name: &str, users: Vec<util::User>, emoji: &str, currency: &str) -> FullGroup {
+  pub fn new(name: &str, emoji: &str, currency: &str) -> FullGroup {
     let group = Group::new_with_emoji(name, emoji, currency);
     FullGroup {
       group,
-      users,
+      users: vec![],
       receipts: vec![],
       transactions: vec![],
       messages: vec![],
@@ -86,11 +86,13 @@ impl FullGroup {
   }
 
   pub fn add_user(&mut self, user: util::User) {
-    self.users.push(user);
+    self
+      .users
+      .push(util::UserGroup::new(&user.id, &self.group.id));
   }
 
-  pub fn find_user(&mut self, uuid: String) -> Option<&mut util::User> {
-    self.users.iter_mut().find(|u| u.id == uuid)
+  pub fn find_user(&mut self, uuid: String) -> Option<&mut util::UserGroup> {
+    self.users.iter_mut().find(|u| u.user_id == uuid)
   }
 
   pub fn find_active_users(&self) -> Vec<String> {
@@ -191,7 +193,7 @@ mod ci_unit {
 
   #[test]
   fn add_receipt() {
-    let mut group = FullGroup::new("Test Group", vec![], "🎉", "USD");
+    let mut group = FullGroup::new("Test Group", "🎉", "USD");
     let receipt = util::Receipt::new(&group.group.id, "Test User", 100, "");
     group.add_receipt(receipt);
     assert_eq!(group.receipts.len(), 1);
@@ -200,7 +202,7 @@ mod ci_unit {
 
   #[test]
   fn find_receipt() {
-    let mut group = FullGroup::new("Test Group", vec![], "🎉", "USD");
+    let mut group = FullGroup::new("Test Group", "🎉", "USD");
     let receipt = util::Receipt::new(&group.group.id, "User 1", 100, "");
     group.add_receipt(receipt.clone());
 
@@ -216,7 +218,7 @@ mod ci_unit {
 
   #[test]
   fn add_transaction() {
-    let mut group = FullGroup::new("Test Group", vec![], "🎉", "USD");
+    let mut group = FullGroup::new("Test Group", "🎉", "USD");
     let transaction =
       util::Transaction::new(&group.group.id, "User 1", "User 2", 100, "Test Transaction");
     group.add_transaction(transaction);
@@ -226,7 +228,7 @@ mod ci_unit {
 
   #[test]
   fn find_transaction() {
-    let mut group = FullGroup::new("Test Group", vec![], "🎉", "USD");
+    let mut group = FullGroup::new("Test Group", "🎉", "USD");
     let transaction =
       util::Transaction::new(&group.group.id, "User 1", "User 2", 100, "Test Transaction");
     group.add_transaction(transaction.clone());
@@ -243,23 +245,23 @@ mod ci_unit {
 
   #[test]
   fn add_user() {
-    let mut group = FullGroup::new("Test Group", vec![], "🎉", "USD");
+    let mut group = FullGroup::new("Test Group", "🎉", "USD");
     let user = util::User::new_with_mobilepay("Test User", "1", "2", "3", "4");
-    group.add_user(user);
+    group.add_user(user.clone());
     assert_eq!(group.users.len(), 1);
-    assert_eq!(group.users[0].username, "Test User");
+    assert_eq!(group.users[0].user_id, user.id);
   }
 
   #[test]
   fn find_user() {
-    let mut group = FullGroup::new("Test Group", vec![], "🎉", "USD");
+    let mut group = FullGroup::new("Test Group", "🎉", "USD");
     let user = util::User::new_with_mobilepay("Test User", "1", "2", "3", "4");
     group.add_user(user.clone());
 
     // Find existing user
-    let found_user = group.find_user(user.id);
+    let found_user = group.find_user(user.clone().id);
     assert!(found_user.is_some());
-    assert_eq!(found_user.unwrap().username, "Test User");
+    assert_eq!(found_user.unwrap().user_id, user.id);
 
     // Find non-existing user
     let non_existent_user = group.find_user("nonexistentid".to_string());
@@ -268,7 +270,7 @@ mod ci_unit {
 
   #[test]
   fn add_message() {
-    let mut group = FullGroup::new("Test Group", vec![], "🎉", "USD");
+    let mut group = FullGroup::new("Test Group", "🎉", "USD");
     let message = util::Message::new(&group.group.id, "Test User", "Test Message");
     group.add_message(message);
     assert_eq!(group.messages.len(), 1);
@@ -277,7 +279,7 @@ mod ci_unit {
 
   #[test]
   fn find_message() {
-    let mut group = FullGroup::new("Test Group", vec![], "🎉", "USD");
+    let mut group = FullGroup::new("Test Group", "🎉", "USD");
     let message = util::Message::new(&group.group.id, "Test User", "Test Message");
     group.add_message(message.clone());
 

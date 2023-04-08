@@ -212,7 +212,6 @@ pub struct GroupMemberUserData {
   pub mobilepay: Option<String>,
   pub paypal_me: Option<String>,
   pub created_at: i64,
-  pub user_group: util::UserGroup,
 }
 
 #[derive(Debug, Deserialize, Serialize, Validate)]
