@@ -118,7 +118,7 @@ impl FullGroup {
   pub fn balance(&mut self) -> HashMap<String, i64> {
     let mut balance: HashMap<String, i64> = HashMap::new();
     for user in self.users.iter() {
-      balance.insert(user.id.clone(), 0);
+      balance.insert(user.user_id.clone(), 0);
     }
     for receipt in self.receipts.iter() {
       if !receipt.deleted {
