@@ -33,9 +33,24 @@ pub fn get_all(req: &Request) -> String {
   }
 }
 
+#[derive(Deserialize)]
+struct GetGroupParams {
+  limit: i64,
+  offset: i64,
+}
+
 #[handler]
 pub fn get(req: &Request, Path(group): Path<String>) -> String {
   let session = api::auth::from_request(req);
+  let params = req.params::<GetGroupParams>();
+
+  let mut limit = 100;
+  let mut offset = 0;
+
+  if let Ok(params) = params {
+    limit = params.limit;
+    offset = params.offset;
+  }
 
   if let Some(session) = session {
     let mut conn = crate::establish_connection();
@@ -101,24 +116,32 @@ pub fn get(req: &Request, Path(group): Path<String>) -> String {
 
         let messages = schema::messages::table
           .filter(schema::messages::group_id.eq(&group))
+          .limit(limit)
+          .offset(offset)
           .order(schema::messages::created_at.desc())
           .get_results::<crate::util::Message>(&mut conn);
 
         if let Ok(messages) = messages {
           let receipts = schema::receipts::table
             .filter(schema::receipts::group_id.eq(&group))
+            .limit(limit)
+            .offset(offset)
             .order(schema::receipts::created_at.desc())
             .get_results::<crate::util::Receipt>(&mut conn);
 
           if let Ok(receipts) = receipts {
             let transactions = schema::transactions::table
               .filter(schema::transactions::group_id.eq(&group))
+              .limit(limit)
+              .offset(offset)
               .order(schema::transactions::created_at.desc())
               .get_results::<crate::util::Transaction>(&mut conn);
 
             if let Ok(transactions) = transactions {
               let debts = schema::debts::table
                 .filter(schema::debts::group_id.eq(&group))
+                .limit(limit)
+                .offset(offset)
                 .order(schema::debts::created_at.desc())
                 .get_results::<crate::util::Debt>(&mut conn);
 
