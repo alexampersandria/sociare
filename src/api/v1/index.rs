@@ -1,5 +1,5 @@
 use crate::api::v1;
-use poem::{get, handler, post, Route};
+use poem::{delete, get, handler, post, Route};
 
 pub fn endpoint() -> poem::Route {
   Route::new()
@@ -7,7 +7,10 @@ pub fn endpoint() -> poem::Route {
     .at("/users/:username", get(v1::user::get))
     .at("/user/create", post(v1::user::create))
     .at("/user/login", post(v1::user::login))
-    .at("/session/:session", get(v1::auth::check))
+    .at("/me", get(v1::user::me))
+    .at("/sessions/:session", get(v1::auth::check))
+    .at("/sessions", get(v1::auth::list))
+    .at("/session/delete/:session", delete(v1::auth::delete))
 }
 
 #[handler]

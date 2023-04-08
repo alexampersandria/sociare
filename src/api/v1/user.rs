@@ -30,6 +30,16 @@ pub fn get(Path(id): Path<String>) -> String {
 }
 
 #[handler]
+pub fn me(req: &Request) -> String {
+  let session = api::auth::from_request(req);
+  if let Some(session) = session {
+    serde_json::to_string_pretty(&session).unwrap()
+  } else {
+    "{\"error\": \"invalid_session\"}".to_string()
+  }
+}
+
+#[handler]
 pub fn create(Json(user): Json<NewUser>) -> String {
   let mut conn = establish_connection();
 
@@ -86,9 +96,9 @@ pub fn login(req: &Request, Json(user): Json<NewUser>) -> String {
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct PublicUserData {
-  id: String,
-  username: String,
-  created_at: i64,
+  pub id: String,
+  pub username: String,
+  pub created_at: i64,
 }
 
 impl PublicUserData {
@@ -103,13 +113,13 @@ impl PublicUserData {
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct PrivateUserData {
-  id: String,
-  username: String,
-  name: String,
-  email: String,
-  mobilepay: String,
-  paypal_me: String,
-  created_at: i64,
+  pub id: String,
+  pub username: String,
+  pub name: String,
+  pub email: String,
+  pub mobilepay: String,
+  pub paypal_me: String,
+  pub created_at: i64,
 }
 
 impl PrivateUserData {

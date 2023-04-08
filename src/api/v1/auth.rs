@@ -1,7 +1,9 @@
 use crate::establish_connection;
 use crate::schema;
 use crate::util;
+use crate::util::UserSession;
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
+use poem::Request;
 use poem::{handler, web::Path};
 
 use super::PrivateUserData;
@@ -11,6 +13,34 @@ pub fn check(Path(session): Path<String>) -> String {
   let session = validate_session(&session);
   if let Some(session) = session {
     serde_json::to_string_pretty(&session).unwrap()
+  } else {
+    "{\"error\": \"invalid_session\"}".to_string()
+  }
+}
+
+#[handler]
+pub fn delete(Path(session): Path<String>) -> String {
+  let deleted = delete_session(&session);
+  if deleted {
+    "{\"deleted\": true}".to_string()
+  } else {
+    "{\"error\": \"invalid_session\"}".to_string()
+  }
+}
+
+#[handler]
+pub fn list(req: &Request) -> String {
+  let session = from_request(req);
+  if let Some(session) = session {
+    let mut conn = establish_connection();
+    let all_sessions = schema::user_sessions::table
+      .filter(schema::user_sessions::user_id.eq(&session.id))
+      .load::<UserSession>(&mut conn);
+    if let Ok(all_sessions) = all_sessions {
+      serde_json::to_string_pretty(&all_sessions).unwrap()
+    } else {
+      "{\"error\": \"no_active_sessions\"}".to_string()
+    }
   } else {
     "{\"error\": \"invalid_session\"}".to_string()
   }
@@ -44,6 +74,12 @@ pub fn create_session(
   } else {
     None
   }
+}
+
+pub fn delete_session(session: &str) -> bool {
+  let mut conn = establish_connection();
+  let deleted_session = util::diesel::delete_user_session(&mut conn, session);
+  deleted_session.is_ok()
 }
 
 pub fn validate_session(session: &str) -> Option<PrivateUserData> {
@@ -80,6 +116,20 @@ pub fn validate_session(session: &str) -> Option<PrivateUserData> {
     } else {
       None
     }
+  } else {
+    None
+  }
+}
+
+pub fn from_request(req: &Request) -> Option<PrivateUserData> {
+  let session = req.headers().get("Authorization");
+  if let Some(session) = session {
+    let session = session.to_str().unwrap();
+    if !session.starts_with("Bearer ") {
+      return None;
+    }
+    let session = session.replace("Bearer ", "");
+    validate_session(&session)
   } else {
     None
   }
