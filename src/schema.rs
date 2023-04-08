@@ -88,7 +88,7 @@ diesel::table! {
         id -> Varchar,
         user_id -> Varchar,
         group_id -> Varchar,
-        nickname -> Varchar,
+        nickname -> Nullable<Varchar>,
         is_admin -> Bool,
         active -> Bool,
         created_at -> Int8,

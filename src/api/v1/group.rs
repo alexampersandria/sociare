@@ -77,7 +77,7 @@ pub fn create(req: &Request, Json(group): Json<NewGroup>) -> String {
     let group = crate::util::Group::new(&group.name, &group.currency);
     let created_group = crate::util::diesel::create_group(&mut conn, &group);
     if created_group.is_ok() {
-      let user_group = crate::util::UserGroup::new(&session.id, &group.id);
+      let user_group = crate::util::UserGroup::new_admin(&session.id, &group.id);
       let added_user_to_group = crate::util::diesel::user::add_to_group(&mut conn, &user_group);
       if added_user_to_group.is_ok() {
         serde_json::to_string_pretty(&user_group)
@@ -114,6 +114,17 @@ pub fn add(req: &Request, Json(add_user_to_group): Json<AddUserToGroup>) -> Stri
 
     if user_groups.is_err() {
       return "{\"error\": \"invalid_group\"}".to_string();
+    }
+
+    let user_already_in_group = schema::users_groups::table
+      .filter(schema::users_groups::active.eq(true))
+      .filter(schema::users_groups::user_id.eq(&add_user_to_group.user_id))
+      .filter(schema::users_groups::group_id.eq(&add_user_to_group.group_id))
+      .select(schema::users_groups::group_id)
+      .get_result::<String>(&mut conn);
+
+    if user_already_in_group.is_ok() {
+      return "{\"error\": \"user_already_in_group\"}".to_string();
     }
 
     let user_group =
