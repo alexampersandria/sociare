@@ -71,7 +71,37 @@ pub fn create(Json(user): Json<NewUser>) -> String {
 }
 
 #[handler]
-pub fn login(req: &Request, Json(user): Json<NewUser>) -> String {
+pub fn delete(req: &Request, Json(user): Json<AuthUser>) -> String {
+  let session = api::auth::from_request(req);
+  if let Some(session) = session {
+    let mut conn = establish_connection();
+    let found_user = schema::users::table
+      .filter(schema::users::id.eq(&session.id))
+      .select((schema::users::id, schema::users::password))
+      .first::<(String, String)>(&mut conn);
+
+    if let Ok(found_user) = found_user {
+      let valid = bcrypt::verify(user.password, &found_user.1);
+      if valid.is_ok() {
+        let deleted = util::diesel::delete_user(&mut conn, &session.id);
+        if deleted.is_ok() {
+          "{\"deleted\": true}".to_string()
+        } else {
+          "{\"error\": \"internal_server_error\"}".to_string()
+        }
+      } else {
+        "{\"error\": \"invalid_password\"}".to_string()
+      }
+    } else {
+      "{\"error\": \"user_not_found\"}".to_string()
+    }
+  } else {
+    "{\"error\": \"invalid_session\"}".to_string()
+  }
+}
+
+#[handler]
+pub fn login(req: &Request, Json(user): Json<AuthUser>) -> String {
   let headers = req.headers();
 
   let ip_address_value = headers.get("X-Forwarded-For");
@@ -156,4 +186,12 @@ pub struct NewUser {
   password: String,
   #[validate(email)]
   email: String,
+}
+
+#[derive(Debug, Deserialize, Serialize, Validate)]
+pub struct AuthUser {
+  #[validate(length(min = 3), length(max = 24))]
+  username: String,
+  #[validate(length(min = 7), length(max = 96))]
+  password: String,
 }

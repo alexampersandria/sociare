@@ -79,6 +79,7 @@ diesel::table! {
         created_at -> Int8,
         mobilepay -> Nullable<Varchar>,
         paypal_me -> Nullable<Varchar>,
+        deleted -> Bool,
     }
 }
 

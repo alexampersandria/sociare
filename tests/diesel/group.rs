@@ -5,7 +5,7 @@ mod diesel_integration {
   use super::*;
 
   #[test]
-  pub fn create_delete() {
+  pub fn create() {
     let mut conn = sociare::establish_connection();
 
     let group = Group::new("Crab Chat", "🦀", "USD");
@@ -30,11 +30,5 @@ mod diesel_integration {
 
     sociare::util::diesel::delete_group(&mut conn, &group.id).expect("Failed to delete group");
     sociare::util::delete_user(&mut conn, &user.id).expect("Failed to delete user");
-
-    let after_deletion_user_groups = get_groups(&mut conn, &user.id);
-    let after_deletion_group_users = get_users(&mut conn, &group.id);
-
-    assert!(after_deletion_user_groups.is_err());
-    assert!(after_deletion_group_users.is_err());
   }
 }

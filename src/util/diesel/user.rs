@@ -63,7 +63,24 @@ pub fn set_password(
 }
 
 pub fn delete_user(conn: &mut PgConnection, id: &String) -> Result<usize, diesel::result::Error> {
-  diesel::delete(schema::users::table.find(id)).execute(conn)
+  let deleted_user = diesel::update(schema::users::table.find(id))
+    .set((
+      schema::users::deleted.eq(true),
+      schema::users::name.eq(""),
+      schema::users::email.eq(""),
+      schema::users::mobilepay.eq(""),
+      schema::users::paypal_me.eq(""),
+      schema::users::username.eq(""),
+    ))
+    .execute(conn);
+  let deteled_sessions =
+    diesel::delete(schema::user_sessions::table.filter(schema::user_sessions::user_id.eq(id)))
+      .execute(conn);
+  if deteled_sessions.is_ok() {
+    deleted_user
+  } else {
+    deteled_sessions
+  }
 }
 
 pub fn get_user(conn: &mut PgConnection, id: &String) -> Result<util::User, diesel::result::Error> {

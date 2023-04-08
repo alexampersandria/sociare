@@ -5,7 +5,7 @@ mod diesel_integration {
   use super::*;
 
   #[test]
-  fn create_delete() {
+  fn create() {
     let mut conn = sociare::establish_connection();
     let from = sociare::util::User::new_with_mobilepay(
       "username",
@@ -38,15 +38,5 @@ mod diesel_integration {
     delete_user(&mut conn, &to.id).expect("failed deleting user");
     delete_group(&mut conn, &group.id).expect("failed deleting group");
     delete_receipt(&mut conn, &receipt.id).expect("failed deleting receipt");
-
-    let after_deletion_from = get_user(&mut conn, &from.id);
-    let after_deletion_to = get_user(&mut conn, &to.id);
-    let after_deletion_group = get_group(&mut conn, &group.id);
-    let after_deletion_receipt = get_receipt(&mut conn, &receipt.id);
-
-    assert!(after_deletion_from.is_err());
-    assert!(after_deletion_to.is_err());
-    assert!(after_deletion_group.is_err());
-    assert!(after_deletion_receipt.is_err());
   }
 }

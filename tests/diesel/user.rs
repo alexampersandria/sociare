@@ -5,7 +5,7 @@ mod diesel_integration {
   use super::*;
 
   #[test]
-  fn create_delete() {
+  fn create() {
     let mut conn = sociare::establish_connection();
     let user = sociare::util::User::new_with_mobilepay(
       "username",
@@ -19,7 +19,5 @@ mod diesel_integration {
     assert_eq!(user, gotten_user);
 
     delete_user(&mut conn, &user.id).expect("failed deleting user");
-    let after_deletion_user = get_user(&mut conn, &user.id);
-    assert!(after_deletion_user.is_err());
   }
 }

@@ -7,5 +7,6 @@ CREATE TABLE users (
   password VARCHAR(255) NOT NULL,
   created_at BIGINT NOT NULL,
   mobilepay VARCHAR(255),
-  paypal_me VARCHAR(255)
+  paypal_me VARCHAR(255),
+  deleted BOOLEAN NOT NULL DEFAULT FALSE
 )

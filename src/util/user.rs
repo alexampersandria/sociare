@@ -16,6 +16,7 @@ pub struct User {
   pub created_at: i64,
   pub mobilepay: Option<String>,
   pub paypal_me: Option<String>,
+  pub deleted: bool,
 }
 
 impl User {
@@ -29,6 +30,7 @@ impl User {
       created_at: util::unix_ms(),
       mobilepay: None,
       paypal_me: None,
+      deleted: false,
     }
   }
   pub fn new_with_mobilepay(
@@ -47,6 +49,7 @@ impl User {
       created_at: util::unix_ms(),
       mobilepay: Option::from(mobilepay.to_string()),
       paypal_me: None,
+      deleted: false,
     }
   }
 }
@@ -70,6 +73,7 @@ mod ci_unit {
     assert_eq!(user.email, email);
     assert!(user.mobilepay.is_none());
     assert!(user.paypal_me.is_none());
+    assert!(!user.deleted);
   }
 
   #[test]
@@ -88,5 +92,6 @@ mod ci_unit {
     assert_eq!(user.email, email);
     assert_eq!(user.mobilepay.unwrap(), mobilepay);
     assert!(user.paypal_me.is_none());
+    assert!(!user.deleted);
   }
 }
