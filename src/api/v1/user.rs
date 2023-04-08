@@ -204,6 +204,17 @@ impl PrivateUserData {
   }
 }
 
+#[derive(Deserialize, Serialize, Debug)]
+pub struct GroupMemberUserData {
+  pub id: String,
+  pub username: String,
+  pub name: String,
+  pub mobilepay: Option<String>,
+  pub paypal_me: Option<String>,
+  pub created_at: i64,
+  pub user_group: util::UserGroup,
+}
+
 #[derive(Debug, Deserialize, Serialize, Validate)]
 pub struct NewUser {
   #[validate(length(min = 3), length(max = 24))]
