@@ -24,7 +24,7 @@ mod diesel_integration {
     create_user(&mut conn, &from).expect("failed creating user");
     create_user(&mut conn, &to).expect("failed creating user");
 
-    let group = sociare::util::Group::new("groupname", "Group Name 🦀", "USD");
+    let group = sociare::util::Group::new_with_emoji("groupname", "Group Name 🦀", "USD");
     create_group(&mut conn, &group).expect("failed creating group");
 
     let receipt = sociare::util::Receipt::new(&group.id, &from.id, 100, "test");

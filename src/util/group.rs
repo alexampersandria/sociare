@@ -1,9 +1,14 @@
 use crate::{schema, util};
 use diesel::{Identifiable, Insertable, Queryable, Selectable};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use uuid::Uuid;
 
-#[derive(Clone, Debug, Identifiable, Insertable, PartialEq, Queryable, Selectable)]
+use super::emoji;
+
+#[derive(
+  Clone, Debug, Deserialize, Identifiable, Insertable, PartialEq, Queryable, Selectable, Serialize,
+)]
 #[diesel(table_name = schema::groups)]
 pub struct Group {
   pub id: String,
@@ -14,7 +19,16 @@ pub struct Group {
 }
 
 impl Group {
-  pub fn new(name: &str, emoji: &str, currency: &str) -> Self {
+  pub fn new(name: &str, currency: &str) -> Self {
+    Group {
+      id: Uuid::new_v4().to_string(),
+      name: name.to_string(),
+      emoji: emoji::random(),
+      currency: currency.to_string(),
+      created_at: util::unix_ms(),
+    }
+  }
+  pub fn new_with_emoji(name: &str, emoji: &str, currency: &str) -> Self {
     Group {
       id: Uuid::new_v4().to_string(),
       name: name.to_string(),
@@ -44,7 +58,7 @@ pub struct FullGroup {
 #[allow(dead_code)]
 impl FullGroup {
   pub fn new(name: &str, users: Vec<util::User>, emoji: &str, currency: &str) -> FullGroup {
-    let group = Group::new(name, emoji, currency);
+    let group = Group::new_with_emoji(name, emoji, currency);
     FullGroup {
       group,
       users,
@@ -169,7 +183,7 @@ mod ci_unit {
 
   #[test]
   fn new() {
-    let group = Group::new("Test Group", "🎉", "USD");
+    let group = Group::new_with_emoji("Test Group", "🎉", "USD");
     assert_eq!(group.name, "Test Group");
     assert_eq!(group.emoji, "🎉");
     assert_eq!(group.currency, "USD");

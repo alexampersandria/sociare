@@ -1,9 +1,19 @@
 use crate::{schema, util};
 use diesel::{Associations, Identifiable, Insertable, Queryable, Selectable};
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(
-  Associations, Clone, Debug, Identifiable, Insertable, PartialEq, Queryable, Selectable,
+  Associations,
+  Clone,
+  Debug,
+  Deserialize,
+  Identifiable,
+  Insertable,
+  PartialEq,
+  Queryable,
+  Selectable,
+  Serialize,
 )]
 #[diesel(table_name = schema::users_groups)]
 #[diesel(belongs_to(util::User))]

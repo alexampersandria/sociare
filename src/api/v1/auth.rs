@@ -12,7 +12,8 @@ use super::PrivateUserData;
 pub fn check(Path(session): Path<String>) -> String {
   let session = validate_session(&session);
   if let Some(session) = session {
-    serde_json::to_string_pretty(&session).unwrap()
+    serde_json::to_string_pretty(&session)
+      .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
   } else {
     "{\"error\": \"invalid_session\"}".to_string()
   }
@@ -37,7 +38,8 @@ pub fn list(req: &Request) -> String {
       .filter(schema::user_sessions::user_id.eq(&session.id))
       .load::<UserSession>(&mut conn);
     if let Ok(all_sessions) = all_sessions {
-      serde_json::to_string_pretty(&all_sessions).unwrap()
+      serde_json::to_string_pretty(&all_sessions)
+        .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
     } else {
       "{\"error\": \"no_active_sessions\"}".to_string()
     }
@@ -124,7 +126,7 @@ pub fn validate_session(session: &str) -> Option<PrivateUserData> {
 pub fn from_request(req: &Request) -> Option<PrivateUserData> {
   let session = req.headers().get("Authorization");
   if let Some(session) = session {
-    let session = session.to_str().unwrap();
+    let session = session.to_str().unwrap_or("");
     if !session.starts_with("Bearer ") {
       return None;
     }

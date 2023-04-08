@@ -12,6 +12,10 @@ pub fn endpoint() -> poem::Route {
     .at("/sessions/:session", get(v1::auth::check))
     .at("/sessions", get(v1::auth::list))
     .at("/session/delete/:session", delete(v1::auth::delete))
+    .at("/groups/:group", get(v1::group::get))
+    .at("/groups", get(v1::group::get_all))
+    .at("/group/create", post(v1::group::create))
+    .at("/group/add", post(v1::group::add))
 }
 
 #[handler]

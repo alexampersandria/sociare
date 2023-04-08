@@ -24,7 +24,8 @@ pub fn get(Path(id): Path<String>) -> String {
     ))
     .first::<(String, String, i64)>(&mut conn);
   match result {
-    Ok(result) => serde_json::to_string_pretty(&PublicUserData::new(result)).unwrap(),
+    Ok(result) => serde_json::to_string_pretty(&PublicUserData::new(result))
+      .unwrap_or("{\"error\": \"internal_server_error\"}".to_string()),
     Err(_) => "{\"error\": \"user_not_found\"}".to_string(),
   }
 }
@@ -33,7 +34,8 @@ pub fn get(Path(id): Path<String>) -> String {
 pub fn me(req: &Request) -> String {
   let session = api::auth::from_request(req);
   if let Some(session) = session {
-    serde_json::to_string_pretty(&session).unwrap()
+    serde_json::to_string_pretty(&session)
+      .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
   } else {
     "{\"error\": \"invalid_session\"}".to_string()
   }
@@ -41,6 +43,11 @@ pub fn me(req: &Request) -> String {
 
 #[handler]
 pub fn create(Json(user): Json<NewUser>) -> String {
+  match user.validate() {
+    Ok(_) => (),
+    Err(_) => return "{\"error\": \"invalid_data\"}".to_string(),
+  }
+
   let mut conn = establish_connection();
 
   let found_user = schema::users::table
@@ -53,25 +60,40 @@ pub fn create(Json(user): Json<NewUser>) -> String {
     return "{\"error\": \"email_or_username_in_use\"}".to_string();
   }
 
-  match user.validate() {
-    Ok(_) => (),
-    Err(_) => return "{\"error\": \"invalid_data\"}".to_string(),
+  let password_hash = hash(&user.password, 10).unwrap_or("".to_string());
+  if password_hash.is_empty() {
+    return "{\"error\": \"internal_server_error\"}".to_string();
   }
-
-  let password_hash = hash(&user.password, 10).unwrap();
 
   let user_object = util::User::new(&user.username, &password_hash, &user.name, &user.email);
 
   let created_user = util::diesel::create_user(&mut conn, &user_object);
 
   match created_user {
-    Ok(_) => serde_json::to_string_pretty(&user_object).unwrap(),
+    Ok(_) => {
+      let private_user_object = PrivateUserData {
+        id: user_object.id,
+        username: user_object.username,
+        name: user_object.name,
+        email: user_object.email,
+        created_at: user_object.created_at,
+        mobilepay: "".to_string(),
+        paypal_me: "".to_string(),
+      };
+      serde_json::to_string_pretty(&private_user_object)
+        .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
+    }
     Err(_) => "{\"error\": \"internal_server_error\"}".to_string(),
   }
 }
 
 #[handler]
 pub fn delete(req: &Request, Json(user): Json<AuthUser>) -> String {
+  match user.validate() {
+    Ok(_) => (),
+    Err(_) => return "{\"error\": \"invalid_data\"}".to_string(),
+  }
+
   let session = api::auth::from_request(req);
   if let Some(session) = session {
     let mut conn = establish_connection();
@@ -102,6 +124,11 @@ pub fn delete(req: &Request, Json(user): Json<AuthUser>) -> String {
 
 #[handler]
 pub fn login(req: &Request, Json(user): Json<AuthUser>) -> String {
+  match user.validate() {
+    Ok(_) => (),
+    Err(_) => return "{\"error\": \"invalid_data\"}".to_string(),
+  }
+
   let headers = req.headers();
 
   let ip_address_value = headers.get("X-Forwarded-For");
@@ -119,7 +146,8 @@ pub fn login(req: &Request, Json(user): Json<AuthUser>) -> String {
   let session = api::auth::create_session(&user.username, &user.password, ip_address, user_agent);
 
   match session {
-    Some(session) => serde_json::to_string_pretty(&session).unwrap(),
+    Some(session) => serde_json::to_string_pretty(&session)
+      .unwrap_or("{\"error\": \"internal_server_error\"}".to_string()),
     None => "{\"error\": \"invalid_credentials\"}".to_string(),
   }
 }

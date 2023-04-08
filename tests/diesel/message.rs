@@ -8,7 +8,7 @@ mod diesel_integration {
   pub fn create() {
     let mut conn = sociare::establish_connection();
 
-    let group = Group::new("Crab Chat", "🦀", "USD");
+    let group = Group::new_with_emoji("Crab Chat", "🦀", "USD");
     let user = sociare::util::User::new_with_mobilepay(
       "momo",
       "hunter2",
