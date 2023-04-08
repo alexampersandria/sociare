@@ -117,21 +117,30 @@ pub fn get(req: &Request, Path(group): Path<String>) -> String {
               .get_results::<crate::util::Transaction>(&mut conn);
 
             if let Ok(transactions) = transactions {
-              let full_group = util::FullGroup {
-                group: found_group,
-                users: users.iter().map(|user| user.0.clone()).collect(),
-                messages,
-                receipts,
-                transactions,
-                debts: vec![],
-              };
-              let full_group_with_members_user_data = FullGroupWithGroupMemberUserData {
-                group: full_group,
-                users: group_member_users,
-              };
+              let debts = schema::debts::table
+                .filter(schema::debts::group_id.eq(&group))
+                .order(schema::debts::created_at.desc())
+                .get_results::<crate::util::Debt>(&mut conn);
 
-              serde_json::to_string_pretty(&full_group_with_members_user_data)
-                .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
+              if let Ok(debts) = debts {
+                let mut full_group = util::FullGroup {
+                  group: found_group,
+                  users: users.iter().map(|user| user.0.clone()).collect(),
+                  messages,
+                  receipts,
+                  transactions,
+                  debts,
+                };
+                let full_group_with_members_user_data = FullGroupWithGroupMemberUserData {
+                  group: full_group,
+                  users: group_member_users,
+                };
+
+                serde_json::to_string_pretty(&full_group_with_members_user_data)
+                  .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
+              } else {
+                "{\"error\": \"internal_server_error\"}".to_string()
+              }
             } else {
               "{\"error\": \"internal_server_error\"}".to_string()
             }
