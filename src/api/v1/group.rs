@@ -6,7 +6,9 @@ use poem::{
   Request,
 };
 use serde::{Deserialize, Serialize};
-use validator::Validate;
+use validator::{Validate, ValidationError};
+
+use super::PrivateUserData;
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct GroupListing {
@@ -31,98 +33,7 @@ pub fn get_all(req: &Request) -> String {
   }
 
   if let Some(session) = session {
-    let mut conn = crate::establish_connection();
-
-    let groups = schema::users_groups::table
-      .filter(schema::users_groups::active.eq(true))
-      .filter(schema::users_groups::user_id.eq(&session.id))
-      .inner_join(schema::groups::table)
-      .select(util::Group::as_select())
-      .get_results::<util::Group>(&mut conn);
-
-    if let Ok(groups) = groups {
-      let users = schema::users_groups::table
-        .filter(schema::users_groups::active.eq(true))
-        .filter(schema::users_groups::group_id.eq_any(groups.iter().map(|g| g.id.clone())))
-        .inner_join(schema::users::table)
-        .select((
-          schema::users_groups::group_id,
-          schema::users::id,
-          schema::users::username,
-          schema::users::name,
-          schema::users::mobilepay,
-          schema::users::paypal_me,
-          schema::users_groups::nickname,
-          schema::users_groups::is_admin,
-          schema::users::created_at,
-        ))
-        .get_results::<(
-          String,
-          String,
-          String,
-          String,
-          Option<String>,
-          Option<String>,
-          Option<String>,
-          bool,
-          i64,
-        )>(&mut conn);
-
-      let debts = schema::debts::table
-        .filter(schema::debts::group_id.eq_any(groups.iter().map(|g| g.id.clone())))
-        .get_results::<util::Debt>(&mut conn);
-
-      if let (Ok(users), Ok(debts)) = (users, debts) {
-        let mut group_listings: Vec<GroupListing> = Vec::new();
-
-        for group in groups {
-          let group_events = schema::group_events::table
-            .filter(schema::group_events::group_id.eq(&group.id))
-            .order(schema::group_events::created_at.desc())
-            .limit(limit)
-            .offset(offset)
-            .get_results::<util::GroupEvent>(&mut conn);
-
-          let mut group_listing = GroupListing {
-            group,
-            events: group_events.unwrap_or(Vec::new()),
-            users: Vec::new(),
-            debts: Vec::new(),
-          };
-
-          for user in &users {
-            if user.0 == group_listing.group.id {
-              group_listing
-                .users
-                .push(api::v1::user::GroupMemberUserData {
-                  id: user.1.clone(),
-                  username: user.2.clone(),
-                  name: user.3.clone(),
-                  mobilepay: user.4.clone(),
-                  paypal_me: user.5.clone(),
-                  nickname: user.6.clone(),
-                  is_admin: user.7,
-                  created_at: user.8,
-                });
-            }
-          }
-
-          for debt in &debts {
-            if debt.group_id == group_listing.group.id {
-              group_listing.debts.push(debt.clone());
-            }
-          }
-
-          group_listings.push(group_listing);
-        }
-
-        serde_json::to_string(&group_listings).unwrap()
-      } else {
-        "{\"error\": \"internal_server_error\"}".to_string()
-      }
-    } else {
-      "{\"error\": \"internal_server_error\"}".to_string()
-    }
+    get_group_listing(session, limit, offset, None)
   } else {
     "{\"error\": \"invalid_session\"}".to_string()
   }
@@ -148,7 +59,7 @@ pub fn get(req: &Request, Path(group): Path<String>) -> String {
 
   let params = req.params::<GetGroupParams>();
 
-  let mut limit = 100;
+  let mut limit = 10;
   let mut offset = 0;
 
   if let Ok(params) = params {
@@ -157,68 +68,7 @@ pub fn get(req: &Request, Path(group): Path<String>) -> String {
   }
 
   if let Some(session) = session {
-    let mut conn = crate::establish_connection();
-
-    let groups = schema::users_groups::table
-      .filter(schema::users_groups::active.eq(true))
-      .filter(schema::users_groups::user_id.eq(&session.id))
-      .filter(schema::users_groups::group_id.eq(&group))
-      .inner_join(schema::groups::table)
-      .select(util::Group::as_select())
-      .get_results::<util::Group>(&mut conn);
-
-    if let Ok(groups) = groups {
-      let group_events = schema::group_events::table
-        .filter(schema::group_events::group_id.eq_any(groups.iter().map(|g| g.id.clone())))
-        .order(schema::group_events::created_at.desc())
-        .limit(limit)
-        .offset(offset)
-        .left_join(schema::messages::table)
-        .left_join(schema::receipts::table)
-        .left_join(schema::transactions::table)
-        .select((
-          util::GroupEvent::as_select(),
-          Option::<util::Message>::as_select(),
-          Option::<util::Receipt>::as_select(),
-          Option::<util::Transaction>::as_select(),
-        ))
-        .get_results::<(
-          util::GroupEvent,
-          Option<util::Message>,
-          Option<util::Receipt>,
-          Option<util::Transaction>,
-        )>(&mut conn);
-
-      if let Ok(group_events) = group_events {
-        let mut group_listings: Vec<GroupListingDetails> = Vec::new();
-
-        for group in groups {
-          let mut group_listing = GroupListingDetails {
-            group,
-            events: Vec::new(),
-          };
-
-          for event in &group_events {
-            if event.0.group_id == group_listing.group.id {
-              let event_details = GroupEventDetails {
-                event: event.0.clone(),
-                message: event.1.clone(),
-                receipt: event.2.clone(),
-                transaction: event.3.clone(),
-              };
-              group_listing.events.push(event_details);
-            }
-          }
-          group_listings.push(group_listing);
-        }
-
-        serde_json::to_string(&group_listings).unwrap()
-      } else {
-        "{\"error\": \"internal_server_error\"}".to_string()
-      }
-    } else {
-      "{\"error\": \"internal_server_error\"}".to_string()
-    }
+    get_group_listing(session, limit, offset, Some(group))
   } else {
     "{\"error\": \"invalid_session\"}".to_string()
   }
@@ -230,167 +80,124 @@ struct GetGroupParams {
   offset: i64,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
-pub struct GroupDetails {
-  pub group: util::Group,
-  pub users: Vec<UserDetails>,
-  pub messages: Vec<util::Message>,
-  pub receipts: Vec<util::Receipt>,
-  pub transactions: Vec<util::Transaction>,
-  pub debts: Vec<util::Debt>,
-}
+pub fn get_group_listing(
+  session: PrivateUserData,
+  limit: i64,
+  offset: i64,
+  group_id: Option<String>,
+) -> String {
+  let mut conn = crate::establish_connection();
 
-#[derive(Deserialize, Serialize, Debug)]
-pub struct UserDetails {
-  pub id: String,
-  pub username: String,
-  pub name: String,
-  pub mobilepay: Option<String>,
-  pub paypal_me: Option<String>,
-  pub created_at: i64,
-  pub nickname: Option<String>,
-}
+  let groups: Result<_, _>;
 
-#[handler]
-pub fn get_old(req: &Request, Path(group): Path<String>) -> String {
-  let session = api::auth::from_request(req);
-  let params = req.params::<GetGroupParams>();
-
-  let mut limit = 100;
-  let mut offset = 0;
-
-  if let Ok(params) = params {
-    limit = params.limit;
-    offset = params.offset;
-  }
-
-  if let Some(session) = session {
-    let mut conn = crate::establish_connection();
-
-    let user_groups = schema::users_groups::table
+  if let Some(group_id) = group_id {
+    groups = schema::users_groups::table
       .filter(schema::users_groups::active.eq(true))
       .filter(schema::users_groups::user_id.eq(&session.id))
-      .filter(schema::users_groups::group_id.eq(&group))
-      .select(schema::users_groups::group_id)
-      .get_result::<String>(&mut conn);
+      .filter(schema::users_groups::group_id.eq(&group_id))
+      .inner_join(schema::groups::table)
+      .select(util::Group::as_select())
+      .get_results::<util::Group>(&mut conn);
+  } else {
+    groups = schema::users_groups::table
+      .filter(schema::users_groups::active.eq(true))
+      .filter(schema::users_groups::user_id.eq(&session.id))
+      .inner_join(schema::groups::table)
+      .select(util::Group::as_select())
+      .get_results::<util::Group>(&mut conn);
+  }
 
-    let found_group = schema::groups::table
-      .filter(schema::groups::id.eq_any(user_groups))
-      .first::<crate::util::Group>(&mut conn);
+  if let Ok(groups) = groups {
+    let users = schema::users_groups::table
+      .filter(schema::users_groups::active.eq(true))
+      .filter(schema::users_groups::group_id.eq_any(groups.iter().map(|g| g.id.clone())))
+      .inner_join(schema::users::table)
+      .select((
+        schema::users_groups::group_id,
+        schema::users::id,
+        schema::users::username,
+        schema::users::name,
+        schema::users::mobilepay,
+        schema::users::paypal_me,
+        schema::users_groups::nickname,
+        schema::users_groups::is_admin,
+        schema::users::created_at,
+      ))
+      .get_results::<(
+        String,
+        String,
+        String,
+        String,
+        Option<String>,
+        Option<String>,
+        Option<String>,
+        bool,
+        i64,
+      )>(&mut conn);
 
-    if let Ok(found_group) = found_group {
-      let users: Result<
-        Vec<(
-          util::UserGroup,
-          String,
-          String,
-          String,
-          Option<String>,
-          Option<String>,
-          i64,
-        )>,
-        diesel::result::Error,
-      > = schema::users_groups::table
-        .filter(schema::users_groups::active.eq(true))
-        .filter(schema::users_groups::group_id.eq(&group))
-        .inner_join(schema::users::table)
-        .select((
-          util::UserGroup::as_select(),
-          schema::users::id,
-          schema::users::username,
-          schema::users::name,
-          schema::users::mobilepay,
-          schema::users::paypal_me,
-          schema::users::created_at,
-        ))
-        .get_results::<(
-          util::UserGroup,
-          String,
-          String,
-          String,
-          Option<String>,
-          Option<String>,
-          i64,
-        )>(&mut conn);
+    let debts = schema::debts::table
+      .filter(schema::debts::group_id.eq_any(groups.iter().map(|g| g.id.clone())))
+      .get_results::<util::Debt>(&mut conn);
 
-      if let Ok(users) = users {
-        let user_details = users
-          .iter()
-          .map(|user| UserDetails {
-            id: user.1.clone(),
-            username: user.2.clone(),
-            name: user.3.clone(),
-            mobilepay: user.4.clone(),
-            paypal_me: user.5.clone(),
-            created_at: user.6,
-            nickname: user.0.nickname.clone(),
-          })
-          .collect::<Vec<UserDetails>>();
+    if let (Ok(users), Ok(debts)) = (users, debts) {
+      let mut group_listings: Vec<GroupListing> = Vec::new();
 
-        let messages = schema::messages::table
-          .filter(schema::messages::group_id.eq(&group))
+      for group in groups {
+        let group_events = schema::group_events::table
+          .filter(schema::group_events::group_id.eq(&group.id))
+          .order(schema::group_events::created_at.desc())
           .limit(limit)
           .offset(offset)
-          .order(schema::messages::created_at.desc())
-          .get_results::<crate::util::Message>(&mut conn);
+          .get_results::<util::GroupEvent>(&mut conn);
 
-        if let Ok(messages) = messages {
-          let receipts = schema::receipts::table
-            .filter(schema::receipts::group_id.eq(&group))
-            .limit(limit)
-            .offset(offset)
-            .order(schema::receipts::created_at.desc())
-            .get_results::<crate::util::Receipt>(&mut conn);
+        let mut group_listing = GroupListing {
+          group,
+          events: group_events.unwrap_or(Vec::new()),
+          users: Vec::new(),
+          debts: Vec::new(),
+        };
 
-          if let Ok(receipts) = receipts {
-            let transactions = schema::transactions::table
-              .filter(schema::transactions::group_id.eq(&group))
-              .limit(limit)
-              .offset(offset)
-              .order(schema::transactions::created_at.desc())
-              .get_results::<crate::util::Transaction>(&mut conn);
-
-            if let Ok(transactions) = transactions {
-              let debts = schema::debts::table
-                .filter(schema::debts::group_id.eq(&group))
-                .limit(limit)
-                .offset(offset)
-                .order(schema::debts::created_at.desc())
-                .get_results::<crate::util::Debt>(&mut conn);
-
-              if let Ok(debts) = debts {
-                let mut group_details = GroupDetails {
-                  group: found_group,
-                  users: user_details,
-                  messages,
-                  receipts,
-                  transactions,
-                  debts,
-                };
-
-                serde_json::to_string_pretty(&group_details)
-                  .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
-              } else {
-                "{\"error\": \"internal_server_error\"}".to_string()
-              }
-            } else {
-              "{\"error\": \"internal_server_error\"}".to_string()
-            }
-          } else {
-            "{\"error\": \"internal_server_error\"}".to_string()
+        for user in &users {
+          if user.0 == group_listing.group.id {
+            group_listing
+              .users
+              .push(api::v1::user::GroupMemberUserData {
+                id: user.1.clone(),
+                username: user.2.clone(),
+                name: user.3.clone(),
+                mobilepay: user.4.clone(),
+                paypal_me: user.5.clone(),
+                nickname: user.6.clone(),
+                is_admin: user.7,
+                created_at: user.8,
+              });
           }
-        } else {
-          "{\"error\": \"internal_server_error\"}".to_string()
         }
-      } else {
-        "{\"error\": \"internal_server_error\"}".to_string()
+
+        for debt in &debts {
+          if debt.group_id == group_listing.group.id {
+            group_listing.debts.push(debt.clone());
+          }
+        }
+
+        group_listings.push(group_listing);
       }
+
+      serde_json::to_string(&group_listings).unwrap()
     } else {
       "{\"error\": \"internal_server_error\"}".to_string()
     }
   } else {
-    "{\"error\": \"invalid_session\"}".to_string()
+    "{\"error\": \"internal_server_error\"}".to_string()
   }
+}
+
+#[derive(Debug, Deserialize, Serialize, Validate)]
+pub struct NewGroup {
+  #[validate(length(min = 1), length(max = 24))]
+  pub name: String,
+  #[validate(length(equal = 3))]
+  pub currency: String,
 }
 
 #[handler]
@@ -422,6 +229,80 @@ pub fn create(req: &Request, Json(group): Json<NewGroup>) -> String {
   } else {
     "{\"error\": \"invalid_session\"}".to_string()
   }
+}
+
+fn validate_emoji(value: &str) -> Result<(), ValidationError> {
+  let is_emoji = emojis::get(value);
+  if is_emoji.is_some() {
+    Ok(())
+  } else {
+    Err(ValidationError::new("invalid_emoji"))
+  }
+}
+
+#[derive(Debug, Deserialize, Serialize, Validate)]
+pub struct EditGroup {
+  #[validate(length(min = 1), length(max = 24))]
+  pub name: String,
+  #[validate(length(equal = 3))]
+  pub currency: String,
+  #[validate(custom(function = "validate_emoji"))]
+  pub emoji: String,
+  #[validate(length(min = 1), length(max = 96))]
+  pub theme: String,
+}
+
+#[handler]
+pub fn edit(req: &Request, Json(group): Json<EditGroup>, Path(group_id): Path<String>) -> String {
+  match group.validate() {
+    Ok(_) => (),
+    Err(_) => return "{\"error\": \"invalid_data\"}".to_string(),
+  }
+
+  let session = api::auth::from_request(req);
+
+  if let Some(session) = session {
+    let mut conn = crate::establish_connection();
+
+    let user_group = schema::users_groups::table
+      .filter(schema::users_groups::user_id.eq(&session.id))
+      .filter(schema::users_groups::group_id.eq(&group_id))
+      .get_result::<util::UserGroup>(&mut conn);
+
+    if let Ok(user_group) = user_group {
+      if user_group.is_admin {
+        let updated_group = diesel::update(schema::groups::table.find(&group_id))
+          .set((
+            schema::groups::name.eq(&group.name),
+            schema::groups::currency.eq(&group.currency),
+            schema::groups::emoji.eq(&group.emoji),
+            schema::groups::theme.eq(&group.theme),
+          ))
+          .get_result::<util::Group>(&mut conn);
+
+        if let Ok(updated_group) = updated_group {
+          serde_json::to_string_pretty(&updated_group)
+            .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
+        } else {
+          "{\"error\": \"internal_server_error\"}".to_string()
+        }
+      } else {
+        "{\"error\": \"invalid_session\"}".to_string()
+      }
+    } else {
+      "{\"error\": \"internal_server_error\"}".to_string()
+    }
+  } else {
+    "{\"error\": \"invalid_session\"}".to_string()
+  }
+}
+
+#[derive(Debug, Deserialize, Serialize, Validate)]
+pub struct AddUserToGroup {
+  #[validate(length(min = 1), length(max = 96))]
+  pub user_id: String,
+  #[validate(length(min = 1), length(max = 96))]
+  pub group_id: String,
 }
 
 #[handler]
@@ -470,20 +351,4 @@ pub fn add(req: &Request, Json(add_user_to_group): Json<AddUserToGroup>) -> Stri
   } else {
     "{\"error\": \"invalid_session\"}".to_string()
   }
-}
-
-#[derive(Debug, Deserialize, Serialize, Validate)]
-pub struct NewGroup {
-  #[validate(length(min = 1), length(max = 24))]
-  pub name: String,
-  #[validate(length(equal = 3))]
-  pub currency: String,
-}
-
-#[derive(Debug, Deserialize, Serialize, Validate)]
-pub struct AddUserToGroup {
-  #[validate(length(min = 1), length(max = 96))]
-  pub user_id: String,
-  #[validate(length(min = 1), length(max = 96))]
-  pub group_id: String,
 }

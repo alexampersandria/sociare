@@ -20,3 +20,5 @@ vite/node_modules
 *.njsproj
 *.sln
 *.sw?
+
+vite.config.ts.timestamp-*

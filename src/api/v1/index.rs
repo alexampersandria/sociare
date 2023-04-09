@@ -1,5 +1,5 @@
 use crate::api::v1;
-use poem::{delete, get, handler, post, Route};
+use poem::{delete, get, handler, patch, post, Route};
 
 pub fn endpoint() -> poem::Route {
   Route::new()
@@ -13,6 +13,7 @@ pub fn endpoint() -> poem::Route {
     .at("/sessions", get(v1::auth::list))
     .at("/session/delete/:session", delete(v1::auth::delete))
     .at("/groups/:group", get(v1::group::get))
+    .at("/groups/:group/edit", patch(v1::group::edit))
     .at("/groups", get(v1::group::get_all))
     .at("/group/create", post(v1::group::create))
     .at("/group/add", post(v1::group::add))
