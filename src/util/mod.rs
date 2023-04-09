@@ -4,6 +4,8 @@ pub mod diesel;
 pub use self::diesel::*;
 pub mod group;
 pub use group::*;
+pub mod group_event;
+pub use group_event::*;
 pub mod message;
 pub use message::*;
 pub mod psp;

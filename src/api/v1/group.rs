@@ -8,9 +8,25 @@ use poem::{
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
+#[derive(Deserialize, Serialize, Debug)]
+pub struct GroupListing {
+  pub group: util::Group,
+  pub events: Vec<util::GroupEvent>,
+}
+
 #[handler]
 pub fn get_all(req: &Request) -> String {
   let session = api::auth::from_request(req);
+
+  let params = req.params::<GetGroupParams>();
+
+  let mut limit = 10;
+  let mut offset = 0;
+
+  if let Ok(params) = params {
+    limit = params.limit;
+    offset = params.offset;
+  }
 
   if let Some(session) = session {
     let mut conn = crate::establish_connection();
@@ -23,8 +39,34 @@ pub fn get_all(req: &Request) -> String {
       .get_results::<util::Group>(&mut conn);
 
     if let Ok(groups) = groups {
-      serde_json::to_string_pretty(&groups)
-        .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
+      let group_events = schema::group_events::table
+        .filter(schema::group_events::group_id.eq_any(groups.iter().map(|g| g.id.clone())))
+        .order(schema::group_events::created_at.desc())
+        .limit(limit)
+        .offset(offset)
+        .get_results::<util::GroupEvent>(&mut conn);
+
+      if let Ok(group_events) = group_events {
+        let mut group_listings: Vec<GroupListing> = Vec::new();
+
+        for group in groups {
+          let mut group_listing = GroupListing {
+            group,
+            events: Vec::new(),
+          };
+
+          for event in &group_events {
+            if event.group_id == group_listing.group.id {
+              group_listing.events.push(event.clone());
+            }
+          }
+          group_listings.push(group_listing);
+        }
+
+        serde_json::to_string(&group_listings).unwrap()
+      } else {
+        "{\"error\": \"internal_server_error\"}".to_string()
+      }
     } else {
       "{\"error\": \"internal_server_error\"}".to_string()
     }
