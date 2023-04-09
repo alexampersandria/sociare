@@ -1,0 +1,5 @@
+# Every bot that might possibly read and respect this file
+# ========================================================
+User-agent: *
+Disallow: /api/v1
+Disallow: /app
