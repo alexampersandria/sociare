@@ -116,67 +116,79 @@ impl FullGroup {
   }
 
   pub fn balance(&mut self) -> HashMap<String, i64> {
-    let mut balance: HashMap<String, i64> = HashMap::new();
-    for user in self.users.iter() {
-      balance.insert(user.user_id.clone(), 0);
-    }
-    for receipt in self.receipts.iter() {
-      if !receipt.deleted {
-        balance.insert(
-          receipt.user_id.clone(),
-          balance.get(&receipt.user_id).unwrap_or(&0) + receipt.amount,
-        );
-      }
-    }
-    for transaction in self.transactions.iter() {
-      if !transaction.deleted && transaction.confirmed {
-        balance.insert(
-          transaction.from_id.clone(),
-          balance.get(&transaction.from_id).unwrap_or(&0) + transaction.amount,
-        );
-        balance.insert(
-          transaction.to_id.clone(),
-          balance.get(&transaction.to_id).unwrap_or(&0) - transaction.amount,
-        );
-      }
-    }
-    balance
+    balance(&self.users, &self.receipts, &self.transactions)
   }
 
-  pub fn total(&mut self) -> i64 {
-    let mut total: i64 = 0;
-    for balance in self.balance().values() {
-      total += balance;
-    }
-    total
+  pub fn total_with_transactions(&mut self) -> i64 {
+    self.balance().values().sum()
+  }
+
+  pub fn total_without_transactions(&mut self) -> i64 {
+    // #TODO: implement this
+    0
   }
 
   pub fn debts(&mut self) -> Vec<util::Debt> {
-    let balance = self.balance();
-    let mut payments = Vec::with_capacity(balance.len() * balance.len());
-
-    for debtor in &balance {
-      for creditor in &balance {
-        if debtor.0 != creditor.0 {
-          let transaction_amount = (*creditor.1 - *debtor.1) / (balance.len() as i64);
-          if transaction_amount > 0 {
-            payments.push(util::Debt::new(
-              &self.group.id,
-              debtor.0,
-              creditor.0,
-              transaction_amount,
-            ));
-          }
-        }
-      }
-    }
-
-    payments
+    debts(&self.group.id.clone(), &self.balance())
   }
 
   pub fn update_debts(&mut self) {
     self.debts = self.debts();
   }
+}
+
+pub fn balance(
+  users: &[util::UserGroup],
+  receipts: &[util::Receipt],
+  transactions: &[util::Transaction],
+) -> HashMap<String, i64> {
+  let mut balance: HashMap<String, i64> = HashMap::new();
+  for user in users.iter() {
+    balance.insert(user.user_id.clone(), 0);
+  }
+  for receipt in receipts.iter() {
+    if !receipt.deleted {
+      balance.insert(
+        receipt.user_id.clone(),
+        balance.get(&receipt.user_id).unwrap_or(&0) + receipt.amount,
+      );
+    }
+  }
+  for transaction in transactions.iter() {
+    if !transaction.deleted && transaction.confirmed {
+      balance.insert(
+        transaction.from_id.clone(),
+        balance.get(&transaction.from_id).unwrap_or(&0) + transaction.amount,
+      );
+      balance.insert(
+        transaction.to_id.clone(),
+        balance.get(&transaction.to_id).unwrap_or(&0) - transaction.amount,
+      );
+    }
+  }
+  balance
+}
+
+pub fn debts(group_id: &str, balance: &HashMap<String, i64>) -> Vec<util::Debt> {
+  let mut payments = Vec::with_capacity(balance.len() * balance.len());
+
+  for debtor in balance {
+    for creditor in balance {
+      if debtor.0 != creditor.0 {
+        let transaction_amount = (*creditor.1 - *debtor.1) / (balance.len() as i64);
+        if transaction_amount > 0 {
+          payments.push(util::Debt::new(
+            group_id,
+            debtor.0,
+            creditor.0,
+            transaction_amount,
+          ));
+        }
+      }
+    }
+  }
+
+  payments
 }
 
 #[cfg(test)]

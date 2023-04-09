@@ -88,9 +88,9 @@ mod ci_integration {
   #[test]
   fn total_remains_the_same() {
     let mut group = full_group();
-    let before_total = group.total();
+    let before_total = group.total_with_transactions();
     settle_debts(&mut group);
-    let after_total = group.total();
+    let after_total = group.total_with_transactions();
     assert_eq!(before_total, after_total);
   }
 
