@@ -211,7 +211,36 @@ pub struct GroupMemberUserData {
   pub name: String,
   pub mobilepay: Option<String>,
   pub paypal_me: Option<String>,
+  pub nickname: Option<String>,
+  pub is_admin: bool,
   pub created_at: i64,
+}
+
+#[allow(clippy::complexity)]
+impl GroupMemberUserData {
+  pub fn new(
+    result: (
+      String,
+      String,
+      String,
+      Option<String>,
+      Option<String>,
+      Option<String>,
+      bool,
+      i64,
+    ),
+  ) -> Self {
+    Self {
+      id: result.0,
+      username: result.1,
+      name: result.2,
+      mobilepay: result.3,
+      paypal_me: result.4,
+      nickname: result.5,
+      is_admin: result.6,
+      created_at: result.7,
+    }
+  }
 }
 
 #[derive(Debug, Deserialize, Serialize, Validate)]

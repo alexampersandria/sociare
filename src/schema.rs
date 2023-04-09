@@ -29,6 +29,8 @@ diesel::table! {
         id -> Varchar,
         name -> Varchar,
         emoji -> Varchar,
+        theme -> Varchar,
+        total -> Int8,
         currency -> Varchar,
         created_at -> Int8,
     }

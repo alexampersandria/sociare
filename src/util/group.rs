@@ -14,6 +14,8 @@ pub struct Group {
   pub id: String,
   pub name: String,
   pub emoji: String,
+  pub theme: String,
+  pub total: i64,
   pub currency: String,
   pub created_at: i64,
 }
@@ -24,6 +26,8 @@ impl Group {
       id: Uuid::new_v4().to_string(),
       name: name.to_string(),
       emoji: emoji::random(),
+      theme: "default".to_string(),
+      total: 0,
       currency: currency.to_string(),
       created_at: util::unix_ms(),
     }
@@ -33,6 +37,8 @@ impl Group {
       id: Uuid::new_v4().to_string(),
       name: name.to_string(),
       emoji: emoji.to_string(),
+      theme: "default".to_string(),
+      total: 0,
       currency: currency.to_string(),
       created_at: util::unix_ms(),
     }

@@ -12,6 +12,8 @@ use validator::Validate;
 pub struct GroupListing {
   pub group: util::Group,
   pub events: Vec<util::GroupEvent>,
+  pub users: Vec<api::v1::user::GroupMemberUserData>,
+  pub debts: Vec<util::Debt>,
 }
 
 #[handler]
@@ -39,27 +41,78 @@ pub fn get_all(req: &Request) -> String {
       .get_results::<util::Group>(&mut conn);
 
     if let Ok(groups) = groups {
-      let group_events = schema::group_events::table
-        .filter(schema::group_events::group_id.eq_any(groups.iter().map(|g| g.id.clone())))
-        .order(schema::group_events::created_at.desc())
-        .limit(limit)
-        .offset(offset)
-        .get_results::<util::GroupEvent>(&mut conn);
+      let users = schema::users_groups::table
+        .filter(schema::users_groups::active.eq(true))
+        .filter(schema::users_groups::group_id.eq_any(groups.iter().map(|g| g.id.clone())))
+        .inner_join(schema::users::table)
+        .select((
+          schema::users_groups::group_id,
+          schema::users::id,
+          schema::users::username,
+          schema::users::name,
+          schema::users::mobilepay,
+          schema::users::paypal_me,
+          schema::users_groups::nickname,
+          schema::users_groups::is_admin,
+          schema::users::created_at,
+        ))
+        .get_results::<(
+          String,
+          String,
+          String,
+          String,
+          Option<String>,
+          Option<String>,
+          Option<String>,
+          bool,
+          i64,
+        )>(&mut conn);
 
-      if let Ok(group_events) = group_events {
+      let debts = schema::debts::table
+        .filter(schema::debts::group_id.eq_any(groups.iter().map(|g| g.id.clone())))
+        .get_results::<util::Debt>(&mut conn);
+
+      if let (Ok(users), Ok(debts)) = (users, debts) {
         let mut group_listings: Vec<GroupListing> = Vec::new();
 
         for group in groups {
+          let group_events = schema::group_events::table
+            .filter(schema::group_events::group_id.eq(&group.id))
+            .order(schema::group_events::created_at.desc())
+            .limit(limit)
+            .offset(offset)
+            .get_results::<util::GroupEvent>(&mut conn);
+
           let mut group_listing = GroupListing {
             group,
-            events: Vec::new(),
+            events: group_events.unwrap_or(Vec::new()),
+            users: Vec::new(),
+            debts: Vec::new(),
           };
 
-          for event in &group_events {
-            if event.group_id == group_listing.group.id {
-              group_listing.events.push(event.clone());
+          for user in &users {
+            if user.0 == group_listing.group.id {
+              group_listing
+                .users
+                .push(api::v1::user::GroupMemberUserData {
+                  id: user.1.clone(),
+                  username: user.2.clone(),
+                  name: user.3.clone(),
+                  mobilepay: user.4.clone(),
+                  paypal_me: user.5.clone(),
+                  nickname: user.6.clone(),
+                  is_admin: user.7,
+                  created_at: user.8,
+                });
             }
           }
+
+          for debt in &debts {
+            if debt.group_id == group_listing.group.id {
+              group_listing.debts.push(debt.clone());
+            }
+          }
+
           group_listings.push(group_listing);
         }
 
