@@ -39,6 +39,27 @@ struct GetGroupParams {
   offset: i64,
 }
 
+#[derive(Deserialize, Serialize, Debug)]
+pub struct GroupDetails {
+  pub group: util::Group,
+  pub users: Vec<UserDetails>,
+  pub messages: Vec<util::Message>,
+  pub receipts: Vec<util::Receipt>,
+  pub transactions: Vec<util::Transaction>,
+  pub debts: Vec<util::Debt>,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct UserDetails {
+  pub id: String,
+  pub username: String,
+  pub name: String,
+  pub mobilepay: Option<String>,
+  pub paypal_me: Option<String>,
+  pub created_at: i64,
+  pub nickname: Option<String>,
+}
+
 #[handler]
 pub fn get(req: &Request, Path(group): Path<String>) -> String {
   let session = api::auth::from_request(req);
@@ -102,17 +123,18 @@ pub fn get(req: &Request, Path(group): Path<String>) -> String {
         )>(&mut conn);
 
       if let Ok(users) = users {
-        let group_member_users: Vec<api::v1::user::GroupMemberUserData> = users
+        let user_details = users
           .iter()
-          .map(|user| api::v1::user::GroupMemberUserData {
+          .map(|user| UserDetails {
             id: user.1.clone(),
             username: user.2.clone(),
             name: user.3.clone(),
             mobilepay: user.4.clone(),
             paypal_me: user.5.clone(),
             created_at: user.6,
+            nickname: user.0.nickname.clone(),
           })
-          .collect::<Vec<api::v1::user::GroupMemberUserData>>();
+          .collect::<Vec<UserDetails>>();
 
         let messages = schema::messages::table
           .filter(schema::messages::group_id.eq(&group))
@@ -146,20 +168,16 @@ pub fn get(req: &Request, Path(group): Path<String>) -> String {
                 .get_results::<crate::util::Debt>(&mut conn);
 
               if let Ok(debts) = debts {
-                let mut full_group = util::FullGroup {
+                let mut group_details = GroupDetails {
                   group: found_group,
-                  users: users.iter().map(|user| user.0.clone()).collect(),
+                  users: user_details,
                   messages,
                   receipts,
                   transactions,
                   debts,
                 };
-                let full_group_with_members_user_data = FullGroupWithGroupMemberUserData {
-                  group: full_group,
-                  users: group_member_users,
-                };
 
-                serde_json::to_string_pretty(&full_group_with_members_user_data)
+                serde_json::to_string_pretty(&group_details)
                   .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
               } else {
                 "{\"error\": \"internal_server_error\"}".to_string()
@@ -261,12 +279,6 @@ pub fn add(req: &Request, Json(add_user_to_group): Json<AddUserToGroup>) -> Stri
   } else {
     "{\"error\": \"invalid_session\"}".to_string()
   }
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-pub struct FullGroupWithGroupMemberUserData {
-  pub group: util::FullGroup,
-  pub users: Vec<api::v1::user::GroupMemberUserData>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Validate)]
