@@ -75,6 +75,102 @@ pub fn get_all(req: &Request) -> String {
   }
 }
 
+#[derive(Deserialize, Serialize, Debug)]
+pub struct GroupEventDetails {
+  pub event: util::GroupEvent,
+  pub message: Option<util::Message>,
+  pub receipt: Option<util::Receipt>,
+  pub transaction: Option<util::Transaction>,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct GroupListingDetails {
+  pub group: util::Group,
+  pub events: Vec<GroupEventDetails>,
+}
+
+#[handler]
+pub fn get(req: &Request, Path(group): Path<String>) -> String {
+  let session = api::auth::from_request(req);
+
+  let params = req.params::<GetGroupParams>();
+
+  let mut limit = 100;
+  let mut offset = 0;
+
+  if let Ok(params) = params {
+    limit = params.limit;
+    offset = params.offset;
+  }
+
+  if let Some(session) = session {
+    let mut conn = crate::establish_connection();
+
+    let groups = schema::users_groups::table
+      .filter(schema::users_groups::active.eq(true))
+      .filter(schema::users_groups::user_id.eq(&session.id))
+      .filter(schema::users_groups::group_id.eq(&group))
+      .inner_join(schema::groups::table)
+      .select(util::Group::as_select())
+      .get_results::<util::Group>(&mut conn);
+
+    if let Ok(groups) = groups {
+      let group_events = schema::group_events::table
+        .filter(schema::group_events::group_id.eq_any(groups.iter().map(|g| g.id.clone())))
+        .order(schema::group_events::created_at.desc())
+        .limit(limit)
+        .offset(offset)
+        .left_join(schema::messages::table)
+        .left_join(schema::receipts::table)
+        .left_join(schema::transactions::table)
+        .select((
+          util::GroupEvent::as_select(),
+          Option::<util::Message>::as_select(),
+          Option::<util::Receipt>::as_select(),
+          Option::<util::Transaction>::as_select(),
+        ))
+        .get_results::<(
+          util::GroupEvent,
+          Option<util::Message>,
+          Option<util::Receipt>,
+          Option<util::Transaction>,
+        )>(&mut conn);
+
+      if let Ok(group_events) = group_events {
+        let mut group_listings: Vec<GroupListingDetails> = Vec::new();
+
+        for group in groups {
+          let mut group_listing = GroupListingDetails {
+            group,
+            events: Vec::new(),
+          };
+
+          for event in &group_events {
+            if event.0.group_id == group_listing.group.id {
+              let event_details = GroupEventDetails {
+                event: event.0.clone(),
+                message: event.1.clone(),
+                receipt: event.2.clone(),
+                transaction: event.3.clone(),
+              };
+              group_listing.events.push(event_details);
+            }
+          }
+          group_listings.push(group_listing);
+        }
+
+        serde_json::to_string(&group_listings).unwrap()
+      } else {
+        "{\"error\": \"internal_server_error\"}".to_string()
+      }
+    } else {
+      "{\"error\": \"internal_server_error\"}".to_string()
+    }
+  } else {
+    "{\"error\": \"invalid_session\"}".to_string()
+  }
+}
+
 #[derive(Deserialize)]
 struct GetGroupParams {
   limit: i64,
@@ -103,7 +199,7 @@ pub struct UserDetails {
 }
 
 #[handler]
-pub fn get(req: &Request, Path(group): Path<String>) -> String {
+pub fn get_old(req: &Request, Path(group): Path<String>) -> String {
   let session = api::auth::from_request(req);
   let params = req.params::<GetGroupParams>();
 
