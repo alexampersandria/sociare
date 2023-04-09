@@ -14,7 +14,7 @@ use super::PrivateUserData;
 pub struct GroupListing {
   pub group: util::Group,
   pub events: Vec<util::GroupEvent>,
-  pub users: Vec<api::v1::user::GroupMemberUserData>,
+  pub users: Vec<GroupMemberUserData>,
   pub debts: Vec<util::Debt>,
 }
 
@@ -22,18 +22,15 @@ pub struct GroupListing {
 pub fn get_all(req: &Request) -> String {
   let session = api::auth::from_request(req);
 
-  let params = req.params::<GetGroupParams>();
-
-  let mut limit = 10;
-  let mut offset = 0;
-
-  if let Ok(params) = params {
-    limit = params.limit;
-    offset = params.offset;
-  }
+  let limit = req
+    .params::<GetGroupParamsLimit>()
+    .unwrap_or(GetGroupParamsLimit { limit: 100 });
+  let offset = req
+    .params::<GetGroupParamsOffset>()
+    .unwrap_or(GetGroupParamsOffset { offset: 0 });
 
   if let Some(session) = session {
-    get_group_listing(session, limit, offset, None)
+    get_group_listing(session, limit.limit, offset.offset, None)
   } else {
     "{\"error\": \"invalid_session\"}".to_string()
   }
@@ -57,26 +54,27 @@ pub struct GroupListingDetails {
 pub fn get(req: &Request, Path(group): Path<String>) -> String {
   let session = api::auth::from_request(req);
 
-  let params = req.params::<GetGroupParams>();
-
-  let mut limit = 10;
-  let mut offset = 0;
-
-  if let Ok(params) = params {
-    limit = params.limit;
-    offset = params.offset;
-  }
+  let limit = req
+    .params::<GetGroupParamsLimit>()
+    .unwrap_or(GetGroupParamsLimit { limit: 10 });
+  let offset = req
+    .params::<GetGroupParamsOffset>()
+    .unwrap_or(GetGroupParamsOffset { offset: 0 });
 
   if let Some(session) = session {
-    get_group_listing(session, limit, offset, Some(group))
+    get_group_listing(session, limit.limit, offset.offset, Some(group))
   } else {
     "{\"error\": \"invalid_session\"}".to_string()
   }
 }
 
 #[derive(Deserialize)]
-struct GetGroupParams {
+struct GetGroupParamsLimit {
   limit: i64,
+}
+
+#[derive(Deserialize)]
+struct GetGroupParamsOffset {
   offset: i64,
 }
 
@@ -121,6 +119,7 @@ pub fn get_group_listing(
         schema::users::paypal_me,
         schema::users_groups::nickname,
         schema::users_groups::is_admin,
+        schema::users_groups::active,
         schema::users::created_at,
       ))
       .get_results::<(
@@ -131,6 +130,7 @@ pub fn get_group_listing(
         Option<String>,
         Option<String>,
         Option<String>,
+        bool,
         bool,
         i64,
       )>(&mut conn);
@@ -159,18 +159,17 @@ pub fn get_group_listing(
 
         for user in &users {
           if user.0 == group_listing.group.id {
-            group_listing
-              .users
-              .push(api::v1::user::GroupMemberUserData {
-                id: user.1.clone(),
-                username: user.2.clone(),
-                name: user.3.clone(),
-                mobilepay: user.4.clone(),
-                paypal_me: user.5.clone(),
-                nickname: user.6.clone(),
-                is_admin: user.7,
-                created_at: user.8,
-              });
+            group_listing.users.push(GroupMemberUserData {
+              id: user.1.clone(),
+              username: user.2.clone(),
+              name: user.3.clone(),
+              mobilepay: user.4.clone(),
+              paypal_me: user.5.clone(),
+              nickname: user.6.clone(),
+              is_admin: user.7,
+              active: user.8,
+              created_at: user.9,
+            });
           }
         }
 
@@ -350,5 +349,47 @@ pub fn add(req: &Request, Json(add_user_to_group): Json<AddUserToGroup>) -> Stri
     }
   } else {
     "{\"error\": \"invalid_session\"}".to_string()
+  }
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct GroupMemberUserData {
+  pub id: String,
+  pub username: String,
+  pub name: String,
+  pub mobilepay: Option<String>,
+  pub paypal_me: Option<String>,
+  pub nickname: Option<String>,
+  pub is_admin: bool,
+  pub active: bool,
+  pub created_at: i64,
+}
+
+#[allow(clippy::complexity)]
+impl GroupMemberUserData {
+  pub fn new(
+    result: (
+      String,
+      String,
+      String,
+      Option<String>,
+      Option<String>,
+      Option<String>,
+      bool,
+      bool,
+      i64,
+    ),
+  ) -> Self {
+    Self {
+      id: result.0,
+      username: result.1,
+      name: result.2,
+      mobilepay: result.3,
+      paypal_me: result.4,
+      nickname: result.5,
+      is_admin: result.6,
+      active: result.7,
+      created_at: result.8,
+    }
   }
 }
