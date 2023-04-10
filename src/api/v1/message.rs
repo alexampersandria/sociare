@@ -27,34 +27,38 @@ pub fn get(req: &Request, Path(message): Path<String>) -> String {
     let users_groups = users_groups::table
       .filter(users_groups::user_id.eq(&session.id))
       .select(users_groups::group_id)
-      .first::<String>(&mut conn);
+      .get_results::<String>(&mut conn);
 
-    let result = schema::messages::table
-      .filter(schema::messages::id.eq(&message))
-      .filter(schema::messages::group_id.eq_any(users_groups))
-      .select(util::Message::as_select())
-      .first::<util::Message>(&mut conn);
+    if let Ok(users_groups) = users_groups {
+      let result = schema::messages::table
+        .filter(schema::messages::id.eq(&message))
+        .filter(schema::messages::group_id.eq_any(users_groups))
+        .select(util::Message::as_select())
+        .first::<util::Message>(&mut conn);
 
-    if let Ok(result) = result {
-      let mut message_details = MessageDetails {
-        message: result,
-        group_events: None,
-      };
+      if let Ok(result) = result {
+        let mut message_details = MessageDetails {
+          message: result,
+          group_events: None,
+        };
 
-      let message_group_events = schema::group_events::table
-        .filter(schema::group_events::group_id.eq(&message_details.message.group_id))
-        .filter(schema::group_events::message_id.eq(&message_details.message.id))
-        .select(util::GroupEvent::as_select())
-        .get_results::<util::GroupEvent>(&mut conn);
+        let message_group_events = schema::group_events::table
+          .filter(schema::group_events::group_id.eq(&message_details.message.group_id))
+          .filter(schema::group_events::message_id.eq(&message_details.message.id))
+          .select(util::GroupEvent::as_select())
+          .get_results::<util::GroupEvent>(&mut conn);
 
-      if let Ok(message_group_events) = message_group_events {
-        message_details.group_events = Some(message_group_events);
+        if let Ok(message_group_events) = message_group_events {
+          message_details.group_events = Some(message_group_events);
+        }
+
+        serde_json::to_string_pretty(&message_details)
+          .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
+      } else {
+        "{\"error\": \"message_not_found\"}".to_string()
       }
-
-      serde_json::to_string_pretty(&message_details)
-        .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
     } else {
-      "{\"error\": \"message_not_found\"}".to_string()
+      "{\"error\": \"internal_server_error\"}".to_string()
     }
   } else {
     "{\"error\": \"invalid_session\"}".to_string()
