@@ -8,3 +8,5 @@ pub mod group;
 pub use group::*;
 pub mod user;
 pub use user::*;
+pub mod message;
+pub use message::*;

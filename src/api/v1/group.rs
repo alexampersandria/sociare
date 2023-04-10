@@ -8,14 +8,6 @@ use poem::{
 use serde::{Deserialize, Serialize};
 use validator::{Validate, ValidationError};
 
-#[derive(Deserialize, Serialize, Debug)]
-pub struct GroupListing {
-  pub group: util::Group,
-  pub events: Vec<util::GroupEvent>,
-  pub users: Vec<GroupMemberUserData>,
-  pub debts: Vec<util::Debt>,
-}
-
 #[handler]
 pub fn get_all(req: &Request) -> String {
   let session = api::auth::from_request(req);
@@ -32,20 +24,6 @@ pub fn get_all(req: &Request) -> String {
   } else {
     "{\"error\": \"invalid_session\"}".to_string()
   }
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-pub struct GroupEventDetails {
-  pub event: util::GroupEvent,
-  pub message: Option<util::Message>,
-  pub receipt: Option<util::Receipt>,
-  pub transaction: Option<util::Transaction>,
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-pub struct GroupListingDetails {
-  pub group: util::Group,
-  pub events: Vec<GroupEventDetails>,
 }
 
 #[handler]
@@ -74,6 +52,30 @@ struct GetGroupParamsLimit {
 #[derive(Deserialize)]
 struct GetGroupParamsOffset {
   offset: i64,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct GroupListing {
+  pub group: util::Group,
+  pub events: Vec<util::GroupEvent>,
+  pub users: Vec<GroupMemberUserData>,
+  pub debts: Vec<util::Debt>,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct GroupEventDetails {
+  pub event: util::GroupEvent,
+  pub message: Option<util::Message>,
+  pub receipt: Option<util::Receipt>,
+  pub transaction: Option<util::Transaction>,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct GroupListingDetails {
+  pub group: util::Group,
+  pub events: Vec<GroupEventDetails>,
+  pub users: Vec<GroupMemberUserData>,
+  pub debts: Vec<util::Debt>,
 }
 
 pub fn get_group_listing(

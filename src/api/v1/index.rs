@@ -3,7 +3,7 @@ use poem::{delete, get, handler, patch, post, Route};
 
 pub fn endpoint() -> poem::Route {
   Route::new()
-    .nest("/", package_version)
+    .at("/", package_version)
     .at("/users/:username", get(v1::user::get))
     .at("/user/create", post(v1::user::create))
     .at("/user/delete", delete(v1::user::delete))
@@ -19,6 +19,9 @@ pub fn endpoint() -> poem::Route {
     .at("/group/create", post(v1::group::create))
     .at("/groups/:group/add", post(v1::group::add))
     .at("/groups/:group/remove", post(v1::group::remove))
+    .at("/messages/:message", get(v1::message::get))
+    .at("/message/create", post(v1::message::create))
+    .at("/messages/:message/edit", patch(v1::message::edit))
 }
 
 #[handler]
