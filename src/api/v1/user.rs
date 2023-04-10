@@ -194,7 +194,7 @@ pub fn edit(req: &Request, Json(user): Json<EditUser>) -> String {
     }
 
     if results.is_empty() {
-      "{\"error\": \"internal_server_error\"}".to_string()
+      "{\"error\": \"no_changes\"}".to_string()
     } else {
       serde_json::to_string_pretty(&results)
         .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())

@@ -190,7 +190,7 @@ pub fn get_group_listing(
 
 #[derive(Debug, Deserialize, Serialize, Validate)]
 pub struct NewGroup {
-  #[validate(length(min = 1), length(max = 24))]
+  #[validate(length(min = 1), length(max = 48))]
   pub name: String,
   #[validate(length(equal = 3))]
   pub currency: String,
@@ -238,14 +238,14 @@ fn validate_emoji(value: &str) -> Result<(), ValidationError> {
 
 #[derive(Debug, Deserialize, Serialize, Validate)]
 pub struct EditGroup {
-  #[validate(length(min = 1), length(max = 24))]
-  pub name: String,
+  #[validate(length(min = 1), length(max = 48))]
+  pub name: Option<String>,
   #[validate(length(equal = 3))]
-  pub currency: String,
+  pub currency: Option<String>,
   #[validate(custom(function = "validate_emoji"))]
-  pub emoji: String,
+  pub emoji: Option<String>,
   #[validate(length(min = 1), length(max = 96))]
-  pub theme: String,
+  pub theme: Option<String>,
 }
 
 #[handler]
@@ -267,20 +267,57 @@ pub fn edit(req: &Request, Json(group): Json<EditGroup>, Path(group_id): Path<St
 
     if let Ok(user_group) = user_group {
       if user_group.is_admin {
-        let updated_group = diesel::update(schema::groups::table.find(&group_id))
-          .set((
-            schema::groups::name.eq(&group.name),
-            schema::groups::currency.eq(&group.currency),
-            schema::groups::emoji.eq(&group.emoji),
-            schema::groups::theme.eq(&group.theme),
-          ))
-          .get_result::<util::Group>(&mut conn);
+        let mut results = Vec::new();
 
-        if let Ok(updated_group) = updated_group {
-          serde_json::to_string_pretty(&updated_group)
-            .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
+        if let Some(name) = group.name {
+          let changed_name = diesel::update(schema::groups::table)
+            .filter(schema::groups::id.eq(&group_id))
+            .set(schema::groups::name.eq(&name))
+            .execute(&mut conn);
+
+          if changed_name.is_ok() {
+            results.push("name");
+          }
+        }
+
+        if let Some(currency) = group.currency {
+          let changed_currency = diesel::update(schema::groups::table)
+            .filter(schema::groups::id.eq(&group_id))
+            .set(schema::groups::currency.eq(&currency))
+            .execute(&mut conn);
+
+          if changed_currency.is_ok() {
+            results.push("currency");
+          }
+        }
+
+        if let Some(emoji) = group.emoji {
+          let changed_emoji = diesel::update(schema::groups::table)
+            .filter(schema::groups::id.eq(&group_id))
+            .set(schema::groups::emoji.eq(&emoji))
+            .execute(&mut conn);
+
+          if changed_emoji.is_ok() {
+            results.push("emoji");
+          }
+        }
+
+        if let Some(theme) = group.theme {
+          let changed_theme = diesel::update(schema::groups::table)
+            .filter(schema::groups::id.eq(&group_id))
+            .set(schema::groups::theme.eq(&theme))
+            .execute(&mut conn);
+
+          if changed_theme.is_ok() {
+            results.push("theme");
+          }
+        }
+
+        if results.is_empty() {
+          "{\"error\": \"no_changes\"}".to_string()
         } else {
-          "{\"error\": \"internal_server_error\"}".to_string()
+          serde_json::to_string_pretty(&results)
+            .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
         }
       } else {
         "{\"error\": \"invalid_session\"}".to_string()
