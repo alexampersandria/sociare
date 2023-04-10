@@ -391,14 +391,24 @@ pub fn add(
       if user_already_in_group {
         return "{\"error\": \"user_already_in_group\"}".to_string();
       } else {
-        let set_user_group_inactive = diesel::update(
+        let set_user_group_active = diesel::update(
           schema::users_groups::table
             .filter(schema::users_groups::user_id.eq(&user_group_params.user_id))
             .filter(schema::users_groups::group_id.eq(&user_group_params.group_id)),
         )
         .set(schema::users_groups::active.eq(true))
         .get_result::<crate::util::UserGroup>(&mut conn);
-        if let Ok(set_user_group_inactive) = set_user_group_inactive {
+        if let Ok(set_user_group_inactive) = set_user_group_active {
+          let logged_event = api::event::log_simple(
+            &session.id,
+            &user_group_params.group_id,
+            &format!("activated_user user_id:{}", &user_group_params.user_id),
+          );
+
+          if logged_event.is_err() {
+            return "{\"error\": \"internal_server_error\"}".to_string();
+          }
+
           return serde_json::to_string_pretty(&set_user_group_inactive)
             .unwrap_or("{\"error\": \"internal_server_error\"}".to_string());
         } else {
@@ -411,6 +421,16 @@ pub fn add(
       crate::util::UserGroup::new(&user_group_params.user_id, &user_group_params.group_id);
     let added_user_to_group = crate::util::diesel::user::add_to_group(&mut conn, &user_group);
     if added_user_to_group.is_ok() {
+      let logged_event = api::event::log_simple(
+        &session.id,
+        &user_group_params.group_id,
+        &format!("added_user user_id:{}", &user_group_params.user_id),
+      );
+
+      if logged_event.is_err() {
+        return "{\"error\": \"internal_server_error\"}".to_string();
+      }
+
       serde_json::to_string_pretty(&user_group)
         .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
     } else {
@@ -481,6 +501,16 @@ pub fn remove(
     .get_result::<crate::util::UserGroup>(&mut conn);
 
     if set_user_group_inactive.is_ok() {
+      let logged_event = api::event::log_simple(
+        &session.id,
+        &user_group_params.group_id,
+        &format!("deactivated_user user_id:{}", &user_group_params.user_id),
+      );
+
+      if logged_event.is_err() {
+        return "{\"error\": \"internal_server_error\"}".to_string();
+      }
+
       serde_json::to_string_pretty(&user_group_params)
         .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
     } else {
