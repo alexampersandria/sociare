@@ -8,8 +8,6 @@ use poem::{
 use serde::{Deserialize, Serialize};
 use validator::{Validate, ValidationError};
 
-use super::PrivateUserData;
-
 #[derive(Deserialize, Serialize, Debug)]
 pub struct GroupListing {
   pub group: util::Group,
@@ -79,7 +77,7 @@ struct GetGroupParamsOffset {
 }
 
 pub fn get_group_listing(
-  session: PrivateUserData,
+  session: api::v1::user::PrivateUserData,
   limit: i64,
   offset: i64,
   group_id: Option<String>,
@@ -107,7 +105,6 @@ pub fn get_group_listing(
 
   if let Ok(groups) = groups {
     let users = schema::users_groups::table
-      .filter(schema::users_groups::active.eq(true))
       .filter(schema::users_groups::group_id.eq_any(groups.iter().map(|g| g.id.clone())))
       .inner_join(schema::users::table)
       .select((
@@ -297,7 +294,13 @@ pub fn edit(req: &Request, Json(group): Json<EditGroup>, Path(group_id): Path<St
 }
 
 #[derive(Debug, Deserialize, Serialize, Validate)]
-pub struct AddUserToGroup {
+pub struct UserIdParams {
+  #[validate(length(min = 1), length(max = 96))]
+  pub user_id: String,
+}
+
+#[derive(Debug, Deserialize, Serialize, Validate)]
+pub struct UserGroupParams {
   #[validate(length(min = 1), length(max = 96))]
   pub user_id: String,
   #[validate(length(min = 1), length(max = 96))]
@@ -305,8 +308,16 @@ pub struct AddUserToGroup {
 }
 
 #[handler]
-pub fn add(req: &Request, Json(add_user_to_group): Json<AddUserToGroup>) -> String {
-  match add_user_to_group.validate() {
+pub fn add(
+  req: &Request,
+  Json(user_id_params): Json<UserIdParams>,
+  Path(group_id): Path<String>,
+) -> String {
+  let user_group_params = UserGroupParams {
+    user_id: user_id_params.user_id,
+    group_id,
+  };
+  match user_group_params.validate() {
     Ok(_) => (),
     Err(_) => return "{\"error\": \"invalid_data\"}".to_string(),
   }
@@ -319,30 +330,121 @@ pub fn add(req: &Request, Json(add_user_to_group): Json<AddUserToGroup>) -> Stri
     let user_groups = schema::users_groups::table
       .filter(schema::users_groups::active.eq(true))
       .filter(schema::users_groups::user_id.eq(&session.id))
-      .filter(schema::users_groups::group_id.eq(&add_user_to_group.group_id))
-      .select(schema::users_groups::group_id)
-      .get_result::<String>(&mut conn);
+      .filter(schema::users_groups::group_id.eq(&user_group_params.group_id))
+      .select(util::UserGroup::as_select())
+      .get_result::<util::UserGroup>(&mut conn);
 
     if user_groups.is_err() {
       return "{\"error\": \"invalid_group\"}".to_string();
     }
 
-    let user_already_in_group = schema::users_groups::table
-      .filter(schema::users_groups::active.eq(true))
-      .filter(schema::users_groups::user_id.eq(&add_user_to_group.user_id))
-      .filter(schema::users_groups::group_id.eq(&add_user_to_group.group_id))
-      .select(schema::users_groups::group_id)
-      .get_result::<String>(&mut conn);
+    if let Ok(user_groups) = user_groups {
+      if !user_groups.is_admin {
+        return "{\"error\": \"not_authorized\"}".to_string();
+      }
+    }
 
-    if user_already_in_group.is_ok() {
-      return "{\"error\": \"user_already_in_group\"}".to_string();
+    let user_already_in_group = schema::users_groups::table
+      .filter(schema::users_groups::user_id.eq(&user_group_params.user_id))
+      .filter(schema::users_groups::group_id.eq(&user_group_params.group_id))
+      .select(schema::users_groups::active)
+      .get_result::<bool>(&mut conn);
+
+    if let Ok(user_already_in_group) = user_already_in_group {
+      if user_already_in_group {
+        return "{\"error\": \"user_already_in_group\"}".to_string();
+      } else {
+        let set_user_group_inactive = diesel::update(
+          schema::users_groups::table
+            .filter(schema::users_groups::user_id.eq(&user_group_params.user_id))
+            .filter(schema::users_groups::group_id.eq(&user_group_params.group_id)),
+        )
+        .set(schema::users_groups::active.eq(true))
+        .get_result::<crate::util::UserGroup>(&mut conn);
+        if let Ok(set_user_group_inactive) = set_user_group_inactive {
+          return serde_json::to_string_pretty(&set_user_group_inactive)
+            .unwrap_or("{\"error\": \"internal_server_error\"}".to_string());
+        } else {
+          return "{\"error\": \"internal_server_error\"}".to_string();
+        }
+      }
     }
 
     let user_group =
-      crate::util::UserGroup::new(&add_user_to_group.user_id, &add_user_to_group.group_id);
+      crate::util::UserGroup::new(&user_group_params.user_id, &user_group_params.group_id);
     let added_user_to_group = crate::util::diesel::user::add_to_group(&mut conn, &user_group);
     if added_user_to_group.is_ok() {
       serde_json::to_string_pretty(&user_group)
+        .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
+    } else {
+      "{\"error\": \"internal_server_error\"}".to_string()
+    }
+  } else {
+    "{\"error\": \"invalid_session\"}".to_string()
+  }
+}
+
+#[handler]
+pub fn remove(
+  req: &Request,
+  Json(user_id_params): Json<UserIdParams>,
+  Path(group_id): Path<String>,
+) -> String {
+  let user_group_params = UserGroupParams {
+    user_id: user_id_params.user_id,
+    group_id,
+  };
+  match user_group_params.validate() {
+    Ok(_) => (),
+    Err(_) => return "{\"error\": \"invalid_data\"}".to_string(),
+  }
+
+  let session = api::auth::from_request(req);
+
+  if let Some(session) = session {
+    let mut conn = crate::establish_connection();
+
+    let user_groups = schema::users_groups::table
+      .filter(schema::users_groups::active.eq(true))
+      .filter(schema::users_groups::user_id.eq(&session.id))
+      .filter(schema::users_groups::group_id.eq(&user_group_params.group_id))
+      .select(util::UserGroup::as_select())
+      .get_result::<util::UserGroup>(&mut conn);
+
+    if user_groups.is_err() {
+      return "{\"error\": \"invalid_group\"}".to_string();
+    }
+
+    let user_in_group = schema::users_groups::table
+      .filter(schema::users_groups::active.eq(true))
+      .filter(schema::users_groups::user_id.eq(&user_group_params.user_id))
+      .filter(schema::users_groups::group_id.eq(&user_group_params.group_id))
+      .select(schema::users_groups::group_id)
+      .get_result::<String>(&mut conn);
+
+    if user_in_group.is_err() {
+      return "{\"error\": \"user_not_in_group\"}".to_string();
+    }
+
+    let mut is_admin = false;
+    if let Ok(user_groups) = user_groups {
+      is_admin = user_groups.is_admin;
+    }
+
+    if session.id != user_group_params.user_id && !is_admin {
+      return "{\"error\": \"not_authorized\"}".to_string();
+    }
+
+    let set_user_group_inactive = diesel::update(
+      schema::users_groups::table
+        .filter(schema::users_groups::user_id.eq(&user_group_params.user_id))
+        .filter(schema::users_groups::group_id.eq(&user_group_params.group_id)),
+    )
+    .set(schema::users_groups::active.eq(false))
+    .get_result::<crate::util::UserGroup>(&mut conn);
+
+    if set_user_group_inactive.is_ok() {
+      serde_json::to_string_pretty(&user_group_params)
         .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
     } else {
       "{\"error\": \"internal_server_error\"}".to_string()
