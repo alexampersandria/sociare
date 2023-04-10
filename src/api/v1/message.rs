@@ -146,20 +146,24 @@ pub fn edit(
 
       if let Some(content) = edit_message.content {
         let updated_message = util::diesel::message::set_content(&mut conn, &message, &content);
-
         if updated_message.is_ok() {
-          results.push("update_message set_content");
+          results.push(format!("update_message message_id:{} set_content", message));
         }
       }
 
       if let Some(deleted) = edit_message.deleted {
         let updated_message = util::diesel::message::set_deleted(&mut conn, &message, deleted);
-
         if updated_message.is_ok() {
           if deleted {
-            results.push("update_message set_deleted:true");
+            results.push(format!(
+              "update_message message_id:{} set_deleted:true",
+              message
+            ));
           } else {
-            results.push("update_message set_deleted:false");
+            results.push(format!(
+              "update_message message_id:{} set_deleted:false",
+              message
+            ));
           }
         }
       }
@@ -168,14 +172,8 @@ pub fn edit(
         "{\"error\": \"no_changes\"}".to_string()
       } else {
         for result in results.iter() {
-          let logged_message = api::v1::event::log_event(
-            &session.id,
-            &found_message.group_id,
-            result,
-            Some(found_message.id.clone()),
-            None,
-            None,
-          );
+          let logged_message =
+            api::v1::event::log_simple(&session.id, &found_message.group_id, result);
           if logged_message.is_err() {
             return "{\"error\": \"internal_server_error\"}".to_string();
           }
