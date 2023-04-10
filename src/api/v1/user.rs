@@ -41,6 +41,18 @@ pub fn me(req: &Request) -> String {
   }
 }
 
+#[derive(Debug, Deserialize, Serialize, Validate)]
+pub struct NewUser {
+  #[validate(length(min = 3), length(max = 24))]
+  username: String,
+  #[validate(length(min = 1), length(max = 96))]
+  name: String,
+  #[validate(length(min = 7), length(max = 96))]
+  password: String,
+  #[validate(email)]
+  email: String,
+}
+
 #[handler]
 pub fn create(Json(user): Json<NewUser>) -> String {
   match user.validate() {
@@ -87,6 +99,111 @@ pub fn create(Json(user): Json<NewUser>) -> String {
   }
 }
 
+#[derive(Debug, Deserialize, Serialize, Validate)]
+pub struct EditUser {
+  #[validate(length(min = 3), length(max = 24))]
+  username: Option<String>,
+  #[validate(length(min = 1), length(max = 96))]
+  name: Option<String>,
+  #[validate(length(min = 7), length(max = 96))]
+  password: Option<String>,
+  #[validate(email)]
+  email: Option<String>,
+  #[validate(length(min = 1), length(max = 24))]
+  mobilepay: Option<String>,
+  #[validate(length(min = 1), length(max = 96))]
+  paypal_me: Option<String>,
+}
+
+#[handler]
+pub fn edit(req: &Request, Json(user): Json<EditUser>) -> String {
+  match user.validate() {
+    Ok(_) => (),
+    Err(_) => return "{\"error\": \"invalid_data\"}".to_string(),
+  }
+
+  let session = api::auth::from_request(req);
+
+  if let Some(session) = session {
+    let mut conn = establish_connection();
+
+    let mut results = Vec::new();
+
+    if let Some(username) = user.username {
+      let changed_username = diesel::update(schema::users::table)
+        .filter(schema::users::id.eq(&session.id))
+        .set(schema::users::username.eq(username))
+        .execute(&mut conn);
+      if changed_username.is_ok() {
+        results.push("username");
+      }
+    }
+
+    if let Some(name) = user.name {
+      let changed_name = diesel::update(schema::users::table)
+        .filter(schema::users::id.eq(&session.id))
+        .set(schema::users::name.eq(name))
+        .execute(&mut conn);
+      if changed_name.is_ok() {
+        results.push("name");
+      }
+    }
+
+    if let Some(password) = user.password {
+      let password_hash = hash(password, 10).unwrap_or("".to_string());
+      if password_hash.is_empty() {
+        return "{\"error\": \"internal_server_error\"}".to_string();
+      }
+      let changed_password = diesel::update(schema::users::table)
+        .filter(schema::users::id.eq(&session.id))
+        .set(schema::users::password.eq(password_hash))
+        .execute(&mut conn);
+      if changed_password.is_ok() {
+        results.push("password");
+      }
+    }
+
+    if let Some(email) = user.email {
+      let changed_email = diesel::update(schema::users::table)
+        .filter(schema::users::id.eq(&session.id))
+        .set(schema::users::email.eq(email))
+        .execute(&mut conn);
+      if changed_email.is_ok() {
+        results.push("email");
+      }
+    }
+
+    if let Some(mobilepay) = user.mobilepay {
+      let changed_mobilepay = diesel::update(schema::users::table)
+        .filter(schema::users::id.eq(&session.id))
+        .set(schema::users::mobilepay.eq(mobilepay))
+        .execute(&mut conn);
+      if changed_mobilepay.is_ok() {
+        results.push("mobilepay");
+      }
+    }
+
+    if let Some(paypal_me) = user.paypal_me {
+      let changed_paypal_me = diesel::update(schema::users::table)
+        .filter(schema::users::id.eq(&session.id))
+        .set(schema::users::paypal_me.eq(paypal_me))
+        .execute(&mut conn);
+      if changed_paypal_me.is_ok() {
+        results.push("paypal_me");
+      }
+    }
+
+    if results.is_empty() {
+      "{\"error\": \"internal_server_error\"}".to_string()
+    } else {
+      serde_json::to_string_pretty(&results)
+        .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
+    }
+  } else {
+    "{\"error\": \"invalid_session\"}".to_string()
+  }
+}
+
 #[handler]
 pub fn delete(req: &Request, Json(user): Json<AuthUser>) -> String {
   match user.validate() {
@@ -120,6 +237,14 @@ pub fn delete(req: &Request, Json(user): Json<AuthUser>) -> String {
   } else {
     "{\"error\": \"invalid_session\"}".to_string()
   }
+}
+
+#[derive(Debug, Deserialize, Serialize, Validate)]
+pub struct AuthUser {
+  #[validate(length(min = 3), length(max = 24))]
+  username: String,
+  #[validate(length(min = 7), length(max = 96))]
+  password: String,
 }
 
 #[handler]
@@ -202,24 +327,4 @@ impl PrivateUserData {
       created_at: result.6,
     }
   }
-}
-
-#[derive(Debug, Deserialize, Serialize, Validate)]
-pub struct NewUser {
-  #[validate(length(min = 3), length(max = 24))]
-  username: String,
-  #[validate(length(min = 1), length(max = 96))]
-  name: String,
-  #[validate(length(min = 7), length(max = 96))]
-  password: String,
-  #[validate(email)]
-  email: String,
-}
-
-#[derive(Debug, Deserialize, Serialize, Validate)]
-pub struct AuthUser {
-  #[validate(length(min = 3), length(max = 24))]
-  username: String,
-  #[validate(length(min = 7), length(max = 96))]
-  password: String,
 }

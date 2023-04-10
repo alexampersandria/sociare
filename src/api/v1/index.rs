@@ -7,6 +7,7 @@ pub fn endpoint() -> poem::Route {
     .at("/users/:username", get(v1::user::get))
     .at("/user/create", post(v1::user::create))
     .at("/user/delete", delete(v1::user::delete))
+    .at("/user/edit", patch(v1::user::edit))
     .at("/user/login", post(v1::user::login))
     .at("/me", get(v1::user::me))
     .at("/sessions/:session", get(v1::auth::check))
