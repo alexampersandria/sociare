@@ -11,6 +11,12 @@ use serde::Deserialize;
 use serde::Serialize;
 use validator::Validate;
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct MessageDetails {
+  pub message: util::Message,
+  pub group_events: Option<Vec<util::GroupEvent>>,
+}
+
 #[handler]
 pub fn get(req: &Request, Path(message): Path<String>) -> String {
   let mut conn = establish_connection();
@@ -30,7 +36,22 @@ pub fn get(req: &Request, Path(message): Path<String>) -> String {
       .first::<util::Message>(&mut conn);
 
     if let Ok(result) = result {
-      serde_json::to_string_pretty(&result)
+      let mut message_details = MessageDetails {
+        message: result,
+        group_events: None,
+      };
+
+      let message_group_events = schema::group_events::table
+        .filter(schema::group_events::group_id.eq(&message_details.message.group_id))
+        .filter(schema::group_events::message_id.eq(&message_details.message.id))
+        .select(util::GroupEvent::as_select())
+        .get_results::<util::GroupEvent>(&mut conn);
+
+      if let Ok(message_group_events) = message_group_events {
+        message_details.group_events = Some(message_group_events);
+      }
+
+      serde_json::to_string_pretty(&message_details)
         .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
     } else {
       "{\"error\": \"message_not_found\"}".to_string()
@@ -71,11 +92,11 @@ pub fn create(req: &Request, Json(message): Json<NewMessage>) -> String {
 
       let created_message = util::diesel::message::create_message(&mut conn, &new_message);
 
-      if let Ok(created_message) = created_message {
+      if created_message.is_ok() {
         let logged_message =
           api::v1::event::log_message(&session.id, &message.group_id, &new_message.id);
         if logged_message.is_ok() {
-          serde_json::to_string_pretty(&created_message)
+          serde_json::to_string_pretty(&new_message)
             .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
         } else {
           "{\"error\": \"internal_server_error\"}".to_string()
@@ -127,7 +148,7 @@ pub fn edit(
         let updated_message = util::diesel::message::set_content(&mut conn, &message, &content);
 
         if updated_message.is_ok() {
-          results.push("updated_message set_content");
+          results.push("update_message set_content");
         }
       }
 
@@ -136,9 +157,9 @@ pub fn edit(
 
         if updated_message.is_ok() {
           if deleted {
-            results.push("updated_message set_deleted:true");
+            results.push("update_message set_deleted:true");
           } else {
-            results.push("updated_message set_deleted:false");
+            results.push("update_message set_deleted:false");
           }
         }
       }
@@ -147,8 +168,14 @@ pub fn edit(
         "{\"error\": \"no_changes\"}".to_string()
       } else {
         for result in results.iter() {
-          let logged_message =
-            api::v1::event::log_simple(&session.id, &found_message.group_id, result);
+          let logged_message = api::v1::event::log_event(
+            &session.id,
+            &found_message.group_id,
+            result,
+            Some(found_message.id.clone()),
+            None,
+            None,
+          );
           if logged_message.is_err() {
             return "{\"error\": \"internal_server_error\"}".to_string();
           }

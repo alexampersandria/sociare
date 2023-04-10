@@ -36,7 +36,7 @@ pub fn log_message(
   log_event(
     user_id,
     group_id,
-    "message",
+    "create_message",
     Some(message_id.to_string()),
     None,
     None,
@@ -51,7 +51,7 @@ pub fn log_receipt(
   log_event(
     user_id,
     group_id,
-    "receipt",
+    "create_receipt",
     None,
     Some(receipt_id.to_string()),
     None,
@@ -66,7 +66,7 @@ pub fn log_transaction(
   log_event(
     user_id,
     group_id,
-    "transaction",
+    "create_transaction",
     None,
     None,
     Some(transaction_id.to_string()),
