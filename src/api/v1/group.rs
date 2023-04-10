@@ -14,7 +14,7 @@ pub fn get_all(req: &Request) -> String {
 
   let limit = req
     .params::<GetGroupParamsLimit>()
-    .unwrap_or(GetGroupParamsLimit { limit: 100 });
+    .unwrap_or(GetGroupParamsLimit { limit: 4 });
   let offset = req
     .params::<GetGroupParamsOffset>()
     .unwrap_or(GetGroupParamsOffset { offset: 0 });
@@ -32,7 +32,7 @@ pub fn get(req: &Request, Path(group): Path<String>) -> String {
 
   let limit = req
     .params::<GetGroupParamsLimit>()
-    .unwrap_or(GetGroupParamsLimit { limit: 10 });
+    .unwrap_or(GetGroupParamsLimit { limit: 32 });
   let offset = req
     .params::<GetGroupParamsOffset>()
     .unwrap_or(GetGroupParamsOffset { offset: 0 });
@@ -139,7 +139,7 @@ pub fn get_group_listing(
       .get_results::<util::Debt>(&mut conn);
 
     if let (Ok(users), Ok(debts)) = (users, debts) {
-      let mut group_listings: Vec<GroupListing> = Vec::new();
+      let mut group_listings: Vec<GroupListingDetails> = Vec::new();
 
       for group in groups {
         let group_events = schema::group_events::table
@@ -149,9 +149,49 @@ pub fn get_group_listing(
           .offset(offset)
           .get_results::<util::GroupEvent>(&mut conn);
 
-        let mut group_listing = GroupListing {
+        let mut group_events_detailed = Vec::new();
+
+        if let Ok(group_events) = group_events {
+          group_events_detailed = group_events
+            .iter()
+            .map(|event| {
+              let mut message = None;
+              if let Some(message_id) = &event.message_id {
+                message = schema::messages::table
+                  .filter(schema::messages::id.eq(message_id))
+                  .get_result::<util::Message>(&mut conn)
+                  .ok();
+              }
+
+              let mut receipt = None;
+              if let Some(receipt_id) = &event.receipt_id {
+                receipt = schema::receipts::table
+                  .filter(schema::receipts::id.eq(receipt_id))
+                  .get_result::<util::Receipt>(&mut conn)
+                  .ok();
+              }
+
+              let mut transaction = None;
+              if let Some(transaction_id) = &event.transaction_id {
+                transaction = schema::transactions::table
+                  .filter(schema::transactions::id.eq(transaction_id))
+                  .get_result::<util::Transaction>(&mut conn)
+                  .ok();
+              }
+
+              GroupEventDetails {
+                event: event.clone(),
+                message,
+                receipt,
+                transaction,
+              }
+            })
+            .collect::<Vec<GroupEventDetails>>();
+        }
+
+        let mut group_listing = GroupListingDetails {
           group,
-          events: group_events.unwrap_or(Vec::new()),
+          events: group_events_detailed,
           users: Vec::new(),
           debts: Vec::new(),
         };

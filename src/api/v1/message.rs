@@ -120,7 +120,7 @@ pub fn edit(
       .select(util::Message::as_select())
       .first::<util::Message>(&mut conn);
 
-    if found_message.is_ok() {
+    if let Ok(found_message) = found_message {
       let mut results = Vec::new();
 
       if let Some(content) = edit_message.content {
@@ -146,6 +146,13 @@ pub fn edit(
       if results.is_empty() {
         "{\"error\": \"no_changes\"}".to_string()
       } else {
+        for result in results.iter() {
+          let logged_message =
+            api::v1::event::log_simple(&session.id, &found_message.group_id, result);
+          if logged_message.is_err() {
+            return "{\"error\": \"internal_server_error\"}".to_string();
+          }
+        }
         serde_json::to_string_pretty(&results)
           .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
       }
