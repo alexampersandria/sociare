@@ -1,9 +1,19 @@
 use crate::{schema, util};
 use diesel::{Associations, Identifiable, Insertable, Queryable, Selectable};
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(
-  Associations, Clone, Debug, Identifiable, Insertable, PartialEq, Queryable, Selectable,
+  Associations,
+  Clone,
+  Debug,
+  Deserialize,
+  Identifiable,
+  Insertable,
+  PartialEq,
+  Queryable,
+  Selectable,
+  Serialize,
 )]
 #[diesel(belongs_to(util::User))]
 #[diesel(table_name = schema::user_sessions)]
@@ -35,7 +45,7 @@ mod ci_unit {
 
   #[test]
   fn new() {
-    let user = util::User::new("test", "hunter2", "Test User", "e@x.com", "1234");
+    let user = util::User::new_with_mobilepay("test", "hunter2", "Test User", "e@x.com", "1234");
     let session = util::UserSession::new(&user.id, "ip", "ua");
     assert_eq!(session.user_id, user.id);
     assert_eq!(session.ip_address, "ip");

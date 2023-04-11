@@ -7,10 +7,11 @@ use sociare::util;
 fn benchmark() {
   let start = util::unix_ms();
   println!("starting benchmark... @ {}", start);
-  let mut group = util::FullGroup::new("Test Group", vec![], "🎉", "USD");
+  let mut group = util::FullGroup::new("Test Group", "🎉", "USD");
 
   for i in 0..100 {
-    let user = util::User::new(&format!("user_{}", i), "hunter", "test", "test", "test");
+    let user =
+      util::User::new_with_mobilepay(&format!("user_{}", i), "hunter", "test", "test", "test");
     group.add_user(user);
   }
 

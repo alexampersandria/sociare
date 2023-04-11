@@ -12,10 +12,25 @@ diesel::table! {
 }
 
 diesel::table! {
+    group_events (id) {
+        id -> Varchar,
+        user_id -> Varchar,
+        group_id -> Varchar,
+        event -> Text,
+        message_id -> Nullable<Varchar>,
+        receipt_id -> Nullable<Varchar>,
+        transaction_id -> Nullable<Varchar>,
+        created_at -> Int8,
+    }
+}
+
+diesel::table! {
     groups (id) {
         id -> Varchar,
         name -> Varchar,
         emoji -> Varchar,
+        theme -> Varchar,
+        total -> Int8,
         currency -> Varchar,
         created_at -> Int8,
     }
@@ -75,9 +90,11 @@ diesel::table! {
         username -> Varchar,
         name -> Varchar,
         email -> Varchar,
-        phone -> Varchar,
         password -> Varchar,
         created_at -> Int8,
+        mobilepay -> Nullable<Varchar>,
+        paypal_me -> Nullable<Varchar>,
+        deleted -> Bool,
     }
 }
 
@@ -86,7 +103,7 @@ diesel::table! {
         id -> Varchar,
         user_id -> Varchar,
         group_id -> Varchar,
-        nickname -> Varchar,
+        nickname -> Nullable<Varchar>,
         is_admin -> Bool,
         active -> Bool,
         created_at -> Int8,
@@ -94,6 +111,11 @@ diesel::table! {
 }
 
 diesel::joinable!(debts -> groups (group_id));
+diesel::joinable!(group_events -> groups (group_id));
+diesel::joinable!(group_events -> messages (message_id));
+diesel::joinable!(group_events -> receipts (receipt_id));
+diesel::joinable!(group_events -> transactions (transaction_id));
+diesel::joinable!(group_events -> users (user_id));
 diesel::joinable!(messages -> groups (group_id));
 diesel::joinable!(messages -> users (user_id));
 diesel::joinable!(receipts -> groups (group_id));
@@ -105,6 +127,7 @@ diesel::joinable!(users_groups -> users (user_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
   debts,
+  group_events,
   groups,
   messages,
   receipts,

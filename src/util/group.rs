@@ -1,24 +1,44 @@
 use crate::{schema, util};
 use diesel::{Identifiable, Insertable, Queryable, Selectable};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use uuid::Uuid;
 
-#[derive(Clone, Debug, Identifiable, Insertable, PartialEq, Queryable, Selectable)]
+use super::emoji;
+
+#[derive(
+  Clone, Debug, Deserialize, Identifiable, Insertable, PartialEq, Queryable, Selectable, Serialize,
+)]
 #[diesel(table_name = schema::groups)]
 pub struct Group {
   pub id: String,
   pub name: String,
   pub emoji: String,
+  pub theme: String,
+  pub total: i64,
   pub currency: String,
   pub created_at: i64,
 }
 
 impl Group {
-  pub fn new(name: &str, emoji: &str, currency: &str) -> Self {
+  pub fn new(name: &str, currency: &str) -> Self {
+    Group {
+      id: Uuid::new_v4().to_string(),
+      name: name.to_string(),
+      emoji: emoji::random(),
+      theme: "default".to_string(),
+      total: 0,
+      currency: currency.to_string(),
+      created_at: util::unix_ms(),
+    }
+  }
+  pub fn new_with_emoji(name: &str, emoji: &str, currency: &str) -> Self {
     Group {
       id: Uuid::new_v4().to_string(),
       name: name.to_string(),
       emoji: emoji.to_string(),
+      theme: "default".to_string(),
+      total: 0,
       currency: currency.to_string(),
       created_at: util::unix_ms(),
     }
@@ -30,11 +50,11 @@ impl Group {
 /// - receipts
 /// - transactions
 /// - messages
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct FullGroup {
   pub group: Group,
   /// junction table between users and groups
-  pub users: Vec<util::User>,
+  pub users: Vec<util::UserGroup>,
   pub receipts: Vec<util::Receipt>,
   pub transactions: Vec<util::Transaction>,
   pub messages: Vec<util::Message>,
@@ -43,11 +63,11 @@ pub struct FullGroup {
 
 #[allow(dead_code)]
 impl FullGroup {
-  pub fn new(name: &str, users: Vec<util::User>, emoji: &str, currency: &str) -> FullGroup {
-    let group = Group::new(name, emoji, currency);
+  pub fn new(name: &str, emoji: &str, currency: &str) -> FullGroup {
+    let group = Group::new_with_emoji(name, emoji, currency);
     FullGroup {
       group,
-      users,
+      users: vec![],
       receipts: vec![],
       transactions: vec![],
       messages: vec![],
@@ -72,11 +92,13 @@ impl FullGroup {
   }
 
   pub fn add_user(&mut self, user: util::User) {
-    self.users.push(user);
+    self
+      .users
+      .push(util::UserGroup::new(&user.id, &self.group.id));
   }
 
-  pub fn find_user(&mut self, uuid: String) -> Option<&mut util::User> {
-    self.users.iter_mut().find(|u| u.id == uuid)
+  pub fn find_user(&mut self, uuid: String) -> Option<&mut util::UserGroup> {
+    self.users.iter_mut().find(|u| u.user_id == uuid)
   }
 
   pub fn find_active_users(&self) -> Vec<String> {
@@ -100,67 +122,82 @@ impl FullGroup {
   }
 
   pub fn balance(&mut self) -> HashMap<String, i64> {
-    let mut balance: HashMap<String, i64> = HashMap::new();
-    for user in self.users.iter() {
-      balance.insert(user.id.clone(), 0);
-    }
-    for receipt in self.receipts.iter() {
-      if !receipt.deleted {
-        balance.insert(
-          receipt.user_id.clone(),
-          balance.get(&receipt.user_id).unwrap_or(&0) + receipt.amount,
-        );
-      }
-    }
-    for transaction in self.transactions.iter() {
-      if !transaction.deleted && transaction.confirmed {
-        balance.insert(
-          transaction.from_id.clone(),
-          balance.get(&transaction.from_id).unwrap_or(&0) + transaction.amount,
-        );
-        balance.insert(
-          transaction.to_id.clone(),
-          balance.get(&transaction.to_id).unwrap_or(&0) - transaction.amount,
-        );
-      }
-    }
-    balance
+    balance(&self.users, &self.receipts, &self.transactions)
+  }
+
+  pub fn total_with_transactions(&mut self) -> i64 {
+    self.balance().values().sum()
   }
 
   pub fn total(&mut self) -> i64 {
-    let mut total: i64 = 0;
-    for balance in self.balance().values() {
-      total += balance;
-    }
-    total
+    total(&self.receipts)
   }
 
   pub fn debts(&mut self) -> Vec<util::Debt> {
-    let balance = self.balance();
-    let mut payments = Vec::with_capacity(balance.len() * balance.len());
-
-    for debtor in &balance {
-      for creditor in &balance {
-        if debtor.0 != creditor.0 {
-          let transaction_amount = (*creditor.1 - *debtor.1) / (balance.len() as i64);
-          if transaction_amount > 0 {
-            payments.push(util::Debt::new(
-              &self.group.id,
-              debtor.0,
-              creditor.0,
-              transaction_amount,
-            ));
-          }
-        }
-      }
-    }
-
-    payments
+    debts(&self.group.id.clone(), &self.balance())
   }
 
   pub fn update_debts(&mut self) {
     self.debts = self.debts();
   }
+}
+
+pub fn total(receipts: &[util::Receipt]) -> i64 {
+  receipts.iter().fold(0, |acc, receipt| acc + receipt.amount)
+}
+
+pub fn balance(
+  users: &[util::UserGroup],
+  receipts: &[util::Receipt],
+  transactions: &[util::Transaction],
+) -> HashMap<String, i64> {
+  let mut balance: HashMap<String, i64> = HashMap::new();
+  for user in users.iter() {
+    balance.insert(user.user_id.clone(), 0);
+  }
+  for receipt in receipts.iter() {
+    if !receipt.deleted {
+      balance.insert(
+        receipt.user_id.clone(),
+        balance.get(&receipt.user_id).unwrap_or(&0) + receipt.amount,
+      );
+    }
+  }
+  for transaction in transactions.iter() {
+    if !transaction.deleted && transaction.confirmed {
+      balance.insert(
+        transaction.from_id.clone(),
+        balance.get(&transaction.from_id).unwrap_or(&0) + transaction.amount,
+      );
+      balance.insert(
+        transaction.to_id.clone(),
+        balance.get(&transaction.to_id).unwrap_or(&0) - transaction.amount,
+      );
+    }
+  }
+  balance
+}
+
+pub fn debts(group_id: &str, balance: &HashMap<String, i64>) -> Vec<util::Debt> {
+  let mut payments = Vec::with_capacity(balance.len() * balance.len());
+
+  for debtor in balance {
+    for creditor in balance {
+      if debtor.0 != creditor.0 {
+        let transaction_amount = (*creditor.1 - *debtor.1) / (balance.len() as i64);
+        if transaction_amount > 0 {
+          payments.push(util::Debt::new(
+            group_id,
+            debtor.0,
+            creditor.0,
+            transaction_amount,
+          ));
+        }
+      }
+    }
+  }
+
+  payments
 }
 
 #[cfg(test)]
@@ -169,7 +206,7 @@ mod ci_unit {
 
   #[test]
   fn new() {
-    let group = Group::new("Test Group", "🎉", "USD");
+    let group = Group::new_with_emoji("Test Group", "🎉", "USD");
     assert_eq!(group.name, "Test Group");
     assert_eq!(group.emoji, "🎉");
     assert_eq!(group.currency, "USD");
@@ -177,7 +214,7 @@ mod ci_unit {
 
   #[test]
   fn add_receipt() {
-    let mut group = FullGroup::new("Test Group", vec![], "🎉", "USD");
+    let mut group = FullGroup::new("Test Group", "🎉", "USD");
     let receipt = util::Receipt::new(&group.group.id, "Test User", 100, "");
     group.add_receipt(receipt);
     assert_eq!(group.receipts.len(), 1);
@@ -186,7 +223,7 @@ mod ci_unit {
 
   #[test]
   fn find_receipt() {
-    let mut group = FullGroup::new("Test Group", vec![], "🎉", "USD");
+    let mut group = FullGroup::new("Test Group", "🎉", "USD");
     let receipt = util::Receipt::new(&group.group.id, "User 1", 100, "");
     group.add_receipt(receipt.clone());
 
@@ -202,7 +239,7 @@ mod ci_unit {
 
   #[test]
   fn add_transaction() {
-    let mut group = FullGroup::new("Test Group", vec![], "🎉", "USD");
+    let mut group = FullGroup::new("Test Group", "🎉", "USD");
     let transaction =
       util::Transaction::new(&group.group.id, "User 1", "User 2", 100, "Test Transaction");
     group.add_transaction(transaction);
@@ -212,7 +249,7 @@ mod ci_unit {
 
   #[test]
   fn find_transaction() {
-    let mut group = FullGroup::new("Test Group", vec![], "🎉", "USD");
+    let mut group = FullGroup::new("Test Group", "🎉", "USD");
     let transaction =
       util::Transaction::new(&group.group.id, "User 1", "User 2", 100, "Test Transaction");
     group.add_transaction(transaction.clone());
@@ -229,23 +266,23 @@ mod ci_unit {
 
   #[test]
   fn add_user() {
-    let mut group = FullGroup::new("Test Group", vec![], "🎉", "USD");
-    let user = util::User::new("Test User", "1", "2", "3", "4");
-    group.add_user(user);
+    let mut group = FullGroup::new("Test Group", "🎉", "USD");
+    let user = util::User::new_with_mobilepay("Test User", "1", "2", "3", "4");
+    group.add_user(user.clone());
     assert_eq!(group.users.len(), 1);
-    assert_eq!(group.users[0].username, "Test User");
+    assert_eq!(group.users[0].user_id, user.id);
   }
 
   #[test]
   fn find_user() {
-    let mut group = FullGroup::new("Test Group", vec![], "🎉", "USD");
-    let user = util::User::new("Test User", "1", "2", "3", "4");
+    let mut group = FullGroup::new("Test Group", "🎉", "USD");
+    let user = util::User::new_with_mobilepay("Test User", "1", "2", "3", "4");
     group.add_user(user.clone());
 
     // Find existing user
-    let found_user = group.find_user(user.id);
+    let found_user = group.find_user(user.clone().id);
     assert!(found_user.is_some());
-    assert_eq!(found_user.unwrap().username, "Test User");
+    assert_eq!(found_user.unwrap().user_id, user.id);
 
     // Find non-existing user
     let non_existent_user = group.find_user("nonexistentid".to_string());
@@ -254,7 +291,7 @@ mod ci_unit {
 
   #[test]
   fn add_message() {
-    let mut group = FullGroup::new("Test Group", vec![], "🎉", "USD");
+    let mut group = FullGroup::new("Test Group", "🎉", "USD");
     let message = util::Message::new(&group.group.id, "Test User", "Test Message");
     group.add_message(message);
     assert_eq!(group.messages.len(), 1);
@@ -263,7 +300,7 @@ mod ci_unit {
 
   #[test]
   fn find_message() {
-    let mut group = FullGroup::new("Test Group", vec![], "🎉", "USD");
+    let mut group = FullGroup::new("Test Group", "🎉", "USD");
     let message = util::Message::new(&group.group.id, "Test User", "Test Message");
     group.add_message(message.clone());
 

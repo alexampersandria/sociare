@@ -1,9 +1,19 @@
 use crate::{schema, util};
 use diesel::{Associations, Identifiable, Insertable, Queryable, Selectable};
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(
-  Associations, Clone, Debug, Identifiable, Insertable, PartialEq, Queryable, Selectable,
+  Associations,
+  Clone,
+  Debug,
+  Deserialize,
+  Identifiable,
+  Insertable,
+  PartialEq,
+  Queryable,
+  Selectable,
+  Serialize,
 )]
 #[diesel(table_name = schema::users_groups)]
 #[diesel(belongs_to(util::User))]
@@ -13,7 +23,7 @@ pub struct UserGroup {
   pub id: String,
   pub user_id: String,
   pub group_id: String,
-  pub nickname: String,
+  pub nickname: Option<String>,
   pub is_admin: bool,
   pub active: bool,
   pub created_at: i64,
@@ -25,8 +35,19 @@ impl UserGroup {
       id: Uuid::new_v4().to_string(),
       user_id: user_id.to_string(),
       group_id: group_id.to_string(),
-      nickname: "".to_string(),
+      nickname: None,
       is_admin: false,
+      active: true,
+      created_at: util::unix_ms(),
+    }
+  }
+  pub fn new_admin(user_id: &str, group_id: &str) -> UserGroup {
+    UserGroup {
+      id: Uuid::new_v4().to_string(),
+      user_id: user_id.to_string(),
+      group_id: group_id.to_string(),
+      nickname: None,
+      is_admin: true,
       active: true,
       created_at: util::unix_ms(),
     }

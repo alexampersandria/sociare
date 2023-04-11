@@ -1,6 +1,6 @@
 use rusty_money::{iso, Money};
 use sociare::util::{
-  group::FullGroup, random_emoji, receipt::Receipt, transaction::Transaction, user::User,
+  emoji, group::FullGroup, receipt::Receipt, transaction::Transaction, user::User,
 };
 
 #[cfg(test)]
@@ -9,9 +9,11 @@ mod ci_integration {
 
   #[allow(dead_code)]
   fn full_group() -> FullGroup {
-    let mut user_1 = User::new("user_1", "hunter2", "Foo", "user_1@example.com", "1234");
-    let mut user_2 = User::new("user_2", "hunter2", "Bar", "user_2@example.com", "5678");
-    let mut user_3 = User::new(
+    let mut user_1 =
+      User::new_with_mobilepay("user_1", "hunter2", "Foo", "user_1@example.com", "1234");
+    let mut user_2 =
+      User::new_with_mobilepay("user_2", "hunter2", "Bar", "user_2@example.com", "5678");
+    let mut user_3 = User::new_with_mobilepay(
       "user_3",
       "hunter2",
       "Keith",
@@ -48,12 +50,11 @@ mod ci_integration {
       Receipt::new("test_group", &user_2.id, 11880, "shop_2"),
     ];
 
-    let mut group = FullGroup::new(
-      "LTT FEB 2023",
-      vec![user_1, user_2, user_3],
-      &random_emoji(),
-      "DKK",
-    );
+    let mut group = FullGroup::new("LTT FEB 2023", &emoji::random(), "DKK");
+
+    group.add_user(user_1);
+    group.add_user(user_2);
+    group.add_user(user_3);
 
     for receipt in data {
       group.add_receipt(receipt);
@@ -87,9 +88,9 @@ mod ci_integration {
   #[test]
   fn total_remains_the_same() {
     let mut group = full_group();
-    let before_total = group.total();
+    let before_total = group.total_with_transactions();
     settle_debts(&mut group);
-    let after_total = group.total();
+    let after_total = group.total_with_transactions();
     assert_eq!(before_total, after_total);
   }
 
@@ -111,7 +112,7 @@ mod ci_integration {
       .iter()
       .find(|u| u.id == group.users.get(0).unwrap().id)
       .unwrap();
-    let user_1_total = balance.get(&user_1.id).unwrap();
+    let user_1_total = balance.get(&user_1.user_id).unwrap();
     let currency = iso::find(&group.group.currency).unwrap();
     assert_eq!(format_value(*user_1_total, currency), "1.285,60kr.");
   }
@@ -125,7 +126,7 @@ mod ci_integration {
       .iter()
       .find(|u| u.id == group.users.get(1).unwrap().id)
       .unwrap();
-    let user_2_total = balance.get(&user_2.id).unwrap();
+    let user_2_total = balance.get(&user_2.user_id).unwrap();
     let currency = iso::find(&group.group.currency).unwrap();
     assert_eq!(format_value(*user_2_total, currency), "1.257,80kr.");
   }
@@ -139,7 +140,7 @@ mod ci_integration {
       .iter()
       .find(|u| u.id == group.users.get(2).unwrap().id)
       .unwrap();
-    let user_3_total = balance.get(&user_3.id).unwrap();
+    let user_3_total = balance.get(&user_3.user_id).unwrap();
     let currency = iso::find(&group.group.currency).unwrap();
     assert_eq!(format_value(*user_3_total, currency), "1.431,75kr.");
   }
