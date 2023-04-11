@@ -1,6 +1,8 @@
 use crate::api::v1;
 use poem::{delete, get, handler, patch, post, Route};
 
+// allow longer lines for the sake of readability
+#[rustfmt::skip]
 pub fn endpoint() -> poem::Route {
   Route::new()
     .at("/", package_version)
@@ -25,6 +27,10 @@ pub fn endpoint() -> poem::Route {
     .at("/receipts/:receipt", get(v1::receipt::get))
     .at("/receipts/:receipt/edit", patch(v1::receipt::edit))
     .at("/receipt/create", post(v1::receipt::create))
+    .at("/transactions/:transaction", get(v1::transaction::get))
+    .at("/transaction/create", post(v1::transaction::create))
+    .at("/transactions/:transaction/edit", patch(v1::transaction::edit))
+    .at("/transactions/:transaction/confirm", patch(v1::transaction::confirm))
 }
 
 #[handler]

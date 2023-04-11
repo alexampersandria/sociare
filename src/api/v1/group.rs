@@ -149,8 +149,6 @@ pub fn get_group_listing(
           .offset(offset)
           .get_results::<util::GroupEvent>(&mut conn);
 
-        println!("group_events: {:?}", group_events);
-
         let mut group_events_detailed = Vec::new();
 
         if let Ok(group_events) = group_events {

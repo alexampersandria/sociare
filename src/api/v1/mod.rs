@@ -14,3 +14,5 @@ pub mod message;
 pub use message::*;
 pub mod receipt;
 pub use receipt::*;
+pub mod transaction;
+pub use transaction::*;
