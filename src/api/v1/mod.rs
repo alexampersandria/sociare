@@ -2,6 +2,8 @@ pub mod index;
 pub use index::*;
 pub mod auth;
 pub use auth::*;
+pub mod econ;
+pub use econ::*;
 pub mod event;
 pub use event::*;
 pub mod group;

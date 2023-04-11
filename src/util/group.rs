@@ -129,9 +129,8 @@ impl FullGroup {
     self.balance().values().sum()
   }
 
-  pub fn total_without_transactions(&mut self) -> i64 {
-    // #TODO: implement this
-    0
+  pub fn total(&mut self) -> i64 {
+    total(&self.receipts)
   }
 
   pub fn debts(&mut self) -> Vec<util::Debt> {
@@ -141,6 +140,10 @@ impl FullGroup {
   pub fn update_debts(&mut self) {
     self.debts = self.debts();
   }
+}
+
+pub fn total(receipts: &[util::Receipt]) -> i64 {
+  receipts.iter().fold(0, |acc, receipt| acc + receipt.amount)
 }
 
 pub fn balance(
