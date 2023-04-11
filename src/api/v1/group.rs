@@ -490,6 +490,86 @@ pub fn add(
   }
 }
 
+#[derive(Debug, Deserialize, Serialize, Validate)]
+pub struct EditUser {
+  #[validate(length(min = 1), length(max = 96))]
+  pub nickname: Option<String>,
+  pub is_admin: Option<bool>,
+}
+
+#[handler]
+pub fn edit_user(
+  req: &Request,
+  Json(edit_user): Json<EditUser>,
+  Path((group_id, user_id)): Path<(String, String)>,
+) -> String {
+  let session = api::auth::from_request(req);
+
+  if let Some(session) = session {
+    let mut conn = crate::establish_connection();
+
+    let user_groups = schema::users_groups::table
+      .filter(schema::users_groups::active.eq(true))
+      .filter(schema::users_groups::user_id.eq(&session.id))
+      .filter(schema::users_groups::group_id.eq(&group_id))
+      .select(util::UserGroup::as_select())
+      .get_result::<util::UserGroup>(&mut conn);
+
+    if let Ok(user_groups) = user_groups {
+      let mut results = Vec::new();
+
+      if let Some(nickname) = edit_user.nickname {
+        if session.id == user_groups.user_id || user_groups.is_admin {
+          let update_user = diesel::update(
+            schema::users_groups::table
+              .filter(schema::users_groups::user_id.eq(&user_id))
+              .filter(schema::users_groups::group_id.eq(&group_id)),
+          )
+          .set(schema::users_groups::nickname.eq(&nickname))
+          .get_result::<crate::util::UserGroup>(&mut conn);
+
+          if update_user.is_ok() {
+            results.push(format!("updated_user_group set_nickname:{}", &nickname));
+          }
+        }
+      }
+
+      if let Some(is_admin) = edit_user.is_admin {
+        if user_groups.is_admin {
+          let update_user = diesel::update(
+            schema::users_groups::table
+              .filter(schema::users_groups::user_id.eq(&user_id))
+              .filter(schema::users_groups::group_id.eq(&group_id)),
+          )
+          .set(schema::users_groups::is_admin.eq(&is_admin))
+          .get_result::<crate::util::UserGroup>(&mut conn);
+
+          if update_user.is_ok() {
+            results.push(format!("updated_user_group set_is_admin:{}", &is_admin));
+          }
+        }
+      }
+
+      if results.is_empty() {
+        "{\"error\": \"no_changes\"}".to_string()
+      } else {
+        for result in results.iter() {
+          let logged_message = api::v1::event::log_simple(&session.id, &group_id, result);
+          if logged_message.is_err() {
+            return "{\"error\": \"internal_server_error\"}".to_string();
+          }
+        }
+        serde_json::to_string_pretty(&results)
+          .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
+      }
+    } else {
+      "{\"error\": \"invalid_group\"}".to_string()
+    }
+  } else {
+    "{\"error\": \"invalid_session\"}".to_string()
+  }
+}
+
 #[handler]
 pub fn remove(
   req: &Request,
