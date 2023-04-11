@@ -12,3 +12,5 @@ pub mod user;
 pub use user::*;
 pub mod message;
 pub use message::*;
+pub mod receipt;
+pub use receipt::*;

@@ -18,8 +18,8 @@ diesel::table! {
         group_id -> Varchar,
         event -> Text,
         message_id -> Nullable<Varchar>,
-        transaction_id -> Nullable<Varchar>,
         receipt_id -> Nullable<Varchar>,
+        transaction_id -> Nullable<Varchar>,
         created_at -> Int8,
     }
 }

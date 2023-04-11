@@ -5,7 +5,7 @@ CREATE TABLE group_events (
     group_id VARCHAR(255) NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
     event TEXT NOT NULL,
     message_id VARCHAR(255) REFERENCES messages(id),
-    transaction_id VARCHAR(255) REFERENCES transactions(id),
     receipt_id VARCHAR(255) REFERENCES receipts(id),
+    transaction_id VARCHAR(255) REFERENCES transactions(id),
     created_at BIGINT NOT NULL
 );

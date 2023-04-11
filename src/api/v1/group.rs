@@ -149,6 +149,8 @@ pub fn get_group_listing(
           .offset(offset)
           .get_results::<util::GroupEvent>(&mut conn);
 
+        println!("group_events: {:?}", group_events);
+
         let mut group_events_detailed = Vec::new();
 
         if let Ok(group_events) = group_events {
@@ -318,7 +320,7 @@ pub fn edit(req: &Request, Json(group): Json<EditGroup>, Path(group_id): Path<St
             .execute(&mut conn);
 
           if changed_name.is_ok() {
-            results.push("name");
+            results.push(format!("set_name value:{}", &name));
           }
         }
 
@@ -329,7 +331,7 @@ pub fn edit(req: &Request, Json(group): Json<EditGroup>, Path(group_id): Path<St
             .execute(&mut conn);
 
           if changed_currency.is_ok() {
-            results.push("currency");
+            results.push(format!("set_currency value:{}", &currency));
           }
         }
 
@@ -340,7 +342,7 @@ pub fn edit(req: &Request, Json(group): Json<EditGroup>, Path(group_id): Path<St
             .execute(&mut conn);
 
           if changed_emoji.is_ok() {
-            results.push("emoji");
+            results.push(format!("set_emoji value:{}", &emoji));
           }
         }
 
@@ -351,13 +353,20 @@ pub fn edit(req: &Request, Json(group): Json<EditGroup>, Path(group_id): Path<St
             .execute(&mut conn);
 
           if changed_theme.is_ok() {
-            results.push("theme");
+            results.push(format!("set_theme value:{}", &theme));
           }
         }
 
         if results.is_empty() {
           "{\"error\": \"no_changes\"}".to_string()
         } else {
+          for result in &results {
+            let logged_event =
+              api::event::log_simple(&session.id, &group_id, &format!("edited_group {}", &result));
+            if logged_event.is_err() {
+              return "{\"error\": \"internal_server_error\"}".to_string();
+            }
+          }
           serde_json::to_string_pretty(&results)
             .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
         }

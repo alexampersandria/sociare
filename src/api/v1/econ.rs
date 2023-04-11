@@ -11,10 +11,12 @@ pub fn update_debts(conn: &mut PgConnection, group_id: &str) -> Option<(usize, u
     .load::<util::UserGroup>(conn);
   let receipts = schema::receipts::table
     .filter(schema::receipts::group_id.eq(group_id))
+    .filter(schema::receipts::deleted.eq(false))
     .load::<util::Receipt>(conn);
   let transactions = schema::transactions::table
     .filter(schema::transactions::group_id.eq(group_id))
     .filter(schema::transactions::confirmed.eq(true))
+    .filter(schema::transactions::deleted.eq(false))
     .load::<util::Transaction>(conn);
 
   if let (Ok(user_groups), Ok(receipts), Ok(transactions)) = (user_groups, receipts, transactions) {

@@ -22,6 +22,9 @@ pub fn endpoint() -> poem::Route {
     .at("/messages/:message", get(v1::message::get))
     .at("/message/create", post(v1::message::create))
     .at("/messages/:message/edit", patch(v1::message::edit))
+    .at("/receipts/:receipt", get(v1::receipt::get))
+    .at("/receipts/:receipt/edit", patch(v1::receipt::edit))
+    .at("/receipt/create", post(v1::receipt::create))
 }
 
 #[handler]
