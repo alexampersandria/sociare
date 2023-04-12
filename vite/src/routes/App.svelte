@@ -1,34 +1,11 @@
 <script>
+	import { link } from 'svelte-spa-router'
+
 	import Button from '../components/Button.svelte'
-	import { user_object, session_is_valid, session } from '../lib/stores'
+	import { user_object, session_is_valid } from '../lib/stores'
 	import { createForm } from 'felte'
 
-	import Cookies from 'js-cookie'
-
-	const log_out = () => {
-		Cookies.remove('payve-session')
-		session.set(null)
-	}
-
-	const log_in = (username, password) => {
-		fetch(`${import.meta.env.VITE_API_URL}/api/v1/user/login`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-				username,
-				password,
-			}),
-		})
-			.then((res) => res.json())
-			.then((res) => {
-				if (!res.error && res.id) {
-					Cookies.set('payve-session', res.id)
-					session.set(res.id)
-				}
-			})
-	}
+	import { log_in, log_out } from '../lib/auth'
 
 	const { form } = createForm({
 		onSubmit: async (value) => {
@@ -38,7 +15,7 @@
 </script>
 
 <div class="container">
-	<a href="/">⬅️ landing page</a>
+	<a href="/" use:link>⬅️ landing page</a>
 
 	{#if $session_is_valid}
 		<div class="user">

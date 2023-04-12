@@ -5,43 +5,11 @@
 
 	import payve_logo from '@/assets/payve_logo.svg'
 
-	import yen_banknote_3d from '@/assets/fluent_emoji/yen_banknote_3d.png'
-	import euro_banknote_3d from '@/assets/fluent_emoji/euro_banknote_3d.png'
-	import coin_3d from '@/assets/fluent_emoji/coin_3d.png'
-	import dollar_banknote_3d from '@/assets/fluent_emoji/dollar_banknote_3d.png'
-
 	import { session_is_valid } from '../lib/stores'
 </script>
 
 <main>
-	<div class="head" id="head">
-		<div class="floating-emojis">
-			<div class="left side">
-				<div class="emoji emoji-1">
-					<div class="yen">
-						<img src={yen_banknote_3d} alt="Yen Emoji" />
-					</div>
-				</div>
-				<div class="emoji emoji-2">
-					<div class="euro">
-						<img src={euro_banknote_3d} alt="Euro Emoji" />
-					</div>
-				</div>
-			</div>
-			<div class="right side">
-				<div class="emoji emoji-3">
-					<div class="coin">
-						<img src={coin_3d} alt="Coin Emoji" />
-					</div>
-				</div>
-				<div class="emoji emoji-4">
-					<div class="dollar">
-						<img src={dollar_banknote_3d} alt="Dollar Emoji" />
-					</div>
-				</div>
-			</div>
-		</div>
-
+	<section class="head" id="head">
 		<div class="nav">
 			<div class="container">
 				<div class="logo">
@@ -50,9 +18,9 @@
 				<div class="links">
 					<a href="/app" use:link class="alt none">
 						{#if $session_is_valid}
-							<span>Go To App</span>
+							Go To App
 						{:else}
-							<span>Log In</span>
+							Log In
 						{/if}
 					</a>
 				</div>
@@ -79,7 +47,39 @@
 				</div>
 			</div>
 		</div>
-	</div>
+
+		<div class="noise" />
+	</section>
+
+	<section>
+		<div class="container">
+			<div class="placeholder">
+				<div class="placeholder-image" />
+				<div class="placeholder-text">
+					<h2>Placeholder</h2>
+					<p>
+						Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem
+						quis natus, saepe officia optio rerum ipsam sunt, voluptatum tempore
+						doloremque exercitationem fuga doloribus culpa at vitae veniam
+						consectetur eveniet error?
+					</p>
+				</div>
+			</div>
+
+			<div class="placeholder">
+				<div class="placeholder-text align-right">
+					<h2>Something Else</h2>
+					<p>
+						Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem
+						quis natus, saepe officia optio rerum ipsam sunt, voluptatum tempore
+						doloremque exercitationem fuga doloribus culpa at vitae veniam
+						consectetur eveniet error?
+					</p>
+				</div>
+				<div class="placeholder-image" />
+			</div>
+		</div>
+	</section>
 </main>
 
 <style lang="scss">
@@ -87,6 +87,7 @@
 		min-height: 100vh;
 		min-width: 100vw;
 	}
+
 	.head {
 		position: relative;
 		padding-bottom: 1rem;
@@ -131,6 +132,7 @@
 	}
 	.nav .logo img {
 		width: 100px;
+		min-height: 40px;
 	}
 
 	.nav .container {
@@ -159,80 +161,42 @@
 		margin-bottom: 2rem;
 	}
 
-	.call-to-action .links > :global(*) {
+	.call-to-action .links > :global(.button) {
 		margin: 0 0.5em;
 	}
 
-	.floating-emojis {
-		max-width: 960px;
-		margin: 0 auto;
+	.placeholder-image {
+		position: relative;
+		height: 10rem;
+		background-color: #ccc;
+		box-shadow: 0.5rem 0.5rem 0 #000;
+		max-width: 20rem;
+		margin: 0 2rem;
+	}
+
+	.placeholder-image::after {
+		content: '';
+		display: block;
+		width: 5rem;
+		height: 5rem;
+		border-radius: 100%;
 		position: absolute;
-		inset: 0;
-		pointer-events: none;
+		inset: 50%;
+		translate: -50% -50%;
+		background: #aaa;
 	}
 
-	.floating-emojis .side {
-		position: absolute;
-		width: 100%;
-		height: 100%;
+	.placeholder {
+		display: flex;
+		padding: 3rem 0 0 0;
 	}
 
-	.floating-emojis .right.side .emoji {
-		right: 0;
+	.placeholder-image,
+	.placeholder-text {
+		flex: 1 100%;
 	}
 
-	.floating-emojis .emoji {
-		position: absolute;
-		top: 50%;
-		translate: 0 -50%;
-		animation: bob 6s cubic-bezier(0.5, 0.05, 0.5, 0.95) infinite;
-	}
-
-	@for $i from 1 through 4 {
-		.floating-emojis .emoji.emoji-#{$i} {
-			animation-delay: -#{$i * 1.5}s;
-		}
-	}
-
-	@keyframes bob {
-		0%,
-		100% {
-			transform: translate(0, 0);
-		}
-		50% {
-			transform: translate(0, -1rem);
-		}
-	}
-
-	.floating-emojis .emoji img {
-		width: min(12rem, 20vw);
-	}
-
-	.floating-emojis .yen {
-		transform: rotate(-12.5deg) translate(-6rem, -5rem);
-		filter: drop-shadow(-0.5rem -0.5rem 3rem #a7612c66);
-	}
-
-	.floating-emojis .yen img {
-		max-width: 11rem;
-	}
-
-	.floating-emojis .euro {
-		transform: rotate(25deg) translate(1rem, 1rem);
-		filter: drop-shadow(-0.5rem -0.5rem 3rem #17749d66);
-	}
-
-	.floating-emojis .coin {
-		transform: rotate(12.5deg) translate(-2rem, -2rem);
-		filter: drop-shadow(-1rem 0 3rem #be824366);
-	}
-
-	.floating-emojis .coin img {
-		max-width: 11rem;
-	}
-
-	.floating-emojis .dollar {
-		transform: rotate(-17.5deg) translate(6rem, 3rem);
-		filter: drop-shadow(-1rem 0 3rem #1e906166);
+	.placeholder-text h2 {
+		margin: 0;
 	}
 </style>
