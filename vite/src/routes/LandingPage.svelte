@@ -1,14 +1,16 @@
 <script lang="ts">
-	import { link } from "svelte-spa-router"
+	import { link } from 'svelte-spa-router'
 
-	import "@/assets/app.scss"
+	import '@/assets/app.scss'
 
-	import payve_logo from "@/assets/payve_logo.svg"
+	import payve_logo from '@/assets/payve_logo.svg'
 
-	import yen_banknote_3d from "@/assets/fluent_emoji/yen_banknote_3d.png"
-	import euro_banknote_3d from "@/assets/fluent_emoji/euro_banknote_3d.png"
-	import coin_3d from "@/assets/fluent_emoji/coin_3d.png"
-	import dollar_banknote_3d from "@/assets/fluent_emoji/dollar_banknote_3d.png"
+	import yen_banknote_3d from '@/assets/fluent_emoji/yen_banknote_3d.png'
+	import euro_banknote_3d from '@/assets/fluent_emoji/euro_banknote_3d.png'
+	import coin_3d from '@/assets/fluent_emoji/coin_3d.png'
+	import dollar_banknote_3d from '@/assets/fluent_emoji/dollar_banknote_3d.png'
+
+	import { session_is_valid } from '../lib/stores'
 </script>
 
 <main>
@@ -46,7 +48,13 @@
 					<img src={payve_logo} alt="payve_logo" />
 				</div>
 				<div class="links">
-					<a href="/app" use:link class="alt none">Log In</a>
+					<a href="/app" use:link class="alt none">
+						{#if $session_is_valid}
+							<span>Go To App</span>
+						{:else}
+							<span>Log In</span>
+						{/if}
+					</a>
 				</div>
 			</div>
 		</div>
@@ -62,7 +70,7 @@
 					manage their finances and settle debts between them.
 				</p>
 				<div class="links">
-					<a href="/docs" class="button primary">Getting Started</a>
+					<a href="/docs" use:link class="button primary">Getting Started</a>
 					<a
 						href="https://github.com/alexampersandria/sociare"
 						target="_blank"
@@ -87,7 +95,7 @@
 
 	.head::before {
 		inset: 0;
-		content: "";
+		content: '';
 		display: block;
 		position: absolute;
 		z-index: -2;
@@ -106,7 +114,7 @@
 
 	.head::after {
 		inset: 0;
-		content: "";
+		content: '';
 		display: block;
 		position: absolute;
 		z-index: -1;
@@ -138,12 +146,6 @@
 
 	.nav .links {
 		text-align: right;
-	}
-
-	.container {
-		max-width: 960px;
-		margin: 0 auto;
-		padding: 0 1rem;
 	}
 
 	.call-to-action {

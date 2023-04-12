@@ -112,10 +112,24 @@ a.none {
   color: var(--neutral-700);
 }
 
+.align-center {
+  text-align: center;
+}
+
+.align-right {
+  text-align: right;
+}
+
 @for $i from 1 through 6 {
   h#{$i} {
     font-weight: 400;
   }
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 1rem;
 }
 
 .button {

@@ -1,11 +1,11 @@
 <script lang="ts">
-	export let type: "primary" | "hollow" = "primary";
-	export let disabled: boolean = false;
-	export let rounded: boolean = false;
+	export let type: 'primary' | 'hollow' = 'primary'
+	export let disabled: boolean = false
+	export let rounded: boolean = false
 
 	export let buttonProps = {
 		class: [$$restProps.class],
-	};
+	}
 </script>
 
 <button

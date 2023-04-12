@@ -8,5 +8,6 @@
 		"migrations": "database"
 	},
 	"prettier.semi": false,
+	"prettier.singleQuote": true,
 	"editor.formatOnSave": true
 }
