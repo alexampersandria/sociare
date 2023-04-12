@@ -1,6 +1,4 @@
 <script>
-	import { link } from 'svelte-spa-router'
-
 	import Button from '../components/Button.svelte'
 	import { user_object, session, session_is_valid } from '../lib/stores'
 	import { createForm } from 'felte'
@@ -21,7 +19,7 @@
 </script>
 
 <div class="container">
-	<a href="/" use:link>⬅️ landing page</a>
+	<a href="/">⬅️ landing page</a>
 
 	{#if $session_is_valid && $user_object && $session}
 		<div class="user">

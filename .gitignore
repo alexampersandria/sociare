@@ -22,3 +22,6 @@ vite/node_modules
 *.sw?
 
 vite.config.ts.timestamp-*
+
+vite/.routify
+vite/.vite

@@ -1,12 +1,8 @@
-<script lang="ts">
-	import { link } from 'svelte-spa-router'
-</script>
-
 <div class="container align-center">
 	<div class="huge-emoji">😖</div>
 	<h1>Page not found</h1>
 	<p>🤷‍♂️ oopsie woopsie 🤷‍♀️</p>
-	<a href="/" use:link class="button red">go to root @ <code>'/'</code></a>
+	<a href="/" class="button red">go to root @ <code>'/'</code></a>
 </div>
 
 <style>

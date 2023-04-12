@@ -1,8 +1,4 @@
 <script lang="ts">
-	import { link } from 'svelte-spa-router'
-
-	import '@/assets/app.scss'
-
 	import payve_logo from '@/assets/payve_logo.svg'
 
 	import { session_is_valid } from '../lib/stores'
@@ -16,7 +12,7 @@
 					<img src={payve_logo} alt="payve_logo" />
 				</div>
 				<div class="links">
-					<a href="/app" use:link class="alt none">
+					<a href="/app" class="alt none">
 						{#if $session_is_valid}
 							Go To App
 						{:else}
@@ -38,7 +34,7 @@
 					manage their finances and settle debts between them.
 				</p>
 				<div class="links">
-					<a href="/docs" use:link class="button primary">Getting Started</a>
+					<a href="/docs" class="button primary">Getting Started</a>
 					<a
 						href="https://github.com/alexampersandria/sociare"
 						target="_blank"
