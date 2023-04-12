@@ -1,0 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+:root {
+  font-family: 'Atkinson Hyperlegible', sans-serif;
+  font-size: 18px;
+
+  --neutral-50: #f9fafb;
+  --neutral-100: #f4f6f8;
+  --neutral-200: #d6dee4;
+  --neutral-300: #b9c4cc;
+  --neutral-400: #aab7be;
+  --neutral-500: #99a1aa;
+  --neutral-600: #6e7a8a;
+  --neutral-700: #4a5561;
+  --neutral-800: #383f47;
+  --neutral-900: #1e2022;
+
+  --pink-50: #f7d3e3;
+  --pink-100: #f2c2d8;
+  --pink-200: #ecafc9;
+  --pink-300: #e89dbb;
+  --pink-400: #e28aae;
+  --pink-500: #ed8eb2;
+  --pink-600: #d7709c;
+  --pink-700: #c05c88;
+  --pink-800: #a94774;
+  --pink-900: #8c335f;
+
+  --blue-50: #e2f0f9;
+  --blue-100: #c5dff2;
+  --blue-200: #a6cced;
+  --blue-300: #86b9e7;
+  --blue-400: #65a6e0;
+  --blue-500: #4a90d9;
+  --blue-600: #3b74b7;
+  --blue-700: #2c598f;
+  --blue-800: #1d3d68;
+  --blue-900: #0e213f;
+
+  --green-50: #e0f5f3;
+  --green-100: #bfece9;
+  --green-200: #9edfe0;
+  --green-300: #7dd2d6;
+  --green-400: #5dc6cd;
+  --green-500: #47b9c3;
+  --green-600: #3a9a9e;
+  --green-700: #2d7b79;
+  --green-800: #204c54;
+  --green-900: #122d2f;
+  
+  --red-50: #ffe6e1;
+  --red-100: #ffcfc9;
+  --red-200: #ffb7b1;
+  --red-300: #ff9f99;
+  --red-400: #ff8782;
+  --red-500: #ff6f6a;
+  --red-600: #e65c57;
+  --red-700: #c94944;
+  --red-800: #a83731;
+  --red-900: #8b2420;
+
+  --yellow-50: #fff7e6;
+  --yellow-100: #ffebcc;
+  --yellow-200: #ffd299;
+  --yellow-300: #ffbf66;
+  --yellow-400: #ffad33;
+  --yellow-500: #ff9900;
+  --yellow-600: #e68a00;
+  --yellow-700: #c67800;
+  --yellow-800: #a66600;
+  --yellow-900: #864400;
+
+  --violet-50: #f2e5f7;
+  --violet-100: #d7c0e9;
+  --violet-200: #ba99db;
+  --violet-300: #9e74cd;
+  --violet-400: #824fbf;
+  --violet-500: #672fb1;
+  --violet-600: #52298e;
+  --violet-700: #3d1e6b;
+  --violet-800: #291848;
+  --violet-900: #140d24;
+}
+
+body {
+  margin: 0;
+}
+
+a {
+  color: var(--green-500);
+  transition: color 0.25s ease-in-out;
+}
+
+a:hover {
+  color: var(--green-700);
+}
+
+a.alt {
+  color: #000000;
+  transition: color 0.25s ease-in-out;
+}
+
+a.alt:hover {
+  color: var(--neutral-700);
+}
+
+a.none {
+  text-decoration: none;
+}
+
+.muted {
+  color: var(--neutral-700);
+}
+
+@for $i from 1 through 6 {
+  h#{$i} {
+    font-weight: 400;
+  }
+}
