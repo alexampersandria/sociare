@@ -6,6 +6,8 @@
 
 	import LandingPage from './routes/LandingPage.svelte'
 	import App from './routes/App.svelte'
+	import NotFound from './routes/NotFound.svelte'
+
 	import {
 		session,
 		session_fetch_completed,
@@ -50,6 +52,7 @@
 	const routes = {
 		'/app': App,
 		'/': LandingPage,
+		'*': NotFound,
 	}
 
 	import Preloader from './components/Preloader.svelte'

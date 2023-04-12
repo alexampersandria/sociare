@@ -25,6 +25,7 @@ const log_in = (username, password) => {
 				Cookies.set('payve-session', res.id)
 				session.set(res.id)
 			} else {
+				Cookies.remove('payve-session')
 				alert(res.error)
 			}
 		})
