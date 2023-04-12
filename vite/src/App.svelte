@@ -1,32 +1,39 @@
 <script lang="ts">
-  import './assets/app.scss'
+	import "./assets/app.scss";
 
-	import payve_logo from './assets/payve_logo.svg';
-	import Button from './components/Button.svelte';
+	import payve_logo from "./assets/payve_logo.svg";
 
-	import yen_banknote_3d from './assets/fluent_emoji/yen_banknote_3d.png';
-	import euro_banknote_3d from './assets/fluent_emoji/euro_banknote_3d.png';
-	import coin_3d from './assets/fluent_emoji/coin_3d.png';
-	import dollar_banknote_3d from './assets/fluent_emoji/dollar_banknote_3d.png';
+	import yen_banknote_3d from "./assets/fluent_emoji/yen_banknote_3d.png";
+	import euro_banknote_3d from "./assets/fluent_emoji/euro_banknote_3d.png";
+	import coin_3d from "./assets/fluent_emoji/coin_3d.png";
+	import dollar_banknote_3d from "./assets/fluent_emoji/dollar_banknote_3d.png";
 </script>
 
 <main>
-	<div class="head">
+	<div class="head" id="head">
 		<div class="floating-emojis">
 			<div class="left side">
-				<div class="emoji yen">
-					<img src={yen_banknote_3d} alt="Yen Emoji" />
+				<div class="emoji emoji-1">
+					<div class="yen">
+						<img src={yen_banknote_3d} alt="Yen Emoji" />
+					</div>
 				</div>
-				<div class="emoji euro">
-					<img src={euro_banknote_3d} alt="Euro Emoji" />
+				<div class="emoji emoji-2">
+					<div class="euro">
+						<img src={euro_banknote_3d} alt="Euro Emoji" />
+					</div>
 				</div>
 			</div>
 			<div class="right side">
-				<div class="emoji coin">
-					<img src={coin_3d} alt="Coin Emoji" />
+				<div class="emoji emoji-3">
+					<div class="coin">
+						<img src={coin_3d} alt="Coin Emoji" />
+					</div>
 				</div>
-				<div class="emoji dollar">
-					<img src={dollar_banknote_3d} alt="Dollar Emoji" />
+				<div class="emoji emoji-4">
+					<div class="dollar">
+						<img src={dollar_banknote_3d} alt="Dollar Emoji" />
+					</div>
 				</div>
 			</div>
 		</div>
@@ -37,12 +44,7 @@
 					<img src={payve_logo} alt="payve_logo" />
 				</div>
 				<div class="links">
-					<a
-						href="https://github.com/alexampersandria/sociare"
-						target="_blank"
-						rel="noopener noreferrer"
-						class="alt none">GitHub</a
-					>
+					<a href="/app" class="alt none">Log In</a>
 				</div>
 			</div>
 		</div>
@@ -54,19 +56,27 @@
 					Made Easier
 				</h1>
 				<p class="explainer muted">
-					Payve is an open source tool that allows groups of people to easily manage their finances
-					and settle debts between them.
+					Payve is an open source tool that allows groups of people to easily
+					manage their finances and settle debts between them.
 				</p>
 				<div class="links">
-					<Button type={'primary'}>Get Started</Button>
-					<Button type={'hollow'}>GitHub</Button>
+					<a href="/docs" class="button primary">Getting Started</a>
+					<a
+						href="https://github.com/alexampersandria/sociare"
+						target="_blank"
+						class="button hollow">GitHub</a
+					>
 				</div>
 			</div>
 		</div>
 	</div>
 </main>
 
-<style>
+<style lang="scss">
+	main {
+		min-height: 100vh;
+		min-width: 100vw;
+	}
 	.head {
 		position: relative;
 		padding-bottom: 1rem;
@@ -75,12 +85,16 @@
 
 	.head::before {
 		inset: 0;
-		content: '';
+		content: "";
 		display: block;
 		position: absolute;
 		z-index: -2;
 		background-color: hsla(0, 0%, 100%, 1);
-		background-image: radial-gradient(at 80% 61%, hsla(270, 47%, 72%, 1) 0px, transparent 50%),
+		background-image: radial-gradient(
+				at 80% 61%,
+				hsla(270, 47%, 72%, 1) 0px,
+				transparent 50%
+			),
 			radial-gradient(at 32% 61%, hsla(33, 100%, 80%, 1) 0px, transparent 50%),
 			radial-gradient(at 87% 20%, hsla(311, 98%, 75%, 1) 0px, transparent 50%),
 			radial-gradient(at 51% 3%, hsla(337, 72%, 74%, 1) 0px, transparent 50%),
@@ -90,7 +104,7 @@
 
 	.head::after {
 		inset: 0;
-		content: '';
+		content: "";
 		display: block;
 		position: absolute;
 		z-index: -1;
@@ -167,24 +181,39 @@
 		position: absolute;
 		top: 50%;
 		translate: 0 -50%;
+    animation: bob 6s cubic-bezier(0.5, 0.05, 0.5, 0.95) infinite;
 	}
 
+  @for $i from 1 through 4 {
+    .floating-emojis .emoji.emoji-#{$i} {
+      animation-delay: -#{$i*1.5}s;
+    }
+  }
+
+  @keyframes bob {
+    0%, 100% {
+      transform: translate(0, 0);
+    } 50% {
+      transform: translate(0, -1rem);
+    }
+  }
+
 	.floating-emojis .emoji img {
-		width: 12rem;
+		width: min(12rem, 20vw);
 	}
 
 	.floating-emojis .yen {
 		transform: rotate(-12.5deg) translate(-6rem, -5rem);
-		filter: drop-shadow(-.5rem -.5rem 3rem #a7612c66);
+		filter: drop-shadow(-0.5rem -0.5rem 3rem #a7612c66);
 	}
 
 	.floating-emojis .yen img {
-		width: 11rem;
+		max-width: 11rem;
 	}
 
 	.floating-emojis .euro {
 		transform: rotate(25deg) translate(1rem, 1rem);
-		filter: drop-shadow(-.5rem -.5rem 3rem #17749d66);
+		filter: drop-shadow(-0.5rem -0.5rem 3rem #17749d66);
 	}
 
 	.floating-emojis .coin {
@@ -193,7 +222,7 @@
 	}
 
 	.floating-emojis .coin img {
-		width: 11rem;
+		max-width: 11rem;
 	}
 
 	.floating-emojis .dollar {
