@@ -1,11 +1,12 @@
 {
 	"[rust]": {
-		"editor.defaultFormatter": "rust-lang.rust-analyzer",
-		"editor.formatOnSave": true
+		"editor.defaultFormatter": "rust-lang.rust-analyzer"
 	},
 	"rust-analyzer.check.command": "clippy",
 	"material-icon-theme.folders.associations": {
 		"vite": "svelte",
-    "migrations": "database",
-	}
+		"migrations": "database"
+	},
+	"prettier.semi": false,
+	"editor.formatOnSave": true
 }
