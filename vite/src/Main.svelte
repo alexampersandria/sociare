@@ -1,4 +1,7 @@
 <script lang="ts">
+	const mounted = Date.now()
+	const show_preloader = writable(true)
+
 	import Router from 'svelte-spa-router'
 
 	import LandingPage from './routes/LandingPage.svelte'
@@ -30,14 +33,29 @@
 		validate_session(session)
 	})
 
+	session_fetch_completed.subscribe(async (session_fetch_completed) => {
+		if (session_fetch_completed) {
+			const min_wait_time = 200
+			const time_diff = Date.now() - mounted
+			if (time_diff < min_wait_time) {
+				setTimeout(() => {
+					show_preloader.set(false)
+				}, min_wait_time - time_diff)
+			} else {
+				show_preloader.set(false)
+			}
+		}
+	})
+
 	const routes = {
 		'/app': App,
 		'/': LandingPage,
 	}
 
 	import Preloader from './components/Preloader.svelte'
+	import { writable } from 'svelte/store'
 </script>
 
 <Router {routes} />
 
-<Preloader show={!$session_fetch_completed} />
+<Preloader show={$show_preloader} />

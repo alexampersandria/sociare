@@ -1,6 +1,8 @@
 use crate::api::v1;
 use poem::{delete, get, handler, patch, post, Route};
 
+// #TODO: go through endpoints and write tests and validate security measures
+
 // allow longer lines for the sake of readability
 #[rustfmt::skip]
 pub fn endpoint() -> poem::Route {

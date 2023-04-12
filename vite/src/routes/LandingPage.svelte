@@ -91,7 +91,7 @@
 	.head {
 		position: relative;
 		padding-bottom: 1rem;
-		border-bottom: #000 solid 2px;
+		border-bottom: var(--black) solid 2px;
 	}
 
 	.head::before {
@@ -169,7 +169,7 @@
 		position: relative;
 		height: 10rem;
 		background-color: #ccc;
-		box-shadow: 0.5rem 0.5rem 0 #000;
+		box-shadow: 0.5rem 0.5rem 0 var(--black);
 		max-width: 20rem;
 		margin: 0 2rem;
 	}

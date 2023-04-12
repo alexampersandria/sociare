@@ -19,8 +19,8 @@
 		height: 0;
 		margin: 8px;
 		box-sizing: border-box;
-		border: var(--spinner-size) solid #fff;
-		border-color: #fff transparent #fff transparent;
+		border: var(--spinner-size) solid var(--white);
+		border-color: var(--neutral-400) transparent var(--neutral-400) transparent;
 		animation: spinner var(--spinner-speed) infinite linear;
 	}
 	.spinner.center::after {
