@@ -1,12 +1,11 @@
 <script lang="ts">
+	import '@/assets/app.scss'
+
 	const mounted = Date.now()
 	const show_preloader = writable(true)
 
-	import Router from 'svelte-spa-router'
-
-	import LandingPage from './routes/LandingPage.svelte'
-	import App from './routes/App.svelte'
-	import NotFound from './routes/NotFound.svelte'
+	import { Router } from '@roxi/routify'
+	import { routes } from '../.routify/routes'
 
 	import {
 		session,
@@ -37,7 +36,7 @@
 
 	session_fetch_completed.subscribe(async (session_fetch_completed) => {
 		if (session_fetch_completed) {
-			const min_wait_time = 200
+			const min_wait_time = 300
 			const time_diff = Date.now() - mounted
 			if (time_diff < min_wait_time) {
 				setTimeout(() => {
@@ -48,12 +47,6 @@
 			}
 		}
 	})
-
-	const routes = {
-		'/app': App,
-		'/': LandingPage,
-		'*': NotFound,
-	}
 
 	import Preloader from './components/Preloader.svelte'
 	import { writable } from 'svelte/store'
