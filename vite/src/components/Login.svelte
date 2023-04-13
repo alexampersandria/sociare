@@ -4,6 +4,8 @@
 	import { goto } from '@roxi/routify'
 	import { validate } from 'email-validator'
 
+	const username_regex = new RegExp('^[a-zA-Z0-9]+$')
+
 	const { form: log_in_form, errors: log_in_errors } = createForm({
 		onSubmit: async (value) => {
 			log_in(value.username, value.password).then(() => {
@@ -14,6 +16,10 @@
 			const errors = {
 				username: '',
 				password: '',
+			}
+			if (!username_regex.test(value.username)) {
+				errors.username =
+					'Username must only contain letters, numbers, and underscore (_)'
 			}
 			if (value.username.length < 3) {
 				errors.username = 'Username must be at least 3 characters long'
@@ -40,6 +46,10 @@
 				password: '',
 				email: '',
 				name: '',
+			}
+			if (!username_regex.test(value.username)) {
+				errors.username =
+					'Username must only contain letters, numbers, and underscore (_)'
 			}
 			if (value.username.length < 3) {
 				errors.username = 'Username must be at least 3 characters long'

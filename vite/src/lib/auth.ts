@@ -30,7 +30,6 @@ const log_in = (username, password) => {
 					resolve(res.id)
 				} else {
 					Cookies.remove('payve-session')
-					alert(res.error)
 					reject(res.error)
 				}
 			})
