@@ -4,6 +4,8 @@
 	import { session_is_valid } from '../lib/stores'
 	import Modal from '../components/Modal.svelte'
 	import Login from '../components/Login.svelte'
+	import Button from '../components/Button.svelte'
+	import Spinner from '../components/Spinner.svelte'
 
 	let show_login_modal = false
 </script>
@@ -14,6 +16,7 @@
 		on:close={() => {
 			show_login_modal = false
 		}}
+		type="glass"
 	>
 		<Login />
 	</Modal>
@@ -53,7 +56,7 @@
 					manage their finances and settle debts between them.
 				</p>
 				<div class="links">
-					<a href="/docs" class="button primary">Getting Started</a>
+					<a href="/docs" class="button black">Getting Started</a>
 					<a
 						href="https://github.com/alexampersandria/sociare"
 						target="_blank"
@@ -67,32 +70,23 @@
 	</section>
 
 	<section>
+		<div class="container" style="margin-top:2rem;">
+			<h4>Buttons</h4>
+			<Button variant="primary">Primary</Button>
+			<Button variant="black">Black</Button>
+			<Button variant="danger">Danger</Button>
+			<Button variant="hollow">Hollow</Button>
+		</div>
 		<div class="container">
-			<div class="placeholder">
-				<div class="placeholder-image" />
-				<div class="placeholder-text">
-					<h2>Placeholder</h2>
-					<p>
-						Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem
-						quis natus, saepe officia optio rerum ipsam sunt, voluptatum tempore
-						doloremque exercitationem fuga doloribus culpa at vitae veniam
-						consectetur eveniet error?
-					</p>
-				</div>
-			</div>
-
-			<div class="placeholder">
-				<div class="placeholder-text align-right">
-					<h2>Something Else</h2>
-					<p>
-						Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem
-						quis natus, saepe officia optio rerum ipsam sunt, voluptatum tempore
-						doloremque exercitationem fuga doloribus culpa at vitae veniam
-						consectetur eveniet error?
-					</p>
-				</div>
-				<div class="placeholder-image" />
-			</div>
+			<h4>Disabled</h4>
+			<Button disabled variant="primary">Primary</Button>
+			<Button disabled variant="black">Black</Button>
+			<Button disabled variant="danger">Danger</Button>
+			<Button disabled variant="hollow">Hollow</Button>
+		</div>
+		<div class="container">
+			<h4>Spinner</h4>
+			<Spinner />
 		</div>
 	</section>
 </main>

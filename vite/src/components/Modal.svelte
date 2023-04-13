@@ -4,6 +4,7 @@
 	import { createEventDispatcher } from 'svelte'
 
 	export let show: boolean = false
+	export let type: 'plain' | 'glass' = 'plain'
 	let wrapper
 
 	const dispatch = createEventDispatcher()
@@ -38,12 +39,11 @@
 	<div
 		class="modal-wrapper"
 		use:teleport={'body'}
-		in:fade
-		out:fade
+		transition:fade={{ duration: 100 }}
 		on:click={wrapper_click}
 		bind:this={wrapper}
 	>
-		<div class="modal">
+		<div class="modal {type}">
 			<slot />
 		</div>
 	</div>
@@ -55,7 +55,7 @@
 		inset: 0;
 		width: 100vw;
 		height: 100vh;
-		background-color: var(--grey-300);
+		background-color: var(--black-100);
 		z-index: 480;
 	}
 
@@ -64,10 +64,17 @@
 		top: 50%;
 		left: 50%;
 		translate: -50% -50%;
-		background: var(--white);
-		filter: drop-shadow(0.5em 0.5em 0 var(--black));
+		border-radius: 0.25em;
 		padding: 2em;
+		background-color: var(--white);
 		min-width: min(50vw, 32rem);
 		z-index: 490;
+	}
+
+	.modal.glass {
+		background: var(--white-700);
+		backdrop-filter: blur(2rem);
+		box-shadow: INSET 0 0 0 2px var(--white-300),
+			0 1rem 2rem 0.5rem var(--black-100);
 	}
 </style>

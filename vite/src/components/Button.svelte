@@ -1,13 +1,6 @@
 <script lang="ts">
-	export let variant:
-		| 'pink'
-		| 'blue'
-		| 'green'
-		| 'red'
-		| 'yellow'
-		| 'violet'
-		| 'hollow'
-		| 'primary' = 'primary'
+	export let variant: 'danger' | 'hollow' | 'black' | 'primary' | 'secondary' =
+		'primary'
 	export let disabled: boolean = false
 	export let rounded: boolean = false
 

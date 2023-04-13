@@ -15,7 +15,6 @@
 	} from './lib/stores'
 
 	const validate_session = async (session) => {
-		console.log('validating session', session)
 		session_fetch_completed.set(false)
 		const res = await fetch(
 			`${import.meta.env.VITE_API_URL}/api/v1/sessions/${session}`
@@ -29,7 +28,6 @@
 		}
 		session_fetch_completed.set(true)
 	}
-
 	session.subscribe(async (session) => {
 		validate_session(session)
 	})

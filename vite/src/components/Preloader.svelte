@@ -17,7 +17,7 @@
 		inset: 0;
 		width: 100vw;
 		height: 100vh;
-		background-color: var(--neutral-300);
+		background-color: var(--gray-300);
 		z-index: 1000;
 	}
 </style>

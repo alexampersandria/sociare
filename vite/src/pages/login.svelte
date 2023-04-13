@@ -25,6 +25,7 @@
 <style>
 	.full-page-login {
 		position: relative;
+		height: 100vh;
 	}
 
 	.go-back {
@@ -39,9 +40,10 @@
 	}
 
 	.login-wrapper {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		height: 100vh;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		min-width: min(50vw, 24rem);
 	}
 </style>

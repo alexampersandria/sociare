@@ -43,9 +43,7 @@
 			</div>
 		</div>
 		<div class="actions" style="margin-top: 2rem;">
-			<Button variant="yellow" on:click={log_out}>Log Out</Button>
+			<Button variant="danger" on:click={log_out}>Log Out</Button>
 		</div>
-	{:else}
-		<Spinner />
 	{/if}
 </div>
