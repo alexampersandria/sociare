@@ -2,9 +2,22 @@
 	import payve_logo from '@/assets/payve_logo.svg'
 
 	import { session_is_valid } from '../lib/stores'
+	import Modal from '../components/Modal.svelte'
+	import Login from '../components/Login.svelte'
+
+	let show_login_modal = false
 </script>
 
 <main>
+	<Modal
+		show={show_login_modal}
+		on:close={() => {
+			show_login_modal = false
+		}}
+	>
+		<Login />
+	</Modal>
+
 	<section class="head" id="head">
 		<div class="nav">
 			<div class="container">
@@ -12,13 +25,19 @@
 					<img src={payve_logo} alt="payve_logo" />
 				</div>
 				<div class="links">
-					<a href="/app" class="alt none">
-						{#if $session_is_valid}
-							Go To App
-						{:else}
+					{#if $session_is_valid}
+						<a href="/app" class="alt none"> Go To App </a>
+					{:else}
+						<a
+							class="alt none"
+							href="javascript:void(0)"
+							on:click={() => {
+								show_login_modal = true
+							}}
+						>
 							Log In
-						{/if}
-					</a>
+						</a>
+					{/if}
 				</div>
 			</div>
 		</div>
