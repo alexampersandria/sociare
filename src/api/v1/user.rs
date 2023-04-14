@@ -7,9 +7,11 @@ use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use poem::web::Json;
 use poem::Request;
 use poem::{handler, web::Path};
+use regex::Regex;
 use serde::Deserialize;
 use serde::Serialize;
 use validator::Validate;
+use validator::ValidationError;
 
 #[handler]
 pub fn get(Path(id): Path<String>) -> String {
@@ -43,7 +45,7 @@ pub fn me(req: &Request) -> String {
 
 #[derive(Debug, Deserialize, Serialize, Validate)]
 pub struct NewUser {
-  #[validate(length(min = 3), length(max = 24))]
+  #[validate(length(min = 3), length(max = 24), custom = "validate_username")]
   username: String,
   #[validate(length(min = 1), length(max = 96))]
   name: String,
@@ -241,7 +243,7 @@ pub fn delete(req: &Request, Json(user): Json<AuthUser>) -> String {
 
 #[derive(Debug, Deserialize, Serialize, Validate)]
 pub struct AuthUser {
-  #[validate(length(min = 3), length(max = 24))]
+  #[validate(length(min = 3), length(max = 24), custom = "validate_username")]
   username: String,
   #[validate(length(min = 7), length(max = 96))]
   password: String,
@@ -326,5 +328,15 @@ impl PrivateUserData {
       paypal_me: result.5.unwrap_or("".to_string()),
       created_at: result.6,
     }
+  }
+}
+
+pub fn validate_username(username: &str) -> Result<(), ValidationError> {
+  //make sure username is only a-z, A-Z, 0-9, and _ (underscore)
+  let re = Regex::new(r"^[a-zA-Z0-9_]+$").unwrap();
+  if re.is_match(username) {
+    Ok(())
+  } else {
+    Err(ValidationError::new("invalid_username"))
   }
 }

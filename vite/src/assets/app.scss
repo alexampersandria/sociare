@@ -1,0 +1,277 @@
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('colors.scss');
+
+:root, button, input, optgroup, select, textarea {
+  font-family: 'Atkinson Hyperlegible', monospace;
+  font-size: 16px;
+}
+
+:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--pink-400), 0 0 0 6px var(--pink-100);
+}
+
+::selection {
+  background: var(--pink-400);
+  color: var(--white);
+}
+
+body {
+  margin: 0;
+}
+
+a {
+  color: var(--pink-500);
+  transition: color 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
+}
+
+a:hover {
+  color: var(--pink-700);
+}
+
+a.alt {
+  color: var(--black);
+}
+
+a.alt:hover {
+  color: var(--black-700);
+}
+
+a.none {
+  text-decoration: none;
+}
+
+.muted {
+  color: var(--gray-500);
+}
+
+.align-center {
+  text-align: center;
+}
+
+.align-right {
+  text-align: right;
+}
+
+@for $i from 1 through 6 {
+  h#{$i} {
+    font-weight: 400;
+  }
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.button {
+  display: inline-block;
+  white-space: nowrap;
+  text-decoration: none;
+  border: 0;
+  background: var(--gray-200);
+  color: var(--gray-400);
+  font-size: 1rem;
+  padding: 0.5em 1em;
+  border-radius: 0.25em;
+  cursor: pointer;
+  transition: background 0.25s ease-in-out, color 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
+}
+
+.button:not(.disabled) {
+  background: var(--pink-500);
+  color: var(--white);
+}
+
+.button:not(.disabled):hover {
+  background: var(--pink-600);
+  color: var(--white);
+}
+
+.button:not(.disabled):active {
+  background: var(--pink-700);
+  color: var(--white);
+}
+
+.button.secondary:not(.disabled) {
+  background: var(--gray-400);
+  color: var(--white);
+}
+
+.button.secondary:not(.disabled):hover {
+  background: var(--gray-500);
+}
+
+.button.secondary:not(.disabled):active {
+  background: var(--gray-600);
+}
+
+.button.secondary:not(.disabled):focus {
+  box-shadow: 0 0 0 2px var(--gray-500), 0 0 0 6px var(--gray-100);
+}
+
+.button.black:not(.disabled) {
+  background: var(--black);
+  color: var(--white);
+}
+
+.button.black:not(.disabled):hover {
+  background: var(--black-800);
+  color: var(--white);
+}
+
+.button.black:not(.disabled):active {
+  background: var(--black-900);
+  color: var(--white);
+}
+
+.button.black:not(.disabled):focus,
+.button.hollow:not(.disabled):focus,
+a.alt:focus {
+  box-shadow: 0 0 0 2px var(--black-400), 0 0 0 6px var(--black-100);
+}
+
+.button.danger:not(.disabled) {
+  background: var(--red-100);
+  color: var(--red-400);
+}
+
+.button.danger:not(.disabled):hover {
+  background: var(--red-200);
+  color: var(--red-500);
+}
+
+.button.danger:not(.disabled):active {
+  background: var(--red-300);
+  color: var(--red-600);
+}
+
+.button.danger:not(.disabled):focus {
+  box-shadow: 0 0 0 2px var(--red-400), 0 0 0 6px var(--red-100);
+}
+
+.button.hollow:not(.disabled),
+.button.hollow:not(.disabled):hover {
+  position: relative;
+  background: transparent;
+  color: var(--black);
+}
+
+.button.hollow:not(.disabled)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 0.25em;
+  border: 0.15em solid var(--black);
+  clip-path: polygon(
+    0% 0%,
+    0% 100%,
+    0.5em 100%,
+    0.5em 0,
+    calc(100% - 0.5em) 0,
+    calc(100% - 0.5em) 100%,
+    100% 100%,
+    100% 0%
+  );
+  transition: clip-path 0.3s cubic-bezier(0.5, 0.05, 0.5, 0.95);
+}
+
+.button.hollow:not(.disabled):hover::before {
+  clip-path: polygon(
+    0% 0%,
+    0% 100%,
+    50% 100%,
+    50% 0,
+    50% 0,
+    50% 100%,
+    100% 100%,
+    100% 0%
+  );
+}
+
+.button.hollow:not(.disabled):active {
+  background: var(--black-100);
+}
+
+.button.disabled {
+  background-color: var(--gray-100);
+  color: var(--gray-300);
+  cursor: not-allowed;
+}
+
+.button.rounded {
+  border-radius: 9999em;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  display: block;
+  padding: 0.5em 1em;
+  border: 0;
+  border-radius: 0.25em;
+  background: var(--gray-200);
+  color: var(--gray-400);
+  font-size: 1rem;
+  transition: background 0.25s ease-in-out, color 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
+  margin-bottom: 0.5rem;
+}
+
+input[type="text"]:hover,
+input[type="email"]:hover,
+input[type="password"]:hover {
+  background: var(--pink-100);
+  color: var(--gray-500);
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+  background: var(--white);
+  color: var(--gray-500);
+  outline: none;
+}
+
+input[type="text"][aria-invalid="true"],
+input[type="email"][aria-invalid="true"],
+input[type="password"][aria-invalid="true"] {
+  background: var(--red-50);
+  color: var(--red-400);
+  box-shadow: 0 0 0 2px var(--red-400), 0 0 0 6px var(--red-100);
+}
+
+input[type="text"][aria-invalid="true"]:hover,
+input[type="email"][aria-invalid="true"]:hover,
+input[type="password"][aria-invalid="true"]:hover {
+  background: var(--red-100);
+}
+
+input[type="text"][aria-invalid="true"]:focus,
+input[type="email"][aria-invalid="true"]:focus,
+input[type="password"][aria-invalid="true"]:focus {
+  background: var(--white);
+  color: var(--red-500);
+}
+
+.error {
+  color: var(--red-400);
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+.wide input[type="text"],
+.wide input[type="email"],
+.wide input[type="password"] {
+  width: calc(100% - 2em);
+}
+
+label {
+  display: block;
+  margin: 1rem 0 0.5rem 0;
+  color: var(--gray-500);
+}
+
+input[type="submit"] {
+  margin: 1rem 0;
+}

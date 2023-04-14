@@ -61,8 +61,8 @@ pub fn create_session(
     .first::<(String, String)>(&mut conn);
 
   if let Ok(user) = user {
-    let valid = bcrypt::verify(password, &user.1);
-    if valid.is_ok() {
+    let valid = bcrypt::verify(password, &user.1).unwrap_or(false);
+    if valid {
       let session = util::UserSession::new(&user.0, ip_address, user_agent);
       let created_session = util::diesel::create_user_session(&mut conn, &session);
       if created_session.is_ok() {

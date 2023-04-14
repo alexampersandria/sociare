@@ -1,7 +1,7 @@
 use poem::{
   endpoint::StaticFilesEndpoint,
   listener::TcpListener,
-  middleware::{NormalizePath, TrailingSlash},
+  middleware::{Cors, NormalizePath, TrailingSlash},
   EndpointExt, Route, Server,
 };
 use sociare::api;
@@ -13,13 +13,18 @@ async fn main() -> Result<(), std::io::Error> {
   }
   tracing_subscriber::fmt::init();
 
+  // #TODO: make this configurable
+  let cors = Cors::new()
+    .allow_origin("http://localhost:5173")
+    .allow_origin("http://localhost:3000");
+
   let app = Route::new()
     .nest("/api", api::index::endpoint())
     .nest(
       "/",
       StaticFilesEndpoint::new("./www").index_file("index.html"),
     )
-    .with(NormalizePath::new(TrailingSlash::Trim));
+    .with((NormalizePath::new(TrailingSlash::Trim), cors));
 
   Server::new(TcpListener::bind("127.0.0.1:3000"))
     .run(app)

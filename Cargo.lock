@@ -976,6 +976,7 @@ dependencies = [
  "futures-util",
  "poem",
  "rand",
+ "regex",
  "rusty-hook",
  "rusty-money",
  "serde",
