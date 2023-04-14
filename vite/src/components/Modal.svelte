@@ -75,6 +75,6 @@
 		background: var(--white-700);
 		backdrop-filter: blur(2rem);
 		box-shadow: INSET 0 0 0 2px var(--white-300),
-			0 1rem 2rem 0.5rem var(--black-100);
+			0 1rem 2rem 0.5rem var(--black-50);
 	}
 </style>

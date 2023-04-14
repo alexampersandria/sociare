@@ -1,4 +1,6 @@
 <script lang="ts">
+	// vvvv #TODO: i18n this vvvv
+
 	import { createForm } from 'felte'
 	import { log_in, sign_up } from '../lib/auth'
 	import { goto } from '@roxi/routify'
