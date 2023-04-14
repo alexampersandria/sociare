@@ -34,7 +34,12 @@
 
 	let show_new_group_modal = false
 
-	const { form: new_group_form, errors: new_group_errors } = createForm({
+	const {
+		form: new_group_form,
+		errors: new_group_errors,
+		isValid: new_group_is_valid,
+		data: new_group_data,
+	} = createForm({
 		onSubmit: async (values) => {
 			const res = await fetch(
 				`${import.meta.env.VITE_API_URL}/api/v1/group/create`,
@@ -60,18 +65,17 @@
 				name: '',
 				currency: '',
 			}
-			if (!value.name) {
-				errors.name = 'error_group_name_required'
-			} else if (value.name.length > 48) {
-				errors.name = 'error_group_name_too_long'
+			if (value.name) {
+				if (value.name.length > 48) {
+					errors.name = $_('error_group_name_too_long')
+				}
 			}
-			if (currency_codes.indexOf(value.currency) === -1) {
-				errors.currency = 'error_group_currency_not_supported'
-			}
-			if (!value.currency) {
-				errors.currency = 'error_group_currency_required'
-			} else if (value.currency.length !== 3) {
-				errors.currency = 'error_group_currency_invalid_format'
+			if (value.currency) {
+				if (value.currency.length !== 3) {
+					errors.currency = $_('error_group_currency_invalid_format')
+				} else if (currency_codes.indexOf(value.currency) === -1) {
+					errors.currency = $_('error_group_currency_not_supported')
+				}
 			}
 			return errors
 		},
@@ -85,7 +89,7 @@
 		show_new_group_modal = false
 	}}
 >
-	<form use:new_group_form>
+	<form use:new_group_form class="wide">
 		<label for="name">{$_('new_group_name_label')}</label>
 		<input type="text" name="name" />
 		{#if $new_group_errors.name}
@@ -96,18 +100,26 @@
 		{#if $new_group_errors.currency}
 			<div class="error">{$new_group_errors.currency}</div>
 		{/if}
-		<input type="submit" value={$_('new_group_submit')} class="button pink" />
+		<input
+			type="submit"
+			value={$_('new_group_submit')}
+			class="button pink"
+			disabled={$new_group_is_valid &&
+			$new_group_data.name &&
+			$new_group_data.currency
+				? false
+				: true}
+		/>
 	</form>
 </Modal>
 
 <div class="group-container">
 	<div class="head">
 		<h2>{$_('groups')}</h2>
-		<a
-			href="#"
+		<Button
 			on:click={() => {
 				show_new_group_modal = true
-			}}>{$_('new_group_button')}</a
+			}}>{$_('new_group_button')}</Button
 		>
 	</div>
 	{#if $groups.length > 0}

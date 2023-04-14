@@ -4,7 +4,7 @@ export const currencies: {
 	[key: string]: CurrencyFormat
 } = {
 	EUR: {
-		prefix: '€',
+		prefix: '€ ',
 		suffix: '',
 		decimalPlaces: 2,
 		decimalSeparator: ',',

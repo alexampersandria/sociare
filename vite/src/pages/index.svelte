@@ -8,7 +8,7 @@
 	import Login from '../components/Login.svelte'
 	import Button from '../components/Button.svelte'
 	import Spinner from '../components/Spinner.svelte'
-	import { currencies, currency_codes, format_currency } from '../lib/econ'
+	import { currency_codes, format_currency } from '../lib/econ'
 
 	let show_login_modal = false
 
