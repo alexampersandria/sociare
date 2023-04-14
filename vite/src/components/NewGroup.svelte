@@ -6,7 +6,7 @@
 
 	import { createEventDispatcher } from 'svelte'
 
-	import { session } from '../lib/stores'
+	import { session } from '../lib/stores/session'
 
 	const dispatch = createEventDispatcher()
 

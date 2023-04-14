@@ -7,9 +7,20 @@
 	export let group: GroupListing
 	import { _ } from 'svelte-i18n'
 	import moment from 'moment'
+	import { open_group_id } from '../lib/stores/app'
+	import { user_object } from '../lib/stores/session'
+
+	const on_click = () => {
+		open_group_id.set(group.group.id)
+	}
+	const on_keydown = (event) => {
+		if (event.key === 'Enter') {
+			on_click()
+		}
+	}
 </script>
 
-<div class="group">
+<div class="group" on:click={on_click} on:keydown={on_keydown} tabindex="0">
 	<div class="head">
 		<div class="name">{group.group.name}</div>
 		<div class="total">
@@ -20,7 +31,12 @@
 		{#each group.events as event}
 			<div class="event">
 				<div class="user">
-					{get_user_name_by_id(group, event.event.user_id)}
+					{get_user_name_by_id(group, event.event.user_id, $user_object.id) ===
+					'user_name_self'
+						? $_(
+								get_user_name_by_id(group, event.event.user_id, $user_object.id)
+						  )
+						: get_user_name_by_id(group, event.event.user_id, $user_object.id)}
 				</div>
 				<div class="type">{$_(event.event.event)}</div>
 				<div class="time">
@@ -36,6 +52,8 @@
 		background-color: var(--gray-50);
 		border-radius: 0.25em;
 		padding: 1em;
+		cursor: pointer;
+		transition: background-color 0.25s;
 	}
 
 	.group:not(:last-child) {
@@ -65,5 +83,13 @@
 
 	.events .event .time {
 		float: right;
+	}
+
+	.group:hover {
+		background-color: var(--gray-100);
+	}
+
+	.group:active {
+		background-color: var(--white);
 	}
 </style>

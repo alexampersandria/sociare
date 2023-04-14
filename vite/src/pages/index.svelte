@@ -3,7 +3,7 @@
 
 	import payve_logo from '@/assets/payve_logo.svg'
 
-	import { session_is_valid } from '../lib/stores'
+	import { session_is_valid } from '../lib/stores/session'
 	import Modal from '../components/Modal.svelte'
 	import Login from '../components/Login.svelte'
 	import Button from '../components/Button.svelte'

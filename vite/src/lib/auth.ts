@@ -1,5 +1,5 @@
 import Cookies from 'js-cookie'
-import { session, user_object } from './stores'
+import { session, user_object } from './stores/session'
 
 const log_out = () => {
 	return new Promise((resolve, reject) => {

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n'
 
-	import { session } from '../../lib/stores'
+	import { session } from '../../lib/stores/session'
 
 	import { writable, type Writable } from 'svelte/store'
 	import Button from '../Button.svelte'
@@ -100,7 +100,8 @@
 
 <style>
 	.group-container {
-		display: relative;
+		position: absolute;
+		inset: 0;
 		height: 100vh;
 		overflow-y: scroll;
 		background-color: var(--gray-200);

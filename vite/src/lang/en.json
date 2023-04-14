@@ -49,5 +49,6 @@
 	"updated_user_group": "edited info for {user}",
 	"update_message": "edited a message",
 	"update_receipt": "edited a receipt",
-	"update_transaction": "edited a transaction"
+	"update_transaction": "edited a transaction",
+	"user_name_self": "You"
 }

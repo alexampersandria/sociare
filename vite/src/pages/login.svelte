@@ -3,7 +3,10 @@
 
 	import Login from '../components/Login.svelte'
 	import payve_logo from '../assets/payve_logo.svg'
-	import { session_fetch_completed, session_is_valid } from '../lib/stores'
+	import {
+		session_fetch_completed,
+		session_is_valid,
+	} from '../lib/stores/session'
 	import { goto } from '@roxi/routify'
 
 	session_is_valid.subscribe((is_valid) => {

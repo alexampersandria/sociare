@@ -12,7 +12,7 @@
 		session_fetch_completed,
 		session_is_valid,
 		user_object,
-	} from './lib/stores'
+	} from './lib/stores/session'
 
 	const validate_session = async (session) => {
 		session_fetch_completed.set(false)
