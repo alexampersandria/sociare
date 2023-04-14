@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n'
+
 	import Login from '../components/Login.svelte'
 	import payve_logo from '../assets/payve_logo.svg'
 	import { session_fetch_completed, session_is_valid } from '../lib/stores'
@@ -10,6 +12,10 @@
 		}
 	})
 </script>
+
+<svelte:head>
+	<title>{$_('page_title')} &mdash; {$_('login_page_title')}</title>
+</svelte:head>
 
 <div class="full-page-login">
 	<div class="go-back">

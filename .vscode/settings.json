@@ -9,5 +9,6 @@
 	},
 	"prettier.semi": false,
 	"prettier.singleQuote": true,
-	"editor.formatOnSave": true
+	"editor.formatOnSave": true,
+	"i18n-ally.localesPaths": ["vite/src/lang"]
 }

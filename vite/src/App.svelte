@@ -48,6 +48,22 @@
 
 	import Preloader from './components/Preloader.svelte'
 	import { writable } from 'svelte/store'
+
+	import { register, init } from 'svelte-i18n'
+
+	register('en', () => import('./lang/en.json'))
+
+	init({
+		fallbackLocale: 'en',
+	})
+
+	init({
+		// fallback to en if current locale is not in the dictionary
+		fallbackLocale: 'en',
+		initialLocale: 'en',
+	})
+
+	import { page } from '@roxi/routify'
 </script>
 
 <Router {routes} />

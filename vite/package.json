@@ -20,6 +20,7 @@
 		"js-cookie": "^3.0.1",
 		"svelte": "^3.55.1",
 		"svelte-check": "^2.10.3",
+		"svelte-i18n": "^3.6.0",
 		"tslib": "^2.5.0",
 		"typescript": "^4.9.3",
 		"vite": "^4.2.0"

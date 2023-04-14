@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n'
+
 	import payve_logo from '@/assets/payve_logo.svg'
 
 	import { session_is_valid } from '../lib/stores'
@@ -9,6 +11,10 @@
 
 	let show_login_modal = false
 </script>
+
+<svelte:head>
+	<title>{$_('page_title')} &mdash; {$_('landing_page_title')}</title>
+</svelte:head>
 
 <main>
 	<Modal
@@ -29,7 +35,7 @@
 				</div>
 				<div class="links">
 					{#if $session_is_valid}
-						<a href="/app" class="alt none"> Go To App </a>
+						<a href="/app" class="alt none">{$_('open_app')}</a>
 					{:else}
 						<a
 							class="alt none"
@@ -38,7 +44,7 @@
 								show_login_modal = true
 							}}
 						>
-							Log In
+							{$_('log_in')}
 						</a>
 					{/if}
 				</div>
@@ -48,15 +54,13 @@
 		<div class="call-to-action">
 			<div class="container">
 				<h1>
-					House Share Economy<br />
-					Made Easier
+					{$_('landing_head_title')}
 				</h1>
 				<p class="explainer muted">
-					Payve is an open source tool that allows groups of people to easily
-					manage their finances and settle debts between them.
+					{$_('landing_head_subtitle')}
 				</p>
 				<div class="links">
-					<a href="/docs" class="button black">Getting Started</a>
+					<a href="/docs" class="button black">{$_('getting_started')}</a>
 					<a
 						href="https://github.com/alexampersandria/sociare"
 						target="_blank"
