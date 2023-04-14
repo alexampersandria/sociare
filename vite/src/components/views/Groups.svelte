@@ -3,14 +3,18 @@
 
 	import { session } from '../../lib/stores'
 
-	import { writable } from 'svelte/store'
+	import { writable, type Writable } from 'svelte/store'
 	import Button from '../Button.svelte'
 	import Modal from '../Modal.svelte'
-	import { createForm } from 'felte'
-	import { currency_codes, format_currency } from '../../lib/econ'
 
-	const groups = writable([])
+	import type { GroupListing } from '../../lib/types/GroupListing'
+	import Group from '../Group.svelte'
+	import NewGroup from '../NewGroup.svelte'
+
+	const groups: Writable<GroupListing[] | []> = writable([])
 	const groups_fetch_completed = writable(false)
+
+	let container
 
 	const get_groups = () => {
 		groups_fetch_completed.set(false)
@@ -39,52 +43,15 @@
 
 	let show_new_group_modal = false
 
-	const {
-		form: new_group_form,
-		errors: new_group_errors,
-		isValid: new_group_is_valid,
-		data: new_group_data,
-	} = createForm({
-		onSubmit: async (values) => {
-			const res = await fetch(
-				`${import.meta.env.VITE_API_URL}/api/v1/group/create`,
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						Authorization: `Bearer ${$session}`,
-					},
-					body: JSON.stringify(values),
-				}
-			)
-			const data = await res.json()
-			if (data.error) {
-				alert(data.error)
-			} else {
-				get_groups()
-				show_new_group_modal = false
-			}
-		},
-		validate: (value) => {
-			const errors = {
-				name: '',
-				currency: '',
-			}
-			if (value.name) {
-				if (value.name.length > 48) {
-					errors.name = $_('error_group_name_too_long')
-				}
-			}
-			if (value.currency) {
-				if (value.currency.length !== 3) {
-					errors.currency = $_('error_group_currency_invalid_format')
-				} else if (currency_codes.indexOf(value.currency) === -1) {
-					errors.currency = $_('error_group_currency_not_supported')
-				}
-			}
-			return errors
-		},
-	})
+	const group_created = () => {
+		show_new_group_modal = false
+		get_groups()
+	}
+
+	let scrolled = false
+	const on_scroll = () => {
+		scrolled = container.scrollTop > 0
+	}
 </script>
 
 <Modal
@@ -94,53 +61,36 @@
 		show_new_group_modal = false
 	}}
 >
-	<form use:new_group_form class="wide">
-		<label for="name">{$_('new_group_name_label')}</label>
-		<input type="text" name="name" />
-		{#if $new_group_errors.name}
-			<div class="error">{$new_group_errors.name}</div>
-		{/if}
-		<label for="currency">{$_('new_group_currency_label')}</label>
-		<input type="text" name="currency" />
-		{#if $new_group_errors.currency}
-			<div class="error">{$new_group_errors.currency}</div>
-		{/if}
-		<input
-			type="submit"
-			value={$_('new_group_submit')}
-			class="button pink"
-			disabled={$new_group_is_valid &&
-			$new_group_data.name &&
-			$new_group_data.currency
-				? false
-				: true}
-		/>
-	</form>
+	<NewGroup on:group_created={group_created} />
 </Modal>
 
-<div class="group-container">
+<div
+	class="group-container"
+	class:scrolled
+	bind:this={container}
+	on:scroll={on_scroll}
+>
 	<div class="head">
-		<h2>{$_('groups')}</h2>
-		<Button
-			on:click={() => {
-				show_new_group_modal = true
-			}}>{$_('new_group_button')}</Button
-		>
+		<div class="title">{$_('groups')}</div>
+		{#if $groups.length > 0}
+			<div class="count label">
+				{$groups.length}
+			</div>
+		{/if}
+		<div class="new-group">
+			<Button
+				on:click={() => {
+					show_new_group_modal = true
+				}}>{$_('new_group_button')}</Button
+			>
+		</div>
 	</div>
 	{#if $groups.length > 0}
-		{#each $groups as group}
-			<div class="group">
-				<h2>{group.group.name}</h2>
-				<div>
-					{$_('group_total')}
-					{format_currency(group.group.total, group.group.currency)}
-					<pre
-						style="font-size: 0.8rem; border: 1px solid var(--gray-400); border-radius: 0.25rem; margin: 0.5rem; padding: 0.5rem;"
-						class="muted"><code>{JSON.stringify(group, undefined, 2)}</code
-						></pre>
-				</div>
-			</div>
-		{/each}
+		<div class="groups">
+			{#each $groups as group}
+				<Group {group} />
+			{/each}
+		</div>
 	{:else if !$groups_fetch_completed}
 		<div class="loading">Loading...</div>
 	{:else}
@@ -166,5 +116,36 @@
 		translate: -50% -50%;
 		white-space: nowrap;
 		color: var(--gray-400);
+	}
+
+	.head,
+	.groups {
+		padding: 1rem;
+	}
+
+	.head {
+		position: sticky;
+		top: 0;
+		background-color: var(--gray-200);
+		transition: box-shadow 0.25s ease-in-out;
+	}
+
+	.scrolled .head {
+		box-shadow: 0 0 3rem 3rem var(--gray-200);
+	}
+
+	.head .title,
+	.head .count,
+	.head .new-group {
+		display: inline-block;
+		vertical-align: middle;
+	}
+
+	.head .new-group {
+		float: right;
+	}
+	.head .title {
+		font-size: 1.5rem;
+		color: var(--gray-700);
 	}
 </style>

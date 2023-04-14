@@ -28,7 +28,10 @@ export const currencies: {
 export const currency_codes = ['EUR', 'DKK', 'USD'] as const
 export type CurrencyCode = typeof currency_codes[number]
 
-export const format_currency = (amount: number, currency: CurrencyCode) => {
+export const format_currency = (
+	amount: number,
+	currency: CurrencyCode | string
+) => {
 	const currency_format = currencies[currency]
 	const formatted_amount = (amount / 10 ** currency_format.decimalPlaces)
 		.toString()
