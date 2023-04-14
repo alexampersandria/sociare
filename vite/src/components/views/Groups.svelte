@@ -24,6 +24,11 @@
 				if (data.error) {
 					alert(data.error)
 				} else {
+					data.sort((a, b) => {
+						return a.events[0].event.created_at < b.events[0].event.created_at
+							? 1
+							: -1
+					})
 					groups.set(data)
 				}
 				groups_fetch_completed.set(true)
@@ -126,8 +131,14 @@
 		{#each $groups as group}
 			<div class="group">
 				<h2>{group.group.name}</h2>
-				<div>{format_currency(group.group.total, group.group.currency)}</div>
-				<pre><code>{JSON.stringify(group, undefined, 2)}</code></pre>
+				<div>
+					{$_('group_total')}
+					{format_currency(group.group.total, group.group.currency)}
+					<pre
+						style="font-size: 0.8rem; border: 1px solid var(--gray-400); border-radius: 0.25rem; margin: 0.5rem; padding: 0.5rem;"
+						class="muted"><code>{JSON.stringify(group, undefined, 2)}</code
+						></pre>
+				</div>
 			</div>
 		{/each}
 	{:else if !$groups_fetch_completed}

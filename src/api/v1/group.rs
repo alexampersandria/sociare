@@ -100,6 +100,7 @@ pub fn get_group_listing(
     groups = schema::users_groups::table
       .filter(schema::users_groups::active.eq(true))
       .filter(schema::users_groups::user_id.eq(&session.id))
+      .order(schema::users_groups::created_at.desc())
       .inner_join(schema::groups::table)
       .select(util::Group::as_select())
       .get_results::<util::Group>(&mut conn);
@@ -256,8 +257,13 @@ pub fn create(req: &Request, Json(group): Json<NewGroup>) -> String {
       let user_group = crate::util::UserGroup::new_admin(&session.id, &group.id);
       let added_user_to_group = crate::util::diesel::user::add_to_group(&mut conn, &user_group);
       if added_user_to_group.is_ok() {
-        serde_json::to_string_pretty(&user_group)
-          .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
+        let logged_created_group = api::v1::log_simple(&session.id, &group.id, "created_group");
+        if logged_created_group.is_ok() {
+          serde_json::to_string_pretty(&user_group)
+            .unwrap_or("{\"error\": \"internal_server_error\"}".to_string())
+        } else {
+          "{\"error\": \"internal_server_error\"}".to_string()
+        }
       } else {
         "{\"error\": \"internal_server_error\"}".to_string()
       }
