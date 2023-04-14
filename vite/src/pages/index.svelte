@@ -8,8 +8,11 @@
 	import Login from '../components/Login.svelte'
 	import Button from '../components/Button.svelte'
 	import Spinner from '../components/Spinner.svelte'
+	import { currencies, currency_codes, format_currency } from '../lib/econ'
 
 	let show_login_modal = false
+
+	let test_currency_format = 12345
 </script>
 
 <svelte:head>
@@ -91,6 +94,13 @@
 		<div class="container">
 			<h4>Spinner</h4>
 			<Spinner />
+		</div>
+		<div class="container">
+			<h4>Currency Format</h4>
+			<input type="number" bind:value={test_currency_format} />
+			{#each currency_codes as currency}
+				<p>{format_currency(test_currency_format, currency)}</p>
+			{/each}
 		</div>
 	</section>
 </main>

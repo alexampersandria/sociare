@@ -7,7 +7,7 @@
 	import Button from '../Button.svelte'
 	import Modal from '../Modal.svelte'
 	import { createForm } from 'felte'
-	import { currencies } from '../../lib/econ'
+	import { currency_codes, format_currency } from '../../lib/econ'
 
 	const groups = writable([])
 	const groups_fetch_completed = writable(false)
@@ -62,17 +62,15 @@
 			}
 			if (!value.name) {
 				errors.name = 'error_group_name_required'
-			}
-			if (value.name.length > 48) {
+			} else if (value.name.length > 48) {
 				errors.name = 'error_group_name_too_long'
 			}
-			if (currencies.indexOf(value.currency) === -1) {
+			if (currency_codes.indexOf(value.currency) === -1) {
 				errors.currency = 'error_group_currency_not_supported'
 			}
 			if (!value.currency) {
 				errors.currency = 'error_group_currency_required'
-			}
-			if (value.currency.length !== 3) {
+			} else if (value.currency.length !== 3) {
 				errors.currency = 'error_group_currency_invalid_format'
 			}
 			return errors
@@ -116,6 +114,7 @@
 		{#each $groups as group}
 			<div class="group">
 				<h2>{group.group.name}</h2>
+				<div>{format_currency(group.group.total, group.group.currency)}</div>
 				<pre><code>{JSON.stringify(group, undefined, 2)}</code></pre>
 			</div>
 		{/each}
