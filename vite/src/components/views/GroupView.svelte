@@ -12,11 +12,34 @@
 	import { format_currency } from '../../lib/econ'
 	import { createForm } from 'felte'
 
+	let container
+
+	let scrolled = false
+	let bottomed = false
+	const on_scroll = () => {
+		if (container) {
+			scrolled = container.scrollTop > 0
+			bottomed =
+				container.scrollTop + container.clientHeight >= container.scrollHeight
+
+			if (!scrolled) {
+				get_more()
+			}
+		}
+	}
+
+	const scroll_to_bottom_of_container = () => {
+		if (container) {
+			container.scrollTop = container.scrollHeight
+		}
+	}
+
 	const go_back = () => {
 		open_group.set(null)
 		open_group_id.set(null)
 		scrolled = false
 		bottomed = false
+		can_load_more = true
 	}
 	const on_keydown = (event) => {
 		if (event.key === 'Enter') {
@@ -24,28 +47,72 @@
 		}
 	}
 
+	const limit = 32
+	let can_load_more = true
+
 	const group_fetch_completed = writable(false)
 	const get_group = () => {
 		if (open_group_id) {
 			group_fetch_completed.set(false)
-			fetch(`${import.meta.env.VITE_API_URL}/api/v1/groups/${$open_group_id}`, {
-				headers: {
-					Authorization: `Bearer ${$session}`,
-				},
-			})
+			fetch(
+				`${
+					import.meta.env.VITE_API_URL
+				}/api/v1/groups/${$open_group_id}?limit=${limit}`,
+				{
+					headers: {
+						Authorization: `Bearer ${$session}`,
+					},
+				}
+			)
 				.then((res) => res.json())
 				.then((data) => {
 					if (data.error) {
 						alert(data.error)
 					} else {
-						data.sort((a, b) => {
-							return a.events[0].event.created_at < b.events[0].event.created_at
-								? 1
-								: -1
-						})
 						open_group.set(data[0])
+						if (data[0].events.length < limit) {
+							can_load_more = false
+						}
 					}
 					group_fetch_completed.set(true)
+				})
+				.then(scroll_to_bottom_of_container)
+		}
+	}
+
+	let container_height = 0
+	const get_more = () => {
+		if (open_group_id && can_load_more) {
+			group_fetch_completed.set(false)
+			fetch(
+				`${
+					import.meta.env.VITE_API_URL
+				}/api/v1/groups/${$open_group_id}?limit=${limit}&offset=${
+					$open_group.events.length
+				}`,
+				{
+					headers: {
+						Authorization: `Bearer ${$session}`,
+					},
+				}
+			)
+				.then((res) => res.json())
+				.then((data) => {
+					if (data.error) {
+						alert(data.error)
+					} else {
+						container_height = container.scrollHeight
+						let new_group = $open_group
+						new_group.events = [...new_group.events, ...data[0].events]
+						open_group.set(new_group)
+						if (data[0].events.length < limit) {
+							can_load_more = false
+						}
+					}
+					group_fetch_completed.set(true)
+				})
+				.then(() => {
+					container.scrollTop = container.scrollHeight - container_height
 				})
 		}
 	}
@@ -97,25 +164,11 @@
 			get_group()
 		}
 	})
-
-	let container
-
-	let scrolled = false
-	let bottomed = false
-	const on_scroll = () => {
-		scrolled = container.scrollTop > 0
-		bottomed =
-			container.scrollTop + container.clientHeight >= container.scrollHeight
-	}
-
-	const scroll_to_bottom_of_container = () => {
-		container.scrollTop = container.scrollHeight
-	}
 </script>
 
 {#if $open_group}
 	<div
-		class="group theme-{$open_group.group.theme}"
+		class="group-view theme-{$open_group.group.theme}"
 		transition:fly={{ x: '100%', opacity: 1 }}
 		class:scrolled
 		class:bottomed
@@ -138,7 +191,10 @@
 			</div>
 		</div>
 		<div class="events">
-			{#each $open_group.events.reverse() as event}
+			{#if !can_load_more}
+				<div class="finished">{$_('reached_top_of_group')}</div>
+			{/if}
+			{#each $open_group.events.slice().reverse() as event}
 				{#if event.message || event.receipt || event.transaction}
 					<Message {event} />
 				{:else}
@@ -169,13 +225,12 @@
 {/if}
 
 <style>
-	.group {
+	.group-view {
 		position: absolute;
 		inset: 0;
 		background-color: var(--gray-200);
 		height: 100vh;
-		width: 100vw;
-		overflow-y: scroll;
+		overflow-y: auto;
 	}
 
 	.head {
@@ -214,12 +269,13 @@
 	.events {
 		padding: 1rem;
 		margin-bottom: 3rem;
+		margin-top: 1rem;
 	}
 
 	.bottom-actions {
 		position: fixed;
 		bottom: 0;
-		width: 100%;
+		right: 0;
 	}
 
 	.message-input {
@@ -229,7 +285,7 @@
 		transition: box-shadow 0.25s ease-in-out;
 	}
 
-	.group:not(.bottomed) .message-input {
+	.group-view:not(.bottomed) .message-input {
 		box-shadow: 0 0 2rem 2rem var(--gray-200);
 	}
 
@@ -271,5 +327,11 @@
 		margin-left: 1rem;
 		position: relative;
 		top: 0.25rem;
+	}
+
+	.finished {
+		text-align: center;
+		color: var(--gray-400);
+		margin-bottom: 2rem;
 	}
 </style>

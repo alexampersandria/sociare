@@ -51,5 +51,7 @@
 	"update_receipt": "edited a receipt",
 	"update_transaction": "edited a transaction",
 	"user_name_self": "You",
-	"send_message": "Send"
+	"send_message": "Send",
+	"reached_top_of_group": "You've reached the beginning 🌈",
+	"no_group_selected": "No group selected"
 }

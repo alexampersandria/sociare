@@ -20,7 +20,13 @@
 	}
 </script>
 
-<div class="group" on:click={on_click} on:keydown={on_keydown} tabindex="0">
+<div
+	class="group"
+	class:active={$open_group_id == group.group.id}
+	on:click={on_click}
+	on:keydown={on_keydown}
+	tabindex="0"
+>
 	<div class="head">
 		<div class="name">{group.group.name}</div>
 		<div class="total">
@@ -40,7 +46,7 @@
 				</div>
 				<div class="type">{$_(event.event.event)}</div>
 				<div class="time">
-					{moment(event.event.created_at).fromNow()}
+					{moment(event.event.created_at).fromNow(true)}
 				</div>
 			</div>
 		{/each}
@@ -91,5 +97,19 @@
 
 	.group:active {
 		background-color: var(--white);
+	}
+
+	@media (min-width: 920px) {
+		.group.active {
+			background-color: var(--pink-100);
+			box-shadow: 0 0 0 2px var(--pink-500);
+		}
+
+		.group.active .events .event .user,
+		.group.active .events .event .type,
+		.group.active .events .event .time {
+			display: inline-block;
+			color: var(--pink-400);
+		}
 	}
 </style>

@@ -10,6 +10,8 @@
 	import type { GroupListing } from '../../lib/types/GroupListing'
 	import Group from '../Group.svelte'
 	import NewGroup from '../NewGroup.svelte'
+	import { open_group } from '../../lib/stores/app'
+	import { fade } from 'svelte/transition'
 
 	const groups: Writable<GroupListing[] | []> = writable([])
 	const groups_fetch_completed = writable(false)
@@ -65,7 +67,7 @@
 </Modal>
 
 <div
-	class="group-container"
+	class="group-listings"
 	class:scrolled
 	bind:this={container}
 	on:scroll={on_scroll}
@@ -96,14 +98,17 @@
 	{:else}
 		<div class="no_groups_found">{$_('no_groups_found')}</div>
 	{/if}
+	{#if $open_group}
+		<div class="cover" transition:fade={{ duration: 200 }} />
+	{/if}
 </div>
 
 <style>
-	.group-container {
+	.group-listings {
 		position: absolute;
 		inset: 0;
 		height: 100vh;
-		overflow-y: scroll;
+		overflow-y: auto;
 		background-color: var(--gray-200);
 		min-width: 10rem;
 		flex: 1;
@@ -148,5 +153,14 @@
 	.head .title {
 		font-size: 1.5rem;
 		color: var(--gray-700);
+	}
+
+	.cover {
+		position: fixed;
+		inset: 0;
+		background-color: var(--black-300);
+		width: 100%;
+		height: 100vh;
+		pointer-events: none;
 	}
 </style>
