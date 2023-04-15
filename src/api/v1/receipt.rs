@@ -48,7 +48,7 @@ pub struct NewReceipt {
   #[validate(length(min = 1), length(max = 96))]
   pub group_id: String,
   pub amount: i64,
-  #[validate(length(min = 1), length(max = 768))]
+  #[validate(length(min = 0), length(max = 768))]
   pub info: String,
 }
 

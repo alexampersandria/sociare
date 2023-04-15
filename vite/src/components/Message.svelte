@@ -8,6 +8,7 @@
 	import { open_group, time_since } from '../lib/stores/app'
 	import { user_object } from '../lib/stores/session'
 	import { string_contains_only_emojis } from '../lib/emoji'
+	import { format_currency } from '../lib/econ'
 </script>
 
 <div class="wrapper" class:self={event.event.user_id === $user_object.id}>
@@ -46,7 +47,12 @@
 			</div>
 		{:else if event.receipt}
 			<div class="receipt">
-				{JSON.stringify(event.receipt)}
+				<div class="amount">
+					{format_currency(event.receipt.amount, $open_group.group.currency)}
+				</div>
+				{#if event.receipt.info}
+					<div class="info">{event.receipt.info}</div>
+				{/if}
 			</div>
 		{:else if event.transaction}
 			<div class="transaction">
@@ -67,7 +73,8 @@
 		text-align: right;
 	}
 
-	.message {
+	.message,
+	.receipt {
 		background: var(--gray-50);
 		color: var(--gray-500);
 		border-radius: 0.5rem;
@@ -75,6 +82,20 @@
 		margin: 0.5rem 0 1rem 0;
 		display: inline-block;
 		max-width: min(calc(100% - 4rem), 40rem);
+	}
+
+	.receipt {
+		text-align: center;
+	}
+
+	.receipt .amount {
+		font-size: 1.5rem;
+		padding: 0 2rem;
+		white-space: nowrap;
+	}
+
+	.receipt .info {
+		color: var(--gray-400);
 	}
 
 	.message.emoji-only {

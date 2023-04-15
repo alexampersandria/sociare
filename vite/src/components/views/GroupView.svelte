@@ -13,9 +13,13 @@
 	import Message from '../Message.svelte'
 	import GroupEvent from '../GroupEvent.svelte'
 
-	import ArrowLeft from 'carbon-icons-svelte/lib/ArrowLeft.svelte'
 	import { format_currency } from '../../lib/econ'
 	import { createForm } from 'felte'
+
+	import { Receipt, ArrowLeft } from 'carbon-icons-svelte'
+	import Overlay from '../Overlay.svelte'
+	import Button from '../Button.svelte'
+	import NewReceipt from './NewReceipt.svelte'
 
 	let container
 
@@ -173,6 +177,8 @@
 			get_group()
 		}
 	})
+
+	let show_receipt_overlay = false
 </script>
 
 {#if $open_group}
@@ -199,39 +205,72 @@
 				{format_currency($open_group.group.total, $open_group.group.currency)}
 			</div>
 		</div>
-		<div class="events">
-			{#if !can_load_more}
-				<div class="finished">{$_('reached_top_of_group')}</div>
-			{/if}
-			{#each $open_group.events.slice().reverse() as event}
-				{#if event.message || event.receipt || event.transaction}
-					<Message {event} />
-				{:else}
-					<GroupEvent {event} />
-				{/if}
-			{/each}
-		</div>
 
-		<div class="bottom-actions">
-			<div class="message-input">
-				<form use:send_message_form>
-					<input type="text" placeholder="Aa" name="content" />
-					<input
-						type="submit"
-						value={$_('send_message')}
-						class="button black"
-						disabled={!$send_message_data.content}
-					/>
-				</form>
-				<div class="send-emoji">
-					<a class="alt none" href="javascript:void(0);" on:click={send_emoji}>
-						{$open_group.group.emoji}
+		<div class="sticky-bottom-wrapper">
+			<div class="events">
+				{#if !can_load_more}
+					<div class="finished">{$_('reached_top_of_group')}</div>
+				{/if}
+				{#each $open_group.events.slice().reverse() as event}
+					{#if event.message || event.receipt || event.transaction}
+						<Message {event} />
+					{:else}
+						<GroupEvent {event} />
+					{/if}
+				{/each}
+			</div>
+
+			<div class="bottom-actions">
+				<div class="message-input">
+					<a
+						href="javascript:void(0);"
+						on:click={() => {
+							show_receipt_overlay = true
+						}}
+						class="alt none receipt"
+					>
+						<Receipt size={32} />
 					</a>
+					<form use:send_message_form>
+						<input type="text" placeholder="Aa" name="content" />
+						<input
+							type="submit"
+							value={$_('send_message')}
+							class="button black"
+							disabled={!$send_message_data.content}
+						/>
+					</form>
+					<div class="send-emoji">
+						<a
+							class="alt none"
+							href="javascript:void(0);"
+							on:click={send_emoji}
+						>
+							{$open_group.group.emoji}
+						</a>
+					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 {/if}
+
+<Overlay type="glass" show={show_receipt_overlay}>
+	<div class="container">
+		<Button
+			on:click={() => {
+				show_receipt_overlay = false
+			}}>get me out of here</Button
+		>
+		<NewReceipt
+			on:receipt_created={() => {
+				show_receipt_overlay = false
+				get_group()
+				get_groups($session)
+			}}
+		/>
+	</div>
+</Overlay>
 
 <style>
 	.group-view {
@@ -249,6 +288,14 @@
 		background-color: var(--gray-200);
 		transition: box-shadow 0.25s ease-in-out;
 		padding: 1rem;
+		z-index: 1;
+	}
+
+	.sticky-bottom-wrapper {
+		position: absolute;
+		bottom: 0;
+		max-height: 100%;
+		width: 100%;
 	}
 
 	.scrolled .head {
@@ -278,14 +325,16 @@
 
 	.events {
 		padding: 1rem;
-		margin-bottom: 3rem;
 		margin-top: 1rem;
 	}
 
 	.bottom-actions {
-		position: fixed;
+		position: sticky;
 		bottom: 0;
-		right: 0;
+		background-color: var(--gray-200);
+		display: flex;
+		justify-content: space-between;
+		padding-bottom: 1rem;
 	}
 
 	.message-input {
@@ -293,24 +342,45 @@
 		margin-right: 1rem;
 		background-color: var(--gray-200);
 		transition: box-shadow 0.25s ease-in-out;
+		display: flex;
+		align-items: center;
+		width: 100%;
+		justify-content: space-between;
 	}
 
 	.group-view:not(.bottomed) .message-input {
 		box-shadow: 0 0 1rem 1rem var(--gray-200);
 	}
 
-	.message-input input {
-		display: inline-block;
+	.message-input .receipt {
+		color: var(--gray-400);
+		margin: 0.25rem 1rem 0 1rem;
+	}
+
+	.message-input .receipt:hover {
+		color: var(--gray-500);
+	}
+
+	.message-input form {
+		display: flex;
+		align-items: center;
+		width: 100%;
+		flex-grow: 1;
+	}
+
+	.message-input input[type='submit'],
+	.message-input input[type='text'] {
+		margin: 0;
 	}
 
 	.message-input input[type='submit'] {
-		position: relative;
-		top: -1px;
 		margin-left: 0.5rem;
 	}
 
 	.message-input input[type='text'] {
 		background-color: var(--gray-300);
+		width: 100%;
+		flex-grow: 1;
 	}
 
 	.message-input input[type='text']:hover {
@@ -327,16 +397,9 @@
 		color: var(--gray-400);
 	}
 
-	.message-input form,
-	.send-emoji {
-		display: inline-block;
-	}
-
 	.send-emoji {
 		font-size: 2rem;
 		margin-left: 1rem;
-		position: relative;
-		top: 0.25rem;
 	}
 
 	.finished {
