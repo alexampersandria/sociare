@@ -311,3 +311,11 @@ input[type="submit"] {
   background-color: var(--red-200);
   color: var(--red-500);
 }
+
+img.rounded {
+  border-radius: 0.25em;
+}
+
+img.round {
+  border-radius: 9999em;
+}

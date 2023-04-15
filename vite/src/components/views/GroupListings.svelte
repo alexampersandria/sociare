@@ -1,26 +1,21 @@
 <script lang="ts">
-	import { _, locale } from 'svelte-i18n'
+	import { _ } from 'svelte-i18n'
 
-	import { goto, params } from '@roxi/routify'
-
-	import { session, user_object } from '../../lib/stores/session'
+	import { session } from '../../lib/stores/session'
 	import Button from '../Button.svelte'
 	import Modal from '../Modal.svelte'
 	import Group from '../Group.svelte'
-	import NewGroup from '../NewGroup.svelte'
+	import NewGroup from './NewGroup.svelte'
 	import {
 		get_groups,
 		groups,
 		groups_fetch_completed,
-		langs,
 		open_group,
-		open_group_id,
 	} from '../../lib/stores/app'
 	import { fade } from 'svelte/transition'
-	import { log_out } from '../../lib/auth'
+	import { createEventDispatcher } from 'svelte'
 
 	let container
-	const limit = 1
 
 	get_groups($session)
 
@@ -39,6 +34,11 @@
 			bottomed =
 				container.scrollTop + container.clientHeight >= container.scrollHeight
 		}
+	}
+
+	const dispatch = createEventDispatcher()
+	const user_settings = () => {
+		dispatch('user_settings')
 	}
 </script>
 
@@ -86,17 +86,9 @@
 		<div class="no_groups_found">{$_('no_groups_found')}</div>
 	{/if}
 	<div class="bottom-section">
-		<Button on:click={log_out} variant="secondary">{$_('log_out')}</Button>
-		{#each langs as lang}
-			{#if lang !== $locale}
-				<Button
-					on:click={() => {
-						locale.set(lang)
-					}}
-					variant="hollow">🌍</Button
-				>
-			{/if}
-		{/each}
+		<Button on:click={user_settings} variant="secondary"
+			>{$_('user_settings')}</Button
+		>
 	</div>
 	{#if $open_group}
 		<div class="cover" transition:fade={{ duration: 200 }} />

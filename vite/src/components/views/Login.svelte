@@ -2,7 +2,7 @@
 	import { _ } from 'svelte-i18n'
 
 	import { createForm } from 'felte'
-	import { log_in, sign_up } from '../lib/auth'
+	import { log_in, sign_up } from '../../lib/auth'
 	import { goto } from '@roxi/routify'
 	import { validate } from 'email-validator'
 

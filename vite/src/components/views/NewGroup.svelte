@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { createForm } from 'felte'
-	import { currency_codes } from '../lib/econ'
+	import { currency_codes } from '../../lib/econ'
 
 	import { _ } from 'svelte-i18n'
 
 	import { createEventDispatcher } from 'svelte'
 
-	import { session } from '../lib/stores/session'
+	import { session } from '../../lib/stores/session'
 
 	const dispatch = createEventDispatcher()
 

@@ -18,12 +18,16 @@
 
 	import { is_desktop } from '../lib/stores/app'
 	import Spinner from '../components/Spinner.svelte'
+	import Overlay from '../components/Overlay.svelte'
+	import UserSettings from '../components/views/UserSettings.svelte'
 
 	is_desktop.set(window.innerWidth >= 920)
 
 	window.addEventListener('resize', () => {
 		is_desktop.set(window.innerWidth >= 920)
 	})
+
+	let show_user_overlay = false
 </script>
 
 <svelte:head>
@@ -32,7 +36,11 @@
 {#if $user_object}
 	<div class="app">
 		<div class="left">
-			<GroupListings />
+			<GroupListings
+				on:user_settings={() => {
+					show_user_overlay = true
+				}}
+			/>
 		</div>
 		<div class="right">
 			<div class="no-group">
@@ -40,6 +48,15 @@
 			</div>
 			<GroupView />
 		</div>
+		{#if show_user_overlay}
+			<Overlay type="glass" show={show_user_overlay}>
+				<UserSettings
+					on:close={() => {
+						show_user_overlay = false
+					}}
+				/>
+			</Overlay>
+		{/if}
 	</div>
 {:else}
 	<div class="no-user-object">

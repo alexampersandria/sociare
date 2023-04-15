@@ -19,6 +19,7 @@
 		"email-validator": "^2.0.4",
 		"felte": "^1.2.7",
 		"js-cookie": "^3.0.1",
+		"js-md5": "^0.7.3",
 		"moment": "^2.29.4",
 		"svelte": "^3.55.1",
 		"svelte-check": "^2.10.3",

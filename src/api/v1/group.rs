@@ -115,6 +115,7 @@ pub fn get_group_listing(
         schema::users::id,
         schema::users::username,
         schema::users::name,
+        schema::users::email,
         schema::users::mobilepay,
         schema::users::paypal_me,
         schema::users_groups::nickname,
@@ -123,6 +124,7 @@ pub fn get_group_listing(
         schema::users::created_at,
       ))
       .get_results::<(
+        String,
         String,
         String,
         String,
@@ -203,12 +205,13 @@ pub fn get_group_listing(
               id: user.1.clone(),
               username: user.2.clone(),
               name: user.3.clone(),
-              mobilepay: user.4.clone(),
-              paypal_me: user.5.clone(),
-              nickname: user.6.clone(),
-              is_admin: user.7,
-              active: user.8,
-              created_at: user.9,
+              email: user.4.clone(),
+              mobilepay: user.5.clone(),
+              paypal_me: user.6.clone(),
+              nickname: user.7.clone(),
+              is_admin: user.8,
+              active: user.9,
+              created_at: user.10,
             });
           }
         }
@@ -661,6 +664,7 @@ pub struct GroupMemberUserData {
   pub id: String,
   pub username: String,
   pub name: String,
+  pub email: String,
   pub mobilepay: Option<String>,
   pub paypal_me: Option<String>,
   pub nickname: Option<String>,
@@ -676,6 +680,7 @@ impl GroupMemberUserData {
       String,
       String,
       String,
+      String,
       Option<String>,
       Option<String>,
       Option<String>,
@@ -688,12 +693,13 @@ impl GroupMemberUserData {
       id: result.0,
       username: result.1,
       name: result.2,
-      mobilepay: result.3,
-      paypal_me: result.4,
-      nickname: result.5,
-      is_admin: result.6,
-      active: result.7,
-      created_at: result.8,
+      email: result.3,
+      mobilepay: result.4,
+      paypal_me: result.5,
+      nickname: result.6,
+      is_admin: result.7,
+      active: result.8,
+      created_at: result.9,
     }
   }
 }

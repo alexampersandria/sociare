@@ -76,8 +76,10 @@
 						alert(data.error)
 					} else {
 						open_group.set(data[0])
-						if (data[0].events.length < limit) {
-							can_load_more = false
+						if (data[0].events) {
+							if (data[0].events.length < limit) {
+								can_load_more = false
+							}
 						}
 					}
 					group_fetch_completed.set(true)

@@ -5,7 +5,7 @@
 
 	import { session_is_valid } from '../lib/stores/session'
 	import Modal from '../components/Modal.svelte'
-	import Login from '../components/Login.svelte'
+	import Login from '../components/views/Login.svelte'
 	import Button from '../components/Button.svelte'
 	import Spinner from '../components/Spinner.svelte'
 	import { currency_codes, format_currency } from '../lib/econ'

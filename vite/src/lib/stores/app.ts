@@ -35,6 +35,7 @@ export const is_desktop = writable(false)
 
 export const langs = ['en', 'da']
 
+// @ts-ignore
 import moment from 'moment/min/moment-with-locales'
 
 export const time_since = (

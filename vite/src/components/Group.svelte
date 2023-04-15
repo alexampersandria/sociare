@@ -8,6 +8,7 @@
 	import { _, locale } from 'svelte-i18n'
 	import { open_group_id, time_since } from '../lib/stores/app'
 	import { user_object } from '../lib/stores/session'
+	import { gravatar } from '../lib/gravatar'
 
 	const on_click = () => {
 		open_group_id.set(group.group.id)
@@ -17,14 +18,16 @@
 			on_click()
 		}
 	}
+
+	const users_to_show = 4
 </script>
 
-<div
-	class="group"
+<a
+	href="javascript:void(0);"
+	class="group none"
 	class:active={$open_group_id == group.group.id}
 	on:click={on_click}
 	on:keydown={on_keydown}
-	tabindex="0"
 >
 	<div class="head">
 		<div class="name">{group.group.name}</div>
@@ -65,10 +68,23 @@
 			</div>
 		{/each}
 	</div>
-</div>
+	<div class="users">
+		{#each group.users.slice(0, users_to_show) as user}
+			<div class="gravatar">
+				<img class="round" src={gravatar(user.email, 48)} alt={user.name} />
+			</div>
+		{/each}
+		{#if group.users.length > users_to_show}
+			<div class="more">
+				<div class="inner">+{Math.abs(group.users.length - users_to_show)}</div>
+			</div>
+		{/if}
+	</div>
+</a>
 
 <style>
 	.group {
+		display: block;
 		background-color: var(--gray-50);
 		border-radius: 0.25em;
 		padding: 1em;
@@ -118,6 +134,37 @@
 
 	.group:active {
 		background-color: var(--white);
+	}
+
+	.users {
+		margin-top: 0.5rem;
+	}
+
+	.users .gravatar,
+	.users .more {
+		display: inline-block;
+		width: 1rem;
+	}
+
+	.users .gravatar img,
+	.users .more {
+		width: 1.5rem;
+		height: 1.5rem;
+		overflow: hidden;
+		border: 2px solid var(--gray-50);
+	}
+
+	.users .more {
+		background-color: var(--gray-300);
+		border-radius: 50%;
+		color: var(--gray-500);
+		text-align: center;
+		font-size: 0.8rem;
+	}
+
+	.users .more .inner {
+		position: relative;
+		top: 0.25rem;
 	}
 
 	@media (min-width: 920px) {
