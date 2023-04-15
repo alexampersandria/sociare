@@ -16,7 +16,6 @@
 	import ArrowLeft from 'carbon-icons-svelte/lib/ArrowLeft.svelte'
 	import { format_currency } from '../../lib/econ'
 	import { createForm } from 'felte'
-	import { goto } from '@roxi/routify'
 
 	let container
 
@@ -59,6 +58,7 @@
 	const group_fetch_completed = writable(false)
 	const get_group = () => {
 		if (open_group_id) {
+			can_load_more = true
 			group_fetch_completed.set(false)
 			fetch(
 				`${

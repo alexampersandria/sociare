@@ -7,6 +7,7 @@
 	import { get_user_name_by_id } from '../lib/types/GroupListing'
 	import { open_group, time_since } from '../lib/stores/app'
 	import { user_object } from '../lib/stores/session'
+	import { string_contains_only_emojis } from '../lib/emoji'
 </script>
 
 <div class="wrapper" class:self={event.event.user_id === $user_object.id}>
@@ -36,15 +37,22 @@
 		</div>
 	</div>
 	<div class="message-wrapper">
-		<div class="message">
-			{#if event.message}
+		{#if event.message}
+			<div
+				class="message"
+				class:emoji-only={string_contains_only_emojis(event.message.content)}
+			>
 				{event.message.content}
-			{:else if event.receipt}
+			</div>
+		{:else if event.receipt}
+			<div class="receipt">
 				{JSON.stringify(event.receipt)}
-			{:else if event.transaction}
+			</div>
+		{:else if event.transaction}
+			<div class="transaction">
 				{JSON.stringify(event.transaction)}
-			{/if}
-		</div>
+			</div>
+		{/if}
 	</div>
 </div>
 
@@ -67,6 +75,12 @@
 		margin: 0.5rem 0 1rem 0;
 		display: inline-block;
 		max-width: min(calc(100% - 4rem), 40rem);
+	}
+
+	.message.emoji-only {
+		font-size: 2rem;
+		background: none;
+		padding: 0;
 	}
 
 	.self .message-wrapper {
