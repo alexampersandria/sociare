@@ -13,7 +13,6 @@
 
 	const on_click = () => {
 		open_group_id.set(group.group.id)
-		$goto(`/app/${group.group.id}`)
 	}
 	const on_keydown = (event) => {
 		if (event.key === 'Enter') {

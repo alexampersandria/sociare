@@ -5,9 +5,9 @@
 	import {
 		session_is_valid,
 		session_fetch_completed,
-	} from '../../lib/stores/session'
-	import GroupListings from '../../components/views/GroupListings.svelte'
-	import GroupView from '../../components/views/GroupView.svelte'
+	} from '../lib/stores/session'
+	import GroupListings from '../components/views/GroupListings.svelte'
+	import GroupView from '../components/views/GroupView.svelte'
 
 	session_is_valid.subscribe((is_valid) => {
 		if (!is_valid && session_fetch_completed) {
@@ -15,27 +15,12 @@
 		}
 	})
 
-	import { params } from '@roxi/routify'
-	import { groups, is_desktop, open_group_id } from '../../lib/stores/app'
+	import { is_desktop } from '../lib/stores/app'
 
 	is_desktop.set(window.innerWidth >= 920)
 
 	window.addEventListener('resize', () => {
 		is_desktop.set(window.innerWidth >= 920)
-	})
-
-	if ($params.id && !$open_group_id && $is_desktop) {
-		open_group_id.set($params.id)
-	}
-
-	const default_group = () => {
-		if ($groups.length > 0 && $is_desktop && !$open_group_id && !$params.id) {
-			open_group_id.set($groups[0].group.id)
-		}
-	}
-
-	groups.subscribe(() => {
-		default_group()
 	})
 </script>
 
