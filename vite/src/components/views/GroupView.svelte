@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n'
 
-	import { open_group, open_group_id } from '../../lib/stores/app'
+	import { is_desktop, open_group, open_group_id } from '../../lib/stores/app'
 	import { session } from '../../lib/stores/session'
 	import { writable } from 'svelte/store'
 	import { fly } from 'svelte/transition'
@@ -11,6 +11,7 @@
 	import ArrowLeft from 'carbon-icons-svelte/lib/ArrowLeft.svelte'
 	import { format_currency } from '../../lib/econ'
 	import { createForm } from 'felte'
+	import { goto } from '@roxi/routify'
 
 	let container
 
@@ -169,7 +170,7 @@
 {#if $open_group}
 	<div
 		class="group-view theme-{$open_group.group.theme}"
-		transition:fly={{ x: '100%', opacity: 1 }}
+		transition:fly={{ x: $is_desktop ? '0%' : '100%', opacity: 1 }}
 		class:scrolled
 		class:bottomed
 		bind:this={container}

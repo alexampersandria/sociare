@@ -9,9 +9,11 @@
 	import moment from 'moment'
 	import { open_group_id } from '../lib/stores/app'
 	import { user_object } from '../lib/stores/session'
+	import { goto } from '@roxi/routify'
 
 	const on_click = () => {
 		open_group_id.set(group.group.id)
+		$goto(`/app/${group.group.id}`)
 	}
 	const on_keydown = (event) => {
 		if (event.key === 'Enter') {
@@ -36,15 +38,30 @@
 	<div class="events">
 		{#each group.events as event}
 			<div class="event">
-				<div class="user">
-					{get_user_name_by_id(group, event.event.user_id, $user_object.id) ===
-					'user_name_self'
-						? $_(
-								get_user_name_by_id(group, event.event.user_id, $user_object.id)
-						  )
-						: get_user_name_by_id(group, event.event.user_id, $user_object.id)}
+				<div class="action">
+					<span class="user">
+						{get_user_name_by_id(
+							group,
+							event.event.user_id,
+							$user_object.id
+						) === 'user_name_self'
+							? $_(
+									get_user_name_by_id(
+										group,
+										event.event.user_id,
+										$user_object.id
+									)
+							  )
+							: get_user_name_by_id(
+									group,
+									event.event.user_id,
+									$user_object.id
+							  )}</span
+					>{#if event.message}<span class="message"
+							>: {event.message.content}</span
+						>{:else}<span class="type">&nbsp;{$_(event.event.event)}</span>
+					{/if}
 				</div>
-				<div class="type">{$_(event.event.event)}</div>
 				<div class="time">
 					{moment(event.event.created_at).fromNow(true)}
 				</div>
@@ -86,17 +103,18 @@
 		text-overflow: ellipsis;
 	}
 
-	.events .event .user,
-	.events .event .type,
-	.events .event .time {
-		display: inline-block;
+	.events .event {
 		color: var(--gray-400);
+		display: flex;
+		justify-content: space-between;
+		white-space: nowrap;
 	}
 
-	.events .event .time {
-		float: right;
+	.events .event .action {
+		justify-content: space-between;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
-
 	.group:hover {
 		background-color: var(--gray-100);
 	}
@@ -111,10 +129,7 @@
 			box-shadow: 0 0 0 2px var(--pink-500);
 		}
 
-		.group.active .events .event .user,
-		.group.active .events .event .type,
-		.group.active .events .event .time {
-			display: inline-block;
+		.group.active .events .event {
 			color: var(--pink-400);
 		}
 	}

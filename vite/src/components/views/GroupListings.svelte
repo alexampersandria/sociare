@@ -1,20 +1,20 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n'
 
-	import { session } from '../../lib/stores/session'
+	import { goto, params } from '@roxi/routify'
 
-	import { writable, type Writable } from 'svelte/store'
+	import { session } from '../../lib/stores/session'
 	import Button from '../Button.svelte'
 	import Modal from '../Modal.svelte'
-
-	import type { GroupListing } from '../../lib/types/GroupListing'
 	import Group from '../Group.svelte'
 	import NewGroup from '../NewGroup.svelte'
-	import { open_group } from '../../lib/stores/app'
+	import {
+		groups,
+		groups_fetch_completed,
+		open_group,
+		open_group_id,
+	} from '../../lib/stores/app'
 	import { fade } from 'svelte/transition'
-
-	const groups: Writable<GroupListing[] | []> = writable([])
-	const groups_fetch_completed = writable(false)
 
 	let container
 	const limit = 1
