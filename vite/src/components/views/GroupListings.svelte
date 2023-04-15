@@ -17,10 +17,11 @@
 	const groups_fetch_completed = writable(false)
 
 	let container
+	const limit = 1
 
 	const get_groups = () => {
 		groups_fetch_completed.set(false)
-		fetch(`${import.meta.env.VITE_API_URL}/api/v1/groups`, {
+		fetch(`${import.meta.env.VITE_API_URL}/api/v1/groups?limit=${limit}`, {
 			headers: {
 				Authorization: `Bearer ${$session}`,
 			},
@@ -134,6 +135,7 @@
 		top: 0;
 		background-color: var(--gray-200);
 		transition: box-shadow 0.25s ease-in-out;
+		z-index: 1;
 	}
 
 	.scrolled .head {
@@ -162,5 +164,6 @@
 		width: 100%;
 		height: 100vh;
 		pointer-events: none;
+		z-index: 2;
 	}
 </style>

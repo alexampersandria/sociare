@@ -14,8 +14,6 @@
 			$goto('/login')
 		}
 	})
-
-	import { open_group } from '../lib/stores/app'
 </script>
 
 <svelte:head>

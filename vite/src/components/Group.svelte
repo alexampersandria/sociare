@@ -60,24 +60,30 @@
 		padding: 1em;
 		cursor: pointer;
 		transition: background-color 0.25s;
+		overflow: hidden;
 	}
 
 	.group:not(:last-child) {
 		margin-bottom: 1em;
 	}
 
+	.group .head {
+		display: flex;
+		justify-content: space-between;
+	}
+
 	.group .head .name,
 	.group .head .total {
-		display: inline-block;
+		white-space: nowrap;
 		color: var(--gray-700);
 	}
 
 	.group .head .name {
+		position: relative;
+		top: -0.5rem;
 		font-size: 1.5em;
-	}
-
-	.group .head .total {
-		float: right;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	.events .event .user,

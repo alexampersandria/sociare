@@ -231,6 +231,7 @@
 		background-color: var(--gray-200);
 		height: 100vh;
 		overflow-y: auto;
+		z-index: 10;
 	}
 
 	.head {
