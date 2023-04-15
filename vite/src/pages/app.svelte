@@ -5,6 +5,7 @@
 	import {
 		session_is_valid,
 		session_fetch_completed,
+		user_object,
 	} from '../lib/stores/session'
 	import GroupListings from '../components/views/GroupListings.svelte'
 	import GroupView from '../components/views/GroupView.svelte'
@@ -16,6 +17,7 @@
 	})
 
 	import { is_desktop } from '../lib/stores/app'
+	import Spinner from '../components/Spinner.svelte'
 
 	is_desktop.set(window.innerWidth >= 920)
 
@@ -27,19 +29,33 @@
 <svelte:head>
 	<title>{$_('page_title')} &mdash; {$_('app_page_title')}</title>
 </svelte:head>
-<div class="app">
-	<div class="left">
-		<GroupListings />
-	</div>
-	<div class="right">
-		<div class="no-group">
-			<div class="no-group-message">{$_('no_group_selected')}</div>
+{#if $user_object}
+	<div class="app">
+		<div class="left">
+			<GroupListings />
 		</div>
-		<GroupView />
+		<div class="right">
+			<div class="no-group">
+				<div class="no-group-message">{$_('no_group_selected')}</div>
+			</div>
+			<GroupView />
+		</div>
 	</div>
-</div>
+{:else}
+	<div class="no-user-object">
+		<Spinner center />
+	</div>
+{/if}
 
 <style>
+	.no-user-object {
+		position: relative;
+		inset: 0;
+		height: 100vh;
+		background: var(--gray-200);
+		color: var(--gray-400);
+	}
+
 	.app {
 		position: relative;
 		overflow: hidden;

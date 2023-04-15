@@ -18,6 +18,7 @@
 	"log_in_submit": "Log In",
 	"sign_up_submit": "Sign Up",
 	"log_in_prompt": "Don't have an account?",
+	"log_out": "Log Out",
 	"sign_up_prompt": "Already have an account?",
 	"groups": "Groups",
 	"new_group_button": "New Group",

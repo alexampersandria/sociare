@@ -5,11 +5,9 @@
 		type GroupListing,
 	} from '../lib/types/GroupListing'
 	export let group: GroupListing
-	import { _ } from 'svelte-i18n'
-	import moment from 'moment'
-	import { open_group_id } from '../lib/stores/app'
+	import { _, locale } from 'svelte-i18n'
+	import { open_group_id, time_since } from '../lib/stores/app'
 	import { user_object } from '../lib/stores/session'
-	import { goto } from '@roxi/routify'
 
 	const on_click = () => {
 		open_group_id.set(group.group.id)
@@ -62,7 +60,7 @@
 					{/if}
 				</div>
 				<div class="time">
-					{moment(event.event.created_at).fromNow(true)}
+					{time_since(event.event.created_at, $locale, true)}
 				</div>
 			</div>
 		{/each}

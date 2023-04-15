@@ -1,12 +1,11 @@
 <script lang="ts">
-	import { _ } from 'svelte-i18n'
+	import { _, locale } from 'svelte-i18n'
 	import type { GroupEvent } from '../lib/types/GroupEvent'
 
 	export let event: GroupEvent
 
 	import { get_user_name_by_id } from '../lib/types/GroupListing'
-	import { open_group } from '../lib/stores/app'
-	import moment from 'moment'
+	import { open_group, time_since } from '../lib/stores/app'
 	import { user_object } from '../lib/stores/session'
 </script>
 
@@ -33,7 +32,7 @@
 		</div>
 
 		<div class="time">
-			&mdash; {moment(event.event.created_at).fromNow()}
+			&mdash; {time_since(event.event.created_at, $locale)}
 		</div>
 	</div>
 	<div class="message-wrapper">

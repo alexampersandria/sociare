@@ -50,22 +50,30 @@
 	import { writable } from 'svelte/store'
 
 	import { register, init } from 'svelte-i18n'
+	import { langs } from './lib/stores/app'
 
 	register('en', () => import('./lang/en.json'))
+	register('da', () => import('./lang/da.json'))
+
+	const fragment = location.pathname.split('/')[1]
+
+	const lang = langs.includes(fragment) ? `/${fragment}` : ''
+
+	const config = {
+		urlTransform: {
+			//add the language prefix for the browser
+			apply: (url) => lang + url,
+			//remove the language prefix for Routify
+			remove: (url) => url.replace(lang, ''),
+		},
+	}
 
 	init({
-		fallbackLocale: 'en',
-	})
-
-	init({
-		// fallback to en if current locale is not in the dictionary
 		fallbackLocale: 'en',
 		initialLocale: 'en',
 	})
-
-	import { page } from '@roxi/routify'
 </script>
 
-<Router {routes} />
+<Router {routes} {config} />
 
 <Preloader show={$show_preloader} />

@@ -1,59 +1,44 @@
 <script lang="ts">
-	import { _ } from 'svelte-i18n'
+	import { _, locale } from 'svelte-i18n'
 
 	import { goto, params } from '@roxi/routify'
 
-	import { session } from '../../lib/stores/session'
+	import { session, user_object } from '../../lib/stores/session'
 	import Button from '../Button.svelte'
 	import Modal from '../Modal.svelte'
 	import Group from '../Group.svelte'
 	import NewGroup from '../NewGroup.svelte'
 	import {
+		get_groups,
 		groups,
 		groups_fetch_completed,
+		langs,
 		open_group,
 		open_group_id,
 	} from '../../lib/stores/app'
 	import { fade } from 'svelte/transition'
+	import { log_out } from '../../lib/auth'
 
 	let container
 	const limit = 1
 
-	const get_groups = () => {
-		groups_fetch_completed.set(false)
-		fetch(`${import.meta.env.VITE_API_URL}/api/v1/groups?limit=${limit}`, {
-			headers: {
-				Authorization: `Bearer ${$session}`,
-			},
-		})
-			.then((res) => res.json())
-			.then((data) => {
-				if (data.error) {
-					alert(data.error)
-				} else {
-					data.sort((a, b) => {
-						return a.events[0].event.created_at < b.events[0].event.created_at
-							? 1
-							: -1
-					})
-					groups.set(data)
-				}
-				groups_fetch_completed.set(true)
-			})
-	}
-
-	get_groups()
+	get_groups($session)
 
 	let show_new_group_modal = false
 
 	const group_created = () => {
 		show_new_group_modal = false
-		get_groups()
+		get_groups($session)
 	}
 
 	let scrolled = false
+	let bottomed = false
 	const on_scroll = () => {
-		scrolled = container.scrollTop > 0
+		if (container) {
+			scrolled = container.scrollTop > 0
+			bottomed =
+				container.scrollTop + container.clientHeight >= container.scrollHeight
+		}
 	}
 </script>
 
@@ -70,6 +55,7 @@
 <div
 	class="group-listings"
 	class:scrolled
+	class:bottomed
 	bind:this={container}
 	on:scroll={on_scroll}
 >
@@ -99,6 +85,19 @@
 	{:else}
 		<div class="no_groups_found">{$_('no_groups_found')}</div>
 	{/if}
+	<div class="bottom-section">
+		<Button on:click={log_out} variant="secondary">{$_('log_out')}</Button>
+		{#each langs as lang}
+			{#if lang !== $locale}
+				<Button
+					on:click={() => {
+						locale.set(lang)
+					}}
+					variant="hollow">🌍</Button
+				>
+			{/if}
+		{/each}
+	</div>
 	{#if $open_group}
 		<div class="cover" transition:fade={{ duration: 200 }} />
 	{/if}
@@ -139,7 +138,7 @@
 	}
 
 	.scrolled .head {
-		box-shadow: 0 0 3rem 3rem var(--gray-200);
+		box-shadow: 0 0 2rem 2rem var(--gray-200);
 	}
 
 	.head .title,
@@ -155,6 +154,19 @@
 	.head .title {
 		font-size: 1.5rem;
 		color: var(--gray-700);
+	}
+
+	.bottom-section {
+		position: sticky;
+		bottom: 0;
+		background-color: var(--gray-200);
+		padding: 1rem;
+		display: flex;
+		justify-content: space-between;
+	}
+
+	.group-listings:not(.bottomed) .bottom-section {
+		box-shadow: 0 0 1rem 1rem var(--gray-200);
 	}
 
 	.cover {

@@ -1,7 +1,12 @@
 <script lang="ts">
 	import { _ } from 'svelte-i18n'
 
-	import { is_desktop, open_group, open_group_id } from '../../lib/stores/app'
+	import {
+		get_groups,
+		is_desktop,
+		open_group,
+		open_group_id,
+	} from '../../lib/stores/app'
 	import { session } from '../../lib/stores/session'
 	import { writable } from 'svelte/store'
 	import { fly } from 'svelte/transition'
@@ -139,6 +144,7 @@
 				alert(data.error)
 			} else {
 				get_group()
+				get_groups($session)
 				send_message_unsetField('content')
 			}
 		}
@@ -244,7 +250,7 @@
 	}
 
 	.scrolled .head {
-		box-shadow: 0 0 3rem 3rem var(--gray-200);
+		box-shadow: 0 0 2rem 2rem var(--gray-200);
 	}
 
 	.head .name,
@@ -288,7 +294,7 @@
 	}
 
 	.group-view:not(.bottomed) .message-input {
-		box-shadow: 0 0 2rem 2rem var(--gray-200);
+		box-shadow: 0 0 1rem 1rem var(--gray-200);
 	}
 
 	.message-input input {
