@@ -50,5 +50,6 @@
 	"update_message": "edited a message",
 	"update_receipt": "edited a receipt",
 	"update_transaction": "edited a transaction",
-	"user_name_self": "You"
+	"user_name_self": "You",
+	"send_message": "Send"
 }

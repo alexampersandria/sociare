@@ -31,8 +31,9 @@
 						$user_object.id
 				  )}
 		</div>
+
 		<div class="time">
-			{moment(event.event.created_at).fromNow()}
+			&mdash; {moment(event.event.created_at).fromNow()}
 		</div>
 	</div>
 	<div class="message-wrapper">
