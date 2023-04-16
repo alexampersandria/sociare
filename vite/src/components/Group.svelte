@@ -132,6 +132,11 @@
 		background-color: var(--gray-100);
 	}
 
+	.group:hover .users .gravatar img,
+	.group:hover .users .more {
+		border-color: var(--gray-100);
+	}
+
 	.group:active {
 		background-color: var(--white);
 	}
@@ -171,6 +176,11 @@
 		.group.active {
 			background-color: var(--pink-100);
 			box-shadow: 0 0 0 2px var(--pink-500);
+		}
+
+		.group.active .users .gravatar img,
+		.group.active .users .more {
+			border-color: var(--pink-100);
 		}
 
 		.group.active .events .event {

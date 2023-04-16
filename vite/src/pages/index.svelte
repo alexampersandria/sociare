@@ -9,6 +9,7 @@
 	import Button from '../components/Button.svelte'
 	import Spinner from '../components/Spinner.svelte'
 	import { currency_codes, format_currency } from '../lib/econ'
+	import CurrencyInput from '../components/CurrencyInput.svelte'
 
 	let show_login_modal = false
 
@@ -78,6 +79,10 @@
 
 	<section>
 		<div class="container" style="margin-top:2rem;">
+			<h4>Currency Input</h4>
+			<CurrencyInput name="test_currency_input" currency="EUR" />
+		</div>
+		<div class="container">
 			<h4>Buttons</h4>
 			<Button variant="primary">Primary</Button>
 			<Button variant="black">Black</Button>

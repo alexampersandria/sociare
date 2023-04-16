@@ -65,6 +65,14 @@ a.none {
   padding: 0 1rem;
 }
 
+.container.l {
+  max-width: 1280px;
+}
+
+.container.s {
+  max-width: 640px;
+}
+
 .button {
   vertical-align: middle;
   display: inline-block;

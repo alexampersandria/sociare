@@ -30,12 +30,18 @@ export type CurrencyCode = typeof currency_codes[number]
 
 export const format_currency = (
 	amount: number,
-	currency: CurrencyCode | string
+	currency: CurrencyCode | string,
+	with_prefix_suffix = true
 ) => {
 	const currency_format = currencies[currency]
 	const formatted_amount = (amount / 10 ** currency_format.decimalPlaces)
+		.toFixed(currency_format.decimalPlaces)
 		.toString()
 		.replace('.', currency_format.decimalSeparator)
 		.replace(/\B(?=(\d{3})+(?!\d))/g, currency_format.thousandsSeparator)
-	return `${currency_format.prefix}${formatted_amount}${currency_format.suffix}`
+	if (with_prefix_suffix) {
+		return `${currency_format.prefix}${formatted_amount}${currency_format.suffix}`
+	} else {
+		return formatted_amount
+	}
 }

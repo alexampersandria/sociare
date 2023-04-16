@@ -20,6 +20,7 @@
 	import Overlay from '../Overlay.svelte'
 	import Button from '../Button.svelte'
 	import NewReceipt from './NewReceipt.svelte'
+	import Modal from '../Modal.svelte'
 
 	let container
 
@@ -255,22 +256,21 @@
 	</div>
 {/if}
 
-<Overlay type="glass" show={show_receipt_overlay}>
-	<div class="container">
-		<Button
-			on:click={() => {
-				show_receipt_overlay = false
-			}}>get me out of here</Button
-		>
-		<NewReceipt
-			on:receipt_created={() => {
-				show_receipt_overlay = false
-				get_group()
-				get_groups($session)
-			}}
-		/>
-	</div>
-</Overlay>
+<Modal
+	type="glass"
+	show={show_receipt_overlay}
+	on:close={() => {
+		show_receipt_overlay = false
+	}}
+>
+	<NewReceipt
+		on:receipt_created={() => {
+			show_receipt_overlay = false
+			get_group()
+			get_groups($session)
+		}}
+	/>
+</Modal>
 
 <style>
 	.group-view {

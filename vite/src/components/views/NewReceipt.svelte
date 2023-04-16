@@ -7,7 +7,7 @@
 
 	import { session } from '../../lib/stores/session'
 	import { open_group, open_group_id } from '../../lib/stores/app'
-	import { format_currency } from '../../lib/econ'
+	import CurrencyInput from '../CurrencyInput.svelte'
 
 	const dispatch = createEventDispatcher()
 
@@ -28,7 +28,8 @@
 					},
 					body: JSON.stringify({
 						group_id: $open_group_id,
-						...values,
+						amount: raw_currency_value,
+						info: values.info,
 					}),
 				}
 			)
@@ -45,7 +46,8 @@
 				info: '',
 			}
 			if (value.amount) {
-				if (!Number.isInteger(value.amount)) {
+				let only_0_to_9 = parseInt(value.amount.replace(/[^0-9]/g, ''))
+				if (!Number.isInteger(only_0_to_9)) {
 					errors.amount = $_('error_receipt_amount_not_integer')
 				}
 			}
@@ -57,15 +59,22 @@
 			return errors
 		},
 	})
+
+	let raw_currency_value = 0
 </script>
 
 <form use:new_receipt_form class="wide">
 	<label for="amount">{$_('amount_label')}</label>
-	<input type="number" name="amount" />
+	<CurrencyInput
+		on:blur={(event) => {
+			raw_currency_value = event.detail.raw
+		}}
+		name="amount"
+		currency={$open_group.group.currency}
+	/>
 	{#if $new_receipt_errors.amount}
 		<div class="error">{$new_receipt_errors.amount}</div>
 	{/if}
-	{format_currency($new_receipt_data.amount, $open_group.group.currency)}
 	<label for="info">{$_('new_receipt_info_label')}</label>
 	<input type="text" name="info" />
 	{#if $new_receipt_errors.info}
@@ -75,6 +84,6 @@
 		type="submit"
 		value={$_('new_receipt_submit')}
 		class="button pink"
-		disabled={$new_receipt_is_valid && $new_receipt_data.amount ? false : true}
+		disabled={$new_receipt_is_valid && raw_currency_value > 0 ? false : true}
 	/>
 </form>

@@ -54,5 +54,10 @@
 	"user_name_self": "You",
 	"send_message": "Send",
 	"reached_top_of_group": "This is the beginning of the group 🌱",
-	"no_group_selected": "No group open"
+	"no_group_selected": "No group open",
+	"error_receipt_amount_not_integer": "Amount must be an integer",
+	"error_receipt_amount_too_small": "Amount too small",
+	"new_receipt_submit": "Add Receipt",
+	"amount_label": "Amount",
+	"new_receipt_info_label": "Info"
 }
