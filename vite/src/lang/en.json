@@ -61,5 +61,7 @@
 	"amount_label": "Amount",
 	"new_receipt_info_label": "Info",
 	"created_time_since": "Created: ",
-	"group_user_is_admin_label": "Admin"
+	"group_user_is_admin_label": "Admin",
+	"you_owe": "You owe",
+	"you_are_owed": "You will receive"
 }

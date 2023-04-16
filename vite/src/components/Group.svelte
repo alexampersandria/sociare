@@ -20,6 +20,18 @@
 	}
 
 	const users_to_show = 4
+
+	let your_balance = 0
+	$: {
+		your_balance = 0
+		group.debts.forEach((debt) => {
+			if (debt.from_id === $user_object.id) {
+				your_balance -= debt.amount
+			} else if (debt.to_id === $user_object.id) {
+				your_balance += debt.amount
+			}
+		})
+	}
 </script>
 
 <a
@@ -68,17 +80,40 @@
 			</div>
 		{/each}
 	</div>
-	<div class="users">
-		{#each group.users.slice(0, users_to_show) as user}
-			<div class="gravatar">
-				<img class="round" src={gravatar(user.email, 48)} alt={user.name} />
-			</div>
-		{/each}
-		{#if group.users.length > users_to_show}
-			<div class="more">
-				<div class="inner">+{Math.abs(group.users.length - users_to_show)}</div>
-			</div>
-		{/if}
+	<div class="bottom">
+		<div class="users">
+			{#each group.users.slice(0, users_to_show) as user}
+				<div class="gravatar">
+					<img class="round" src={gravatar(user.email, 48)} alt={user.name} />
+				</div>
+			{/each}
+			{#if group.users.length > users_to_show}
+				<div class="more">
+					<div class="inner">
+						+{Math.abs(group.users.length - users_to_show)}
+					</div>
+				</div>
+			{/if}
+		</div>
+		<div class="balance">
+			{#if your_balance < 0}
+				<div class="balance-inner you-owe">
+					<div class="text">
+						{$_('you_owe')}
+					</div>
+					<div class="amount">
+						{format_currency(-your_balance, group.group.currency)}
+					</div>
+				</div>
+			{:else if your_balance > 0}
+				<div class="balance-inner you-are-owed">
+					<div class="text">{$_('you_are_owed')}</div>
+					<div class="amount">
+						{format_currency(your_balance, group.group.currency)}
+					</div>
+				</div>
+			{/if}
+		</div>
 	</div>
 </a>
 
@@ -89,7 +124,7 @@
 		border-radius: 0.25em;
 		padding: 1em;
 		cursor: pointer;
-		transition: background-color 0.25s;
+		transition: background-color 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
 		overflow: hidden;
 	}
 
@@ -132,6 +167,11 @@
 		background-color: var(--gray-100);
 	}
 
+	.users {
+		position: relative;
+		top: 0.25rem;
+	}
+
 	.group:hover .users .gravatar img,
 	.group:hover .users .more {
 		border-color: var(--gray-100);
@@ -141,8 +181,37 @@
 		background-color: var(--white);
 	}
 
-	.users {
+	.bottom {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
 		margin-top: 0.5rem;
+	}
+
+	.balance-inner .text,
+	.balance-inner .amount {
+		display: inline-flex;
+	}
+
+	.balance-inner .text {
+		color: var(--gray-400);
+	}
+
+	.balance-inner .amount {
+		border-radius: 0.25em;
+		padding: 0.125em 0.33em;
+	}
+
+	.you-owe .amount {
+		color: var(--red-500);
+		background-color: var(--red-100);
+		border: 1px solid var(--red-200);
+	}
+
+	.you-are-owed .amount {
+		color: var(--green-500);
+		background-color: var(--green-100);
+		border: 1px solid var(--green-200);
 	}
 
 	.users .gravatar,
@@ -183,7 +252,8 @@
 			border-color: var(--pink-100);
 		}
 
-		.group.active .events .event {
+		.group.active .events .event,
+		.group.active .balance-inner .text {
 			color: var(--pink-400);
 		}
 	}
