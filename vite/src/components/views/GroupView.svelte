@@ -231,7 +231,7 @@
 					{#if event.message || event.receipt || event.transaction}
 						<Message {event} />
 					{:else}
-						<GroupEvent {event} />
+						<GroupEvent {event} group={$open_group} />
 					{/if}
 				{/each}
 			</div>

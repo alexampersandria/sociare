@@ -4,26 +4,49 @@
 	import type { GroupEvent } from '../lib/types/GroupEvent'
 
 	export let event: GroupEvent
+	export let group
+	export let inline: boolean = false
+	export let concise: boolean = false
 
 	import { get_user_name_by_id } from '../lib/types/GroupListing'
-	import { open_group, time_since } from '../lib/stores/app'
+	import { time_since } from '../lib/stores/app'
 	import { user_object } from '../lib/stores/session'
+
+	let f = ''
+	$: {
+		let sections = event.event.event.split(' ')
+		let user = undefined
+		let localized_sections = sections.map((section) => {
+			if (!section.includes(':')) return $_(section)
+			else if (section.startsWith('user_id:')) {
+				user = get_user_name_by_id(
+					group,
+					section.replace('user_id:', ''),
+					$user_object.id
+				)
+			}
+		})
+		f = localized_sections.join(' ').replace('{user}', user)
+	}
 </script>
 
-<div class="event">
+<div class="event" class:inline>
 	<div class="time">
-		{time_since(event.event.created_at, $locale)}
+		{time_since(event.event.created_at, $locale, concise)}
 	</div>
-	<div class="user">
-		{get_user_name_by_id($open_group, event.event.user_id, $user_object.id) ===
+	<div class="action">
+		{get_user_name_by_id(group, event.event.user_id, $user_object.id) ===
 		'user_name_self'
-			? $_(
-					get_user_name_by_id($open_group, event.event.user_id, $user_object.id)
-			  )
-			: get_user_name_by_id($open_group, event.event.user_id, $user_object.id)}
-	</div>
-	<div class="type">
-		{$_(event.event.event)}
+			? $_(get_user_name_by_id(group, event.event.user_id, $user_object.id))
+			: get_user_name_by_id(
+					group,
+					event.event.user_id,
+					$user_object.id
+			  )}{#if event.message}:
+			{event.message.content}
+		{:else}
+			&nbsp;{f}
+		{/if}
 	</div>
 </div>
 
@@ -31,11 +54,21 @@
 	.event {
 		color: var(--gray-400);
 		text-align: center;
+		white-space: nowrap;
+	}
+
+	.event:not(.inline) {
 		margin-bottom: 1rem;
 	}
 
-	.event .user,
-	.event .type {
-		display: inline-block;
+	.event.inline .action {
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.event.inline {
+		display: flex;
+		justify-content: space-between;
+		flex-direction: row-reverse;
 	}
 </style>

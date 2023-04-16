@@ -1,14 +1,12 @@
 <script lang="ts">
 	import { format_currency } from '../lib/econ'
-	import {
-		get_user_name_by_id,
-		type GroupListing,
-	} from '../lib/types/GroupListing'
+	import type { GroupListing } from '../lib/types/GroupListing'
 	export let group: GroupListing
-	import { _, locale } from 'svelte-i18n'
-	import { open_group_id, time_since } from '../lib/stores/app'
+	import { _ } from 'svelte-i18n'
+	import { open_group_id } from '../lib/stores/app'
 	import { user_object } from '../lib/stores/session'
 	import { gravatar } from '../lib/gravatar'
+	import GroupEvent from './GroupEvent.svelte'
 
 	const on_click = () => {
 		open_group_id.set(group.group.id)
@@ -49,35 +47,7 @@
 	</div>
 	<div class="events">
 		{#each group.events as event}
-			<div class="event">
-				<div class="action">
-					<span class="user">
-						{get_user_name_by_id(
-							group,
-							event.event.user_id,
-							$user_object.id
-						) === 'user_name_self'
-							? $_(
-									get_user_name_by_id(
-										group,
-										event.event.user_id,
-										$user_object.id
-									)
-							  )
-							: get_user_name_by_id(
-									group,
-									event.event.user_id,
-									$user_object.id
-							  )}</span
-					>{#if event.message}<span class="message"
-							>: {event.message.content}</span
-						>{:else}<span class="type">&nbsp;{$_(event.event.event)}</span>
-					{/if}
-				</div>
-				<div class="time">
-					{time_since(event.event.created_at, $locale, true)}
-				</div>
-			</div>
+			<GroupEvent {event} {group} inline concise />
 		{/each}
 	</div>
 	<div class="bottom">
@@ -150,19 +120,6 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
-
-	.events .event {
-		color: var(--gray-400);
-		display: flex;
-		justify-content: space-between;
-		white-space: nowrap;
-	}
-
-	.events .event .action {
-		justify-content: space-between;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
 	.group:hover {
 		background-color: var(--gray-100);
 	}
@@ -226,6 +183,7 @@
 		height: 1.5rem;
 		overflow: hidden;
 		border: 2px solid var(--gray-50);
+		transition: border-color 0.25s ease-in-out;
 	}
 
 	.users .more {
@@ -252,7 +210,7 @@
 			border-color: var(--pink-100);
 		}
 
-		.group.active .events .event,
+		.group.active :global(.event),
 		.group.active .balance-inner .text {
 			color: var(--pink-400);
 		}
