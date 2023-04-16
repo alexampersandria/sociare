@@ -10,10 +10,18 @@
 	import Spinner from '../components/Spinner.svelte'
 	import { currency_codes, format_currency } from '../lib/econ'
 	import CurrencyInput from '../components/CurrencyInput.svelte'
+	import UserSearch from '../components/UserSearch.svelte'
 
 	let show_login_modal = false
 
 	let test_currency_format = 12345
+
+	let test_user_searches = []
+	const select_user = (user) => {
+		console.log(user)
+		test_user_searches = [...test_user_searches, user]
+		console.log(test_user_searches)
+	}
 </script>
 
 <svelte:head>
@@ -81,6 +89,15 @@
 		<div class="container" style="margin-top:2rem;">
 			<h4>Currency Input</h4>
 			<CurrencyInput name="test_currency_input" currency="EUR" />
+		</div>
+		<div class="container">
+			<h4>User Search</h4>
+			<UserSearch
+				on:select={(event) => {
+					select_user(event.detail)
+				}}
+			/>
+			<pre><code>{JSON.stringify(test_user_searches, undefined, 2)}</code></pre>
 		</div>
 		<div class="container">
 			<h4>Buttons</h4>
