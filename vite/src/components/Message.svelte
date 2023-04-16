@@ -11,56 +11,58 @@
 	import { format_currency } from '../lib/econ'
 </script>
 
-<div class="wrapper" class:self={event.event.user_id === $user_object.id}>
-	<div class="above">
-		<div class="name">
-			{get_user_name_by_id(
-				$open_group,
-				event.event.user_id,
-				$user_object.id
-			) === 'user_name_self'
-				? $_(
-						get_user_name_by_id(
+{#if $open_group}
+	<div class="wrapper" class:self={event.event.user_id === $user_object.id}>
+		<div class="above">
+			<div class="name">
+				{get_user_name_by_id(
+					$open_group,
+					event.event.user_id,
+					$user_object.id
+				) === 'user_name_self'
+					? $_(
+							get_user_name_by_id(
+								$open_group,
+								event.event.user_id,
+								$user_object.id
+							)
+					  )
+					: get_user_name_by_id(
 							$open_group,
 							event.event.user_id,
 							$user_object.id
-						)
-				  )
-				: get_user_name_by_id(
-						$open_group,
-						event.event.user_id,
-						$user_object.id
-				  )}
-		</div>
+					  )}
+			</div>
 
-		<div class="time">
-			&mdash; {time_since(event.event.created_at, $locale)}
+			<div class="time">
+				&mdash; {time_since(event.event.created_at, $locale)}
+			</div>
+		</div>
+		<div class="message-wrapper">
+			{#if event.message}
+				<div
+					class="message"
+					class:emoji-only={string_contains_only_emojis(event.message.content)}
+				>
+					{event.message.content}
+				</div>
+			{:else if event.receipt}
+				<div class="receipt">
+					<div class="amount">
+						{format_currency(event.receipt.amount, $open_group.group.currency)}
+					</div>
+					{#if event.receipt.info}
+						<div class="info">{event.receipt.info}</div>
+					{/if}
+				</div>
+			{:else if event.transaction}
+				<div class="transaction">
+					{JSON.stringify(event.transaction)}
+				</div>
+			{/if}
 		</div>
 	</div>
-	<div class="message-wrapper">
-		{#if event.message}
-			<div
-				class="message"
-				class:emoji-only={string_contains_only_emojis(event.message.content)}
-			>
-				{event.message.content}
-			</div>
-		{:else if event.receipt}
-			<div class="receipt">
-				<div class="amount">
-					{format_currency(event.receipt.amount, $open_group.group.currency)}
-				</div>
-				{#if event.receipt.info}
-					<div class="info">{event.receipt.info}</div>
-				{/if}
-			</div>
-		{:else if event.transaction}
-			<div class="transaction">
-				{JSON.stringify(event.transaction)}
-			</div>
-		{/if}
-	</div>
-</div>
+{/if}
 
 <style>
 	.above .name,

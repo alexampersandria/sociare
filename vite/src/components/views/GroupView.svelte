@@ -16,11 +16,12 @@
 	import { format_currency } from '../../lib/econ'
 	import { createForm } from 'felte'
 
-	import { Receipt, ArrowLeft } from 'carbon-icons-svelte'
+	import { Receipt, ArrowLeft, Information } from 'carbon-icons-svelte'
 	import Overlay from '../Overlay.svelte'
 	import Button from '../Button.svelte'
 	import NewReceipt from './NewReceipt.svelte'
 	import Modal from '../Modal.svelte'
+	import GroupViewDetails from './GroupViewDetails.svelte'
 
 	let container
 
@@ -50,11 +51,6 @@
 		scrolled = false
 		bottomed = false
 		can_load_more = true
-	}
-	const on_keydown = (event) => {
-		if (event.key === 'Enter') {
-			go_back()
-		}
 	}
 
 	const limit = 32
@@ -95,7 +91,7 @@
 
 	let container_height = 0
 	const get_more = () => {
-		if (open_group_id && can_load_more) {
+		if ($open_group_id && $open_group && can_load_more) {
 			group_fetch_completed.set(false)
 			fetch(
 				`${
@@ -180,6 +176,7 @@
 	})
 
 	let show_receipt_overlay = false
+	let show_details_overlay = false
 </script>
 
 {#if $open_group}
@@ -191,14 +188,32 @@
 		bind:this={container}
 		on:scroll={on_scroll}
 	>
+		<Overlay type="glass" show={show_details_overlay}>
+			<div class="container">
+				<GroupViewDetails
+					on:close={() => {
+						show_details_overlay = false
+					}}
+					on:added_user={get_group}
+				/>
+			</div>
+		</Overlay>
 		<div class="head">
 			<div class="back">
 				<a
 					class="none"
 					href="javascript:void(0)"
 					bind:this={back_button}
-					on:click={go_back}
-					on:keydown={on_keydown}><ArrowLeft size={24} /></a
+					on:click={go_back}><ArrowLeft size={24} /></a
+				>
+			</div>
+			<div class="details">
+				<a
+					class="none"
+					href="javascript:void(0)"
+					on:click={() => {
+						show_details_overlay = true
+					}}><Information size={24} /></a
 				>
 			</div>
 			<div class="name">{$open_group.group.name}</div>
@@ -320,6 +335,13 @@
 		position: absolute;
 		top: 50%;
 		left: 1rem;
+		translate: 0 -50%;
+	}
+
+	.head .details {
+		position: absolute;
+		top: 50%;
+		right: 1rem;
 		translate: 0 -50%;
 	}
 

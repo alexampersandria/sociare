@@ -11,15 +11,20 @@
 	let results = []
 
 	const on_input = () => {
-		searching = true
 		results = []
-		let blur_value = self.value
 
-		setTimeout(() => {
-			if (blur_value === self.value && self.value.length > 0) {
-				search()
-			}
-		}, 500)
+		if (self.value) {
+			searching = true
+			let blur_value = self.value
+
+			setTimeout(() => {
+				if (blur_value === self.value && self.value.length > 0) {
+					search()
+				}
+			}, 500)
+		} else {
+			searching = false
+		}
 	}
 
 	const search = async () => {
@@ -110,6 +115,11 @@
 		border-bottom-right-radius: 0.25em;
 	}
 
+	.results .result:last-child {
+		border-bottom-left-radius: 0.25em;
+		border-bottom-right-radius: 0.25em;
+	}
+
 	.results {
 		position: absolute;
 		width: 100%;
@@ -127,6 +137,12 @@
 		display: flex;
 		padding: 0.5em 0.5em 0.25em 0.5em;
 		color: var(--gray-500);
+		background-color: var(--gray-50);
+		transition: background-color 0.25s ease-in-out;
+	}
+
+	.results .result:hover {
+		background-color: var(--white);
 	}
 
 	.results .result .gravatar img {

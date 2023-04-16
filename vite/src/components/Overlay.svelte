@@ -48,7 +48,8 @@
 		background-color: var(--black-100);
 		z-index: 320;
 		background-color: var(--white);
-		padding: 2rem 0;
+		padding: 0;
+		overflow: auto;
 	}
 
 	.overlay.glass {

@@ -59,5 +59,7 @@
 	"error_receipt_amount_too_small": "Amount too small",
 	"new_receipt_submit": "Add Receipt",
 	"amount_label": "Amount",
-	"new_receipt_info_label": "Info"
+	"new_receipt_info_label": "Info",
+	"created_time_since": "Created: ",
+	"group_user_is_admin_label": "Admin"
 }
