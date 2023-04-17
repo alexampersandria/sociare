@@ -18,7 +18,6 @@
 
 	import { Receipt, ArrowLeft, Information } from 'carbon-icons-svelte'
 	import Overlay from '../Overlay.svelte'
-	import Button from '../Button.svelte'
 	import NewReceipt from './NewReceipt.svelte'
 	import Modal from '../Modal.svelte'
 	import GroupViewDetails from './GroupViewDetails.svelte'
@@ -27,14 +26,14 @@
 
 	let scrolled = false
 	let bottomed = false
-	const on_scroll = () => {
+	const on_scroll = (event) => {
 		if (container) {
 			scrolled = container.scrollTop > 0
 			bottomed =
 				container.scrollTop + container.clientHeight >= container.scrollHeight
 
-			if (!scrolled) {
-				get_more()
+			if (!scrolled && $open_group) {
+				if ($open_group.group.id === $open_group_id) get_more()
 			}
 		}
 	}
@@ -224,16 +223,16 @@
 
 		<div class="sticky-bottom-wrapper">
 			<div class="events">
-				{#if !can_load_more}
-					<div class="finished">{$_('reached_top_of_group')}</div>
-				{/if}
-				{#each $open_group.events.slice().reverse() as event}
+				{#each $open_group.events.slice() as event}
 					{#if event.message || event.receipt || event.transaction}
 						<Message {event} />
 					{:else}
 						<GroupEvent {event} group={$open_group} />
 					{/if}
 				{/each}
+				{#if !can_load_more}
+					<div class="finished">{$_('reached_top_of_group')}</div>
+				{/if}
 			</div>
 
 			<div class="bottom-actions">
@@ -346,6 +345,9 @@
 	}
 
 	.events {
+		display: flex;
+		flex-direction: column-reverse;
+		flex-wrap: wrap;
 		padding: 1rem;
 		margin-top: 1rem;
 	}
