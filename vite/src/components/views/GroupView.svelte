@@ -349,7 +349,7 @@
 		flex-direction: column-reverse;
 		flex-wrap: wrap;
 		padding: 1rem;
-		margin-top: 1rem;
+		margin-top: 4rem;
 	}
 
 	.bottom-actions {
@@ -429,6 +429,7 @@
 	.finished {
 		text-align: center;
 		color: var(--gray-400);
-		margin-bottom: 2rem;
+		padding-bottom: 4rem;
+		padding-top: 4rem;
 	}
 </style>
