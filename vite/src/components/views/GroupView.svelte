@@ -7,7 +7,7 @@
 		open_group,
 		open_group_id,
 	} from '../../lib/stores/app'
-	import { session } from '../../lib/stores/session'
+	import { session, user_object } from '../../lib/stores/session'
 	import { writable } from 'svelte/store'
 	import { fly } from 'svelte/transition'
 	import Message from '../Message.svelte'
@@ -75,11 +75,16 @@
 					if (data.error) {
 						alert(data.error)
 					} else {
-						open_group.set(data[0])
-						if (data[0].events) {
-							if (data[0].events.length < limit) {
-								can_load_more = false
+						if (data[0]) {
+							open_group.set(data[0])
+							if (data[0].events) {
+								if (data[0].events.length < limit) {
+									can_load_more = false
+								}
 							}
+						} else {
+							get_groups($session)
+							go_back()
 						}
 					}
 					group_fetch_completed.set(true)
@@ -178,7 +183,7 @@
 	let show_details_overlay = false
 </script>
 
-{#if $open_group}
+{#if $open_group && $user_object}
 	<div
 		class="group-view theme-{$open_group.group.theme}"
 		transition:fly={{ x: $is_desktop ? '0%' : '100%', opacity: 1 }}
@@ -194,6 +199,7 @@
 						show_details_overlay = false
 					}}
 					on:added_user={get_group}
+					on:removed_user={get_group}
 				/>
 			</div>
 		</Overlay>

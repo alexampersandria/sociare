@@ -16,17 +16,29 @@
 	$: {
 		let sections = event.event.event.split(' ')
 		let user = undefined
+		let user_is_self = false
 		let localized_sections = sections.map((section) => {
-			if (!section.includes(':')) return $_(section)
+			if (!section.includes(':')) return section
 			else if (section.startsWith('user_id:')) {
-				user = get_user_name_by_id(
-					group,
-					section.replace('user_id:', ''),
-					$user_object.id
-				)
+				let id = section.replace('user_id:', '')
+				user = get_user_name_by_id(group, id, $user_object.id)
+				if (id === event.event.user_id) {
+					user_is_self = true
+				}
 			}
 		})
-		f = localized_sections.join(' ').replace('{user}', user)
+		f = localized_sections
+			.map((section) => {
+				if (section) {
+					if (user_is_self) {
+						return $_(section + '_self')
+					} else {
+						return $_(section)
+					}
+				}
+			})
+			.join(' ')
+			.replace('{user}', user)
 	}
 </script>
 

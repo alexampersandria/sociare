@@ -47,6 +47,7 @@
 	"activated_user": "added {user} to the group",
 	"added_user": "added {user} to the group",
 	"deactivated_user": "removed {user} from the group",
+	"deactivated_user_self": "left the group",
 	"updated_user_group": "edited info for {user}",
 	"update_message": "edited a message",
 	"update_receipt": "edited a receipt",

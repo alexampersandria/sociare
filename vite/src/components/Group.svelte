@@ -53,9 +53,11 @@
 	<div class="bottom">
 		<div class="users">
 			{#each group.users.slice(0, users_to_show) as user}
-				<div class="gravatar">
-					<img class="round" src={gravatar(user.email, 48)} alt={user.name} />
-				</div>
+				{#if user.active}
+					<div class="gravatar">
+						<img class="round" src={gravatar(user.email, 48)} alt={user.name} />
+					</div>
+				{/if}
 			{/each}
 			{#if group.users.length > users_to_show}
 				<div class="more">
