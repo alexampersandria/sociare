@@ -56,13 +56,17 @@
 	"send_message": "Send",
 	"reached_top_of_group": "This is the beginning of the group 🌱",
 	"no_group_selected": "No group open",
-	"error_receipt_amount_not_integer": "Amount must be an integer",
-	"error_receipt_amount_too_small": "Amount too small",
+	"error_receipt_amount_not_integer": "Invalid amount",
+	"error_receipt_amount_too_small": "Invalid amount",
 	"new_receipt_submit": "Add Receipt",
 	"amount_label": "Amount",
 	"new_receipt_info_label": "Info",
 	"created_time_since": "Created: ",
 	"group_user_is_admin_label": "Admin",
 	"you_owe": "You owe",
-	"you_are_owed": "You will receive"
+	"you_are_owed": "You will receive",
+	"user_settings": "Settings",
+	"add_user_to_group_label": "Add user",
+	"leave_group_button": "Leave Group",
+	"remove_user_from_group_button": "Remove User"
 }

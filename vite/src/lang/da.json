@@ -47,6 +47,7 @@
 	"activated_user": "tilføjede {user} til gruppen",
 	"added_user": "tilføjede {user} til gruppen",
 	"deactivated_user": "fjerne {user} fra gruppen",
+	"deactivated_user_self": "fordlod gruppen",
 	"updated_user_group": "redigerede info for {user}",
 	"update_message": "redigerede en besked",
 	"update_receipt": "redigerede en kvittering",
@@ -54,5 +55,18 @@
 	"user_name_self": "Dig",
 	"send_message": "Send",
 	"reached_top_of_group": "Det her er starten af gruppen 🌱",
-	"no_group_selected": "Ingen gruppe åben"
+	"no_group_selected": "Ingen gruppe åben",
+	"error_receipt_amount_not_integer": "Ugyldigt beløb",
+	"error_receipt_amount_too_small": "Ugyldigt beløb",
+	"new_receipt_submit": "Tilføj kvittering",
+	"amount_label": "Beløb",
+	"new_receipt_info_label": "Info",
+	"created_time_since": "Oprettet: ",
+	"group_user_is_admin_label": "Admin",
+	"you_owe": "Du skylder",
+	"you_are_owed": "Du vil modtage",
+	"user_settings": "Indstillinger",
+	"add_user_to_group_label": "Tilføj bruger",
+	"leave_group_button": "Forlad gruppe",
+	"remove_user_from_group_button": "Fjerne bruger"
 }

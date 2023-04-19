@@ -8,6 +8,7 @@
 	import { gravatar } from '../../lib/gravatar'
 	import UserSearch from '../UserSearch.svelte'
 	import { session, user_object } from '../../lib/stores/session'
+	import Button from '../Button.svelte'
 
 	const dispatch = createEventDispatcher()
 
@@ -126,18 +127,17 @@
 						{#if user.id === self_user.id || self_user.is_admin}
 							<div class="actions">
 								{#if user.id !== self_user.id}
-									<button
-										class="none"
+									<Button
 										on:click={() => {
 											remove_user_from_group(user.id)
 										}}
 									>
 										{$_('remove_user_from_group_button')}
-									</button>
+									</Button>
 								{:else}
-									<button class="none" on:click={leave_group}>
+									<Button on:click={leave_group}>
 										{$_('leave_group_button')}
-									</button>
+									</Button>
 								{/if}
 							</div>
 						{/if}
