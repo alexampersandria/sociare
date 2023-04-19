@@ -28,6 +28,25 @@ body {
   margin: 0;
 }
 
+table {
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--gray-300);
+}
+
+tr:nth-child(even) {
+  background: var(--gray-100);
+}
+
+blockquote {
+  border-left: 0.25rem solid var(--gray-300);
+  padding: 0.25rem 1rem;
+}
+
 a {
   color: var(--pink-500);
   transition: color 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
