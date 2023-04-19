@@ -26,7 +26,7 @@
 
 	let scrolled = false
 	let bottomed = false
-	const on_scroll = (event) => {
+	const on_scroll = () => {
 		if (container) {
 			scrolled = container.scrollTop > 0
 			bottomed =
@@ -171,6 +171,13 @@
 		},
 	})
 
+	const textarea_keydown = (event) => {
+		if (event.key === 'Enter' && !event.shiftKey) {
+			event.preventDefault()
+			send_message($send_message_data.content)
+		}
+	}
+
 	let back_button
 
 	open_group_id.subscribe((id) => {
@@ -253,23 +260,31 @@
 						<Receipt size={32} />
 					</a>
 					<form use:send_message_form>
-						<input type="text" placeholder="Aa" name="content" />
-						<input
-							type="submit"
-							value={$_('send_message')}
-							class="button black"
-							disabled={!$send_message_data.content}
+						<textarea
+							on:keydown={textarea_keydown}
+							placeholder={$_('message_input_placeholder')}
+							name="content"
+							rows="1"
 						/>
+						{#if $send_message_data.content}
+							<input
+								type="submit"
+								value={$_('send_message')}
+								class="button black"
+								disabled={!$send_message_data.content}
+							/>
+						{:else}
+							<div class="send-emoji">
+								<a
+									class="alt none"
+									href="javascript:void(0);"
+									on:click={send_emoji}
+								>
+									{$open_group.group.emoji}
+								</a>
+							</div>
+						{/if}
 					</form>
-					<div class="send-emoji">
-						<a
-							class="alt none"
-							href="javascript:void(0);"
-							on:click={send_emoji}
-						>
-							{$open_group.group.emoji}
-						</a>
-					</div>
 				</div>
 			</div>
 		</div>
@@ -399,7 +414,7 @@
 	}
 
 	.message-input input[type='submit'],
-	.message-input input[type='text'] {
+	.message-input textarea {
 		margin: 0;
 	}
 
@@ -407,18 +422,19 @@
 		margin-left: 0.5rem;
 	}
 
-	.message-input input[type='text'] {
+	.message-input textarea {
 		background-color: var(--gray-300);
 		width: 100%;
 		flex-grow: 1;
+		resize: none;
 	}
 
-	.message-input input[type='text']:hover {
+	.message-input textarea:hover {
 		background-color: var(--gray-100);
 	}
 
-	.message-input input[type='text']:active,
-	.message-input input[type='text']:focus {
+	.message-input textarea:active,
+	.message-input textarea:focus {
 		background-color: var(--white);
 	}
 
@@ -428,8 +444,8 @@
 	}
 
 	.send-emoji {
-		font-size: 2rem;
-		margin-left: 1rem;
+		font-size: 1.75rem;
+		margin-left: 0.75rem;
 	}
 
 	.finished {

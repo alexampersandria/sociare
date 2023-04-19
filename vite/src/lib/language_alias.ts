@@ -1,0 +1,18 @@
+export const language_alias = {
+	js: 'javascript',
+	ts: 'typescript',
+	tsx: 'typescript',
+	jsx: 'javascript',
+	vue: 'xml',
+	svelte: 'xml',
+	html: 'xml',
+	py: 'python',
+	rb: 'ruby',
+	sh: 'shell',
+	md: 'markdown',
+	yml: 'yaml',
+	'c#': 'csharp',
+	'c++': 'c',
+	ahk: 'autohotkey',
+	jar: 'java',
+}

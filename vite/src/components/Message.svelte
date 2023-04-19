@@ -9,6 +9,7 @@
 	import { user_object } from '../lib/stores/session'
 	import { string_contains_only_emojis } from '../lib/emoji'
 	import { format_currency } from '../lib/econ'
+	import MessageDown from './MessageDown.svelte'
 </script>
 
 {#if $open_group}
@@ -44,7 +45,7 @@
 					class="message"
 					class:emoji-only={string_contains_only_emojis(event.message.content)}
 				>
-					{event.message.content}
+					<MessageDown source={event.message.content} />
 				</div>
 			{:else if event.receipt}
 				<div class="receipt">

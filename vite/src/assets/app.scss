@@ -1,9 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
+
 @import url('colors.scss');
 
 :root, button, input, optgroup, select, textarea {
   font-family: 'Atkinson Hyperlegible', monospace;
   font-size: 16px;
+}
+
+code {
+  font-family: 'Fira Code', monospace;
+  font-weight: 500;
+  font-size: 0.8325rem;
 }
 
 :focus {
@@ -220,6 +228,7 @@ a.alt:focus {
 }
 
 input[type="text"],
+textarea,
 input[type="email"],
 input[type="password"],
 input[type="number"] {
@@ -235,6 +244,7 @@ input[type="number"] {
 }
 
 input[type="text"]:hover,
+textarea:hover,
 input[type="email"]:hover,
 input[type="password"]:hover,
 input[type="number"]:hover {
@@ -243,6 +253,7 @@ input[type="number"]:hover {
 }
 
 input[type="text"]:focus,
+textarea:focus,
 input[type="email"]:focus,
 input[type="password"]:focus,
 input[type="number"]:focus {
@@ -252,6 +263,7 @@ input[type="number"]:focus {
 }
 
 input[type="text"][aria-invalid="true"],
+textarea[aria-invalid="true"],
 input[type="email"][aria-invalid="true"],
 input[type="password"][aria-invalid="true"],
 input[type="number"][aria-invalid="true"] {
@@ -261,6 +273,7 @@ input[type="number"][aria-invalid="true"] {
 }
 
 input[type="text"][aria-invalid="true"]:hover,
+textarea[aria-invalid="true"]:hover,
 input[type="email"][aria-invalid="true"]:hover,
 input[type="password"][aria-invalid="true"]:hover,
 input[type="number"][aria-invalid="true"]:hover {
@@ -268,6 +281,7 @@ input[type="number"][aria-invalid="true"]:hover {
 }
 
 input[type="text"][aria-invalid="true"]:focus,
+textarea[aria-invalid="true"]:focus,
 input[type="email"][aria-invalid="true"]:focus,
 input[type="password"][aria-invalid="true"]:focus,
 input[type="number"][aria-invalid="true"]:focus {
@@ -282,6 +296,7 @@ input[type="number"][aria-invalid="true"]:focus {
 }
 
 .wide input[type="text"],
+.wide textarea,
 .wide input[type="email"],
 .wide input[type="password"] {
   width: calc(100% - 2em);

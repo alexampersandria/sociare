@@ -18,9 +18,7 @@
 
 	let test_user_searches = []
 	const select_user = (user) => {
-		console.log(user)
 		test_user_searches = [...test_user_searches, user]
-		console.log(test_user_searches)
 	}
 </script>
 

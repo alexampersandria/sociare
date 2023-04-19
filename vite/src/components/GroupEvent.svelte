@@ -11,6 +11,7 @@
 	import { get_user_name_by_id } from '../lib/types/GroupListing'
 	import { time_since } from '../lib/stores/app'
 	import { user_object } from '../lib/stores/session'
+	import MessageDown from './MessageDown.svelte'
 
 	let f = ''
 	$: {

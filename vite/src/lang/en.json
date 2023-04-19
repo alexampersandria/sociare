@@ -68,5 +68,6 @@
 	"user_settings": "Settings",
 	"add_user_to_group_label": "Add user",
 	"leave_group_button": "Leave Group",
-	"remove_user_from_group_button": "Remove User"
+	"remove_user_from_group_button": "Remove User",
+	"message_input_placeholder": "Aa"
 }

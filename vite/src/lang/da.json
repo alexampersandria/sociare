@@ -68,5 +68,6 @@
 	"user_settings": "Indstillinger",
 	"add_user_to_group_label": "Tilføj bruger",
 	"leave_group_button": "Forlad gruppe",
-	"remove_user_from_group_button": "Fjerne bruger"
+	"remove_user_from_group_button": "Fjerne bruger",
+	"message_input_placeholder": "Aa"
 }
