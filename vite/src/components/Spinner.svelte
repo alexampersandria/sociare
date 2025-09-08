@@ -11,6 +11,10 @@
 />
 
 <style>
+	.spinner {
+		display: inline-block;
+	}
+
 	.spinner::after {
 		content: ' ';
 		display: block;

@@ -1,3 +1,11 @@
+<script lang="ts">
+	import { _ } from 'svelte-i18n'
+</script>
+
+<svelte:head>
+	<title>{$_('page_title')} &mdash; {$_('_fallback_page_title')}</title>
+</svelte:head>
+
 <div class="container align-center">
 	<div class="huge-emoji">😖</div>
 	<h1>Page not found</h1>

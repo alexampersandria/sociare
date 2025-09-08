@@ -1,9 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
+
 @import url('colors.scss');
 
 :root, button, input, optgroup, select, textarea {
   font-family: 'Atkinson Hyperlegible', monospace;
   font-size: 16px;
+}
+
+code {
+  font-family: 'Fira Code', monospace;
+  font-weight: 500;
+  font-size: 0.8325rem;
 }
 
 :focus {
@@ -18,6 +26,25 @@
 
 body {
   margin: 0;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--gray-300);
+}
+
+tr:nth-child(even) {
+  background: var(--gray-100);
+}
+
+blockquote {
+  border-left: 0.25rem solid var(--gray-300);
+  padding: 0.25rem 1rem;
 }
 
 a {
@@ -65,7 +92,16 @@ a.none {
   padding: 0 1rem;
 }
 
+.container.l {
+  max-width: 1280px;
+}
+
+.container.s {
+  max-width: 640px;
+}
+
 .button {
+  vertical-align: middle;
   display: inline-block;
   white-space: nowrap;
   text-decoration: none;
@@ -79,86 +115,86 @@ a.none {
   transition: background 0.25s ease-in-out, color 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
 }
 
-.button:not(.disabled) {
+.button:not(.disabled):not(:disabled) {
   background: var(--pink-500);
   color: var(--white);
 }
 
-.button:not(.disabled):hover {
+.button:not(.disabled):not(:disabled):hover {
   background: var(--pink-600);
   color: var(--white);
 }
 
-.button:not(.disabled):active {
+.button:not(.disabled):not(:disabled):active {
   background: var(--pink-700);
   color: var(--white);
 }
 
-.button.secondary:not(.disabled) {
+.button.secondary:not(.disabled):not(:disabled) {
   background: var(--gray-400);
   color: var(--white);
 }
 
-.button.secondary:not(.disabled):hover {
+.button.secondary:not(.disabled):not(:disabled):hover {
   background: var(--gray-500);
 }
 
-.button.secondary:not(.disabled):active {
+.button.secondary:not(.disabled):not(:disabled):active {
   background: var(--gray-600);
 }
 
-.button.secondary:not(.disabled):focus {
+.button.secondary:not(.disabled):not(:disabled):focus {
   box-shadow: 0 0 0 2px var(--gray-500), 0 0 0 6px var(--gray-100);
 }
 
-.button.black:not(.disabled) {
+.button.black:not(.disabled):not(:disabled) {
   background: var(--black);
   color: var(--white);
 }
 
-.button.black:not(.disabled):hover {
+.button.black:not(.disabled):not(:disabled):hover {
   background: var(--black-800);
   color: var(--white);
 }
 
-.button.black:not(.disabled):active {
+.button.black:not(.disabled):not(:disabled):active {
   background: var(--black-900);
   color: var(--white);
 }
 
-.button.black:not(.disabled):focus,
-.button.hollow:not(.disabled):focus,
+.button.black:not(.disabled):not(:disabled):focus,
+.button.hollow:not(.disabled):not(:disabled):focus,
 a.alt:focus {
   box-shadow: 0 0 0 2px var(--black-400), 0 0 0 6px var(--black-100);
 }
 
-.button.danger:not(.disabled) {
+.button.danger:not(.disabled):not(:disabled) {
   background: var(--red-100);
   color: var(--red-400);
 }
 
-.button.danger:not(.disabled):hover {
+.button.danger:not(.disabled):not(:disabled):hover {
   background: var(--red-200);
   color: var(--red-500);
 }
 
-.button.danger:not(.disabled):active {
+.button.danger:not(.disabled):not(:disabled):active {
   background: var(--red-300);
   color: var(--red-600);
 }
 
-.button.danger:not(.disabled):focus {
+.button.danger:not(.disabled):not(:disabled):focus {
   box-shadow: 0 0 0 2px var(--red-400), 0 0 0 6px var(--red-100);
 }
 
-.button.hollow:not(.disabled),
-.button.hollow:not(.disabled):hover {
+.button.hollow:not(.disabled):not(:disabled),
+.button.hollow:not(.disabled):not(:disabled):hover {
   position: relative;
   background: transparent;
   color: var(--black);
 }
 
-.button.hollow:not(.disabled)::before {
+.button.hollow:not(.disabled):not(:disabled)::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -177,7 +213,7 @@ a.alt:focus {
   transition: clip-path 0.3s cubic-bezier(0.5, 0.05, 0.5, 0.95);
 }
 
-.button.hollow:not(.disabled):hover::before {
+.button.hollow:not(.disabled):not(:disabled):hover::before {
   clip-path: polygon(
     0% 0%,
     0% 100%,
@@ -190,14 +226,20 @@ a.alt:focus {
   );
 }
 
-.button.hollow:not(.disabled):active {
+.button.hollow:not(.disabled):not(:disabled):active {
   background: var(--black-100);
 }
 
+.button:disabled,
 .button.disabled {
   background-color: var(--gray-100);
   color: var(--gray-300);
   cursor: not-allowed;
+}
+
+.button:disabled:focus,
+.button.disabled:focus {
+  box-shadow: 0 0 0 4px var(--gray-200);
 }
 
 .button.rounded {
@@ -205,8 +247,10 @@ a.alt:focus {
 }
 
 input[type="text"],
+textarea,
 input[type="email"],
-input[type="password"] {
+input[type="password"],
+input[type="number"] {
   display: block;
   padding: 0.5em 1em;
   border: 0;
@@ -219,37 +263,47 @@ input[type="password"] {
 }
 
 input[type="text"]:hover,
+textarea:hover,
 input[type="email"]:hover,
-input[type="password"]:hover {
+input[type="password"]:hover,
+input[type="number"]:hover {
   background: var(--pink-100);
   color: var(--gray-500);
 }
 
 input[type="text"]:focus,
+textarea:focus,
 input[type="email"]:focus,
-input[type="password"]:focus {
+input[type="password"]:focus,
+input[type="number"]:focus {
   background: var(--white);
   color: var(--gray-500);
   outline: none;
 }
 
 input[type="text"][aria-invalid="true"],
+textarea[aria-invalid="true"],
 input[type="email"][aria-invalid="true"],
-input[type="password"][aria-invalid="true"] {
+input[type="password"][aria-invalid="true"],
+input[type="number"][aria-invalid="true"] {
   background: var(--red-50);
   color: var(--red-400);
   box-shadow: 0 0 0 2px var(--red-400), 0 0 0 6px var(--red-100);
 }
 
 input[type="text"][aria-invalid="true"]:hover,
+textarea[aria-invalid="true"]:hover,
 input[type="email"][aria-invalid="true"]:hover,
-input[type="password"][aria-invalid="true"]:hover {
+input[type="password"][aria-invalid="true"]:hover,
+input[type="number"][aria-invalid="true"]:hover {
   background: var(--red-100);
 }
 
 input[type="text"][aria-invalid="true"]:focus,
+textarea[aria-invalid="true"]:focus,
 input[type="email"][aria-invalid="true"]:focus,
-input[type="password"][aria-invalid="true"]:focus {
+input[type="password"][aria-invalid="true"]:focus,
+input[type="number"][aria-invalid="true"]:focus {
   background: var(--white);
   color: var(--red-500);
 }
@@ -261,6 +315,7 @@ input[type="password"][aria-invalid="true"]:focus {
 }
 
 .wide input[type="text"],
+.wide textarea,
 .wide input[type="email"],
 .wide input[type="password"] {
   width: calc(100% - 2em);
@@ -274,4 +329,35 @@ label {
 
 input[type="submit"] {
   margin: 1rem 0;
+}
+
+.label {
+  background-color: var(--gray-300);
+  color: var(--gray-500);
+  border-radius: 0.25rem;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.8rem;
+}
+
+.label.black {
+  background-color: var(--black);
+  color: var(--white);
+}
+
+.label.pink {
+  background-color: var(--pink-200);
+  color: var(--pink-500);
+}
+
+.label.danger {
+  background-color: var(--red-200);
+  color: var(--red-500);
+}
+
+img.rounded {
+  border-radius: 0.25em;
+}
+
+img.round {
+  border-radius: 9999em;
 }

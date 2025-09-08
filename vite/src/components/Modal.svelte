@@ -60,14 +60,16 @@
 	}
 
 	.modal {
+		--padding: 2rem;
 		position: absolute;
 		top: 50%;
 		left: 50%;
 		translate: -50% -50%;
 		border-radius: 0.25em;
-		padding: 2em;
+		padding: var(--padding);
 		background-color: var(--white);
-		min-width: min(50vw, 32rem);
+		width: calc((100% - (var(--padding) * 2)) - 2rem);
+		max-width: 30rem;
 		z-index: 490;
 	}
 
@@ -75,6 +77,6 @@
 		background: var(--white-700);
 		backdrop-filter: blur(2rem);
 		box-shadow: INSET 0 0 0 2px var(--white-300),
-			0 1rem 2rem 0.5rem var(--black-100);
+			0 1rem 2rem 0.5rem var(--black-50);
 	}
 </style>

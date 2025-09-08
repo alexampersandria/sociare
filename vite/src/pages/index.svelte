@@ -1,14 +1,30 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n'
+
 	import payve_logo from '@/assets/payve_logo.svg'
 
-	import { session_is_valid } from '../lib/stores'
+	import { session_is_valid } from '../lib/stores/session'
 	import Modal from '../components/Modal.svelte'
-	import Login from '../components/Login.svelte'
+	import Login from '../components/views/Login.svelte'
 	import Button from '../components/Button.svelte'
 	import Spinner from '../components/Spinner.svelte'
+	import { currency_codes, format_currency } from '../lib/econ'
+	import CurrencyInput from '../components/CurrencyInput.svelte'
+	import UserSearch from '../components/UserSearch.svelte'
 
 	let show_login_modal = false
+
+	let test_currency_format = 12345
+
+	let test_user_searches = []
+	const select_user = (user) => {
+		test_user_searches = [...test_user_searches, user]
+	}
 </script>
+
+<svelte:head>
+	<title>{$_('page_title')} &mdash; {$_('landing_page_title')}</title>
+</svelte:head>
 
 <main>
 	<Modal
@@ -29,7 +45,7 @@
 				</div>
 				<div class="links">
 					{#if $session_is_valid}
-						<a href="/app" class="alt none"> Go To App </a>
+						<a href="/app" class="alt none">{$_('open_app')}</a>
 					{:else}
 						<a
 							class="alt none"
@@ -38,7 +54,7 @@
 								show_login_modal = true
 							}}
 						>
-							Log In
+							{$_('log_in')}
 						</a>
 					{/if}
 				</div>
@@ -48,15 +64,13 @@
 		<div class="call-to-action">
 			<div class="container">
 				<h1>
-					House Share Economy<br />
-					Made Easier
+					{$_('landing_head_title')}
 				</h1>
 				<p class="explainer muted">
-					Payve is an open source tool that allows groups of people to easily
-					manage their finances and settle debts between them.
+					{$_('landing_head_subtitle')}
 				</p>
 				<div class="links">
-					<a href="/docs" class="button black">Getting Started</a>
+					<a href="/docs" class="button black">{$_('getting_started')}</a>
 					<a
 						href="https://github.com/alexampersandria/sociare"
 						target="_blank"
@@ -71,6 +85,19 @@
 
 	<section>
 		<div class="container" style="margin-top:2rem;">
+			<h4>Currency Input</h4>
+			<CurrencyInput name="test_currency_input" currency="EUR" />
+		</div>
+		<div class="container">
+			<h4>User Search</h4>
+			<UserSearch
+				on:select={(event) => {
+					select_user(event.detail)
+				}}
+			/>
+			<pre><code>{JSON.stringify(test_user_searches, undefined, 2)}</code></pre>
+		</div>
+		<div class="container">
 			<h4>Buttons</h4>
 			<Button variant="primary">Primary</Button>
 			<Button variant="black">Black</Button>
@@ -87,6 +114,13 @@
 		<div class="container">
 			<h4>Spinner</h4>
 			<Spinner />
+		</div>
+		<div class="container">
+			<h4>Currency Format</h4>
+			<input type="number" bind:value={test_currency_format} />
+			{#each currency_codes as currency}
+				<p>{format_currency(test_currency_format, currency)}</p>
+			{/each}
 		</div>
 	</section>
 </main>

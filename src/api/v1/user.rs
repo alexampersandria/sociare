@@ -22,11 +22,13 @@ pub fn get(Path(id): Path<String>) -> String {
     .select((
       schema::users::id,
       schema::users::username,
+      schema::users::name,
       schema::users::created_at,
+      schema::users::email,
     ))
-    .first::<(String, String, i64)>(&mut conn);
+    .first::<(String, String, String, i64, String)>(&mut conn);
   match result {
-    Ok(result) => serde_json::to_string_pretty(&PublicUserData::new(result))
+    Ok(result) => serde_json::to_string_pretty(&PublicUserData::new_with_md5_email(result))
       .unwrap_or("{\"error\": \"internal_server_error\"}".to_string()),
     Err(_) => "{\"error\": \"user_not_found\"}".to_string(),
   }
@@ -283,15 +285,28 @@ pub fn login(req: &Request, Json(user): Json<AuthUser>) -> String {
 pub struct PublicUserData {
   pub id: String,
   pub username: String,
+  pub name: String,
   pub created_at: i64,
+  pub md5_email: Option<String>,
 }
 
 impl PublicUserData {
-  pub fn new(result: (String, String, i64)) -> Self {
+  pub fn new(result: (String, String, String, i64)) -> Self {
     Self {
       id: result.0,
       username: result.1,
-      created_at: result.2,
+      name: result.2,
+      created_at: result.3,
+      md5_email: None,
+    }
+  }
+  pub fn new_with_md5_email(result: (String, String, String, i64, String)) -> Self {
+    Self {
+      id: result.0,
+      username: result.1,
+      name: result.2,
+      created_at: result.3,
+      md5_email: Some(format!("{:x}", md5::compute(result.4))),
     }
   }
 }

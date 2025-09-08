@@ -12,7 +12,7 @@
 		session_fetch_completed,
 		session_is_valid,
 		user_object,
-	} from './lib/stores'
+	} from './lib/stores/session'
 
 	const validate_session = async (session) => {
 		session_fetch_completed.set(false)
@@ -48,8 +48,32 @@
 
 	import Preloader from './components/Preloader.svelte'
 	import { writable } from 'svelte/store'
+
+	import { register, init } from 'svelte-i18n'
+	import { langs } from './lib/stores/app'
+
+	register('en', () => import('./lang/en.json'))
+	register('da', () => import('./lang/da.json'))
+
+	const fragment = location.pathname.split('/')[1]
+
+	const lang = langs.includes(fragment) ? `/${fragment}` : ''
+
+	const config = {
+		urlTransform: {
+			//add the language prefix for the browser
+			apply: (url) => lang + url,
+			//remove the language prefix for Routify
+			remove: (url) => url.replace(lang, ''),
+		},
+	}
+
+	init({
+		fallbackLocale: 'en',
+		initialLocale: 'en',
+	})
 </script>
 
-<Router {routes} />
+<Router {routes} {config} />
 
 <Preloader show={$show_preloader} />
